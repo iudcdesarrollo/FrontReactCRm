@@ -1,0 +1,116 @@
+.lead-list-container {
+    overflow-y: auto;
+    height: calc(100vh - 110px);
+    background-color: #FFFFFF;
+}
+
+.lead-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid #E9EDEF;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+}
+
+.lead-item:hover {
+    background-color: #F5F6F6;
+}
+
+.lead-item-selected {
+    background-color: #F0F2F5;
+}
+
+.lead-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    overflow: hidden;
+    background-color: #00A884;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.lead-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lead-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 4px;
+}
+
+.lead-main-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: 8px;
+}
+
+.lead-name {
+    color: #111B21;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    margin: 0 0 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lead-last-message {
+    color: #667781;
+    font-size: 12px;
+    line-height: 16px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lead-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 65px;
+}
+
+.lead-status {
+    font-size: 11px;
+    color: #667781;
+    text-transform: capitalize;
+    background-color: #F0F2F5;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Scrollbar customization */
+.lead-list-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.lead-list-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.lead-list-container::-webkit-scrollbar-thumb {
+    background-color: #CCCCCC;
+    border-radius: 3px;
+}
+
+.lead-list-container {
+    scrollbar-width: thin;
+    scrollbar-color: #CCCCCC transparent;
+}

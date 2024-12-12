@@ -1,0 +1,84 @@
+.left-sidebar {
+    background-color: #f8f9fa;
+    width: 60px;
+    height: 97vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 1rem;
+    border-right: 1px solid #e9ecef;
+}
+
+.left-sidebar .icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.left-sidebar .icon {
+    color: #6c757d;  /* Color gris más suave para los iconos */
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.left-sidebar .icon:hover {
+    background-color: #e9ecef;  /* Color de hover más suave */
+    color: #212529;  /* Color más oscuro al hover */
+}
+
+.left-sidebar .icon .avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #e9ecef;  /* Fondo más claro para el avatar */
+    color: #495057;  /* Color de texto más oscuro */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    background-color: #ffffff;  /* Fondo blanco para el contenedor principal */
+}
+
+.left-sidebar-container {
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);  /* Sombra sutil */
+}
+
+.chat-interface-container {
+    flex-grow: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+/* Estilos adicionales para los indicadores de notificación */
+.icon .notification-badge {
+    background-color: #10b981;  /* Verde para notificaciones */
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}

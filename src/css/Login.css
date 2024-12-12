@@ -1,0 +1,29 @@
+.login-container {
+    background-color: #ffffff; /* Fondo blanco para el formulario */
+    padding: 20px; /* Espaciado interno */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    text-align: center; /* Centrar el texto */
+    max-width: 400px; /* Ancho máximo */
+    margin: auto; /* Centrar el contenedor */
+}
+
+.login-title {
+    color: #333333; /* Color del texto del encabezado */
+    margin-bottom: 20px; /* Espaciado inferior */
+}
+
+.login-button {
+    background-color: #4285f4; /* Color del botón (Google blue) */
+    color: white; /* Color del texto del botón */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    padding: 10px 20px; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    font-size: 16px; /* Tamaño de fuente */
+    transition: background-color 0.3s; /* Transición suave para el color de fondo */
+}
+
+.login-button:hover {
+    background-color: #357ae8; /* Color más oscuro al pasar el mouse */
+}

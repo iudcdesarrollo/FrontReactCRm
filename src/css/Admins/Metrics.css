@@ -1,0 +1,140 @@
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: #F3F4F6;
+}
+
+@media (min-width: 640px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.metric-card {
+    background-color: #1A1A1A;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.metric-content {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.metric-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-info h3 {
+    color: #9CA3AF;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.metric-change {
+    color: #6B7280;
+    font-size: 0.75rem;
+}
+
+.error-container {
+    background-color: #FEE2E2;
+    border: 1px solid #DC2626;
+    color: #DC2626;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin: 1.5rem;
+}
+
+/* Colores específicos para cada tipo de métrica */
+.metric-icon.total-leads {
+    background-color: #4F46E5;
+}
+
+.metric-icon.sin-gestionar {
+    background-color: #7C3AED;
+}
+
+.metric-icon.conversacion {
+    background-color: #2563EB;
+}
+
+.metric-icon.depuracion {
+    background-color: #0891B2;
+}
+
+.metric-icon.llamada {
+    background-color: #059669;
+}
+
+.metric-icon.segunda-llamada {
+    background-color: #0D9488;
+}
+
+.metric-icon.inscritos {
+    background-color: #16A34A;
+}
+
+.metric-icon.venta-perdida {
+    background-color: #DC2626;
+}
+
+/* Loading state */
+.animate-pulse {
+    background: #262626;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}

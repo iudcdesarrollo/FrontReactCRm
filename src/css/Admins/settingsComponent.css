@@ -1,0 +1,177 @@
+.settings-wrapper {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.settings-header {
+    margin-bottom: 24px;
+}
+
+.settings-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+}
+
+.card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    /* Evita desbordamiento */
+}
+
+.card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+.card-content {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    max-width: 100%;
+    /* Asegura que no exceda el ancho del contenedor */
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    max-width: 100%;
+    /* Asegura que no exceda el ancho del contenedor */
+    padding: 12px 14px;
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    /* Incluye padding y border en el ancho total */
+    word-wrap: break-word;
+    /* Permite que el texto largo se rompa */
+    overflow-wrap: break-word;
+    /* Soporte adicional para navegadores */
+}
+
+/* Evita que el input de texto se desborde horizontalmente */
+.form-group input {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #aaa;
+}
+
+.form-group input:hover,
+.form-group textarea:hover {
+    border-color: #d4d4d4;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #25D366;
+    box-shadow: 0 0 0 3px rgba(77, 126, 255, 0.1);
+}
+
+.form-group textarea {
+    min-height: 100px;
+    max-height: 300px;
+    /* Limita la altura máxima */
+    resize: vertical;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    /* Mantiene los saltos de línea */
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-primary {
+    background-color: #4d7eff;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(77, 126, 255, 0.2);
+    min-width: 140px;
+    /* Ancho mínimo para el botón */
+    text-align: center;
+}
+
+.btn-primary:hover {
+    background-color: #3d6df0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(77, 126, 255, 0.25);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(77, 126, 255, 0.2);
+}
+
+/* Ajustes responsive mejorados */
+@media (max-width: 640px) {
+    .settings-wrapper {
+        margin: 20px auto;
+        padding: 0 16px;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-header,
+    .card-content {
+        padding: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px;
+        /* Mejor tamaño para móviles */
+        padding: 10px 12px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 12px 20px;
+    }
+}

@@ -1,0 +1,148 @@
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.settings-modal {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: modalFade 0.3s ease-in-out;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+    border-radius: 12px 12px 0 0;
+}
+
+.settings-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.settings-header button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #666;
+    padding: 5px 10px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.settings-header button:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.settings-sections {
+    padding: 20px;
+}
+
+.settings-section {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.settings-section:hover {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    transform: translateX(5px);
+}
+
+.settings-icon {
+    margin-right: 15px;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.settings-section:hover .settings-icon {
+    color: #333;
+}
+
+.settings-section h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.templates-preview {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.template-item {
+    padding: 12px 15px;
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    color: #495057;
+}
+
+.template-item:hover {
+    background-color: #f1f3f5;
+    border-color: #dee2e6;
+    transform: translateX(5px);
+}
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-modal {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .settings-section {
+        padding: 12px;
+    }
+}

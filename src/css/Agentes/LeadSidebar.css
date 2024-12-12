@@ -1,0 +1,156 @@
+/* Container for the sidebar */
+.lead-sidebar-container {
+    width: 280px;
+    height: 100%;
+    overflow-y: auto;
+    border-left: 1px solid #e0e0e0;
+}
+
+/* Main sidebar styles */
+.lead-sidebar {
+    background-color: #ffffff;
+    padding: 20px;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+/* Lead info section */
+.lead-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.lead-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    font-weight: bold;
+    font-size: 24px;
+    color: #555555;
+    overflow: hidden;
+}
+
+.lead-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lead-info h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333333;
+}
+
+.lead-info p {
+    margin: 4px 0;
+    color: #777777;
+}
+
+/* Lead actions */
+.lead-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.action-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    font-size: 16px;
+    width: 40px;
+}
+
+.action-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Conversation actions */
+.conversation-actions {
+    margin-top: 24px;
+}
+
+.action-item {
+    margin-bottom: 16px;
+}
+
+.action-item label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #333333;
+}
+
+.action-item select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333333;
+}
+
+.action-item select:hover {
+    border-color: #007bff;
+}
+
+.action-item select[multiple] {
+    height: 100px;
+}
+
+/* Styles for the edit input */
+.edit-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #333333;
+}
+
+.edit-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Layout styles for proper positioning */
+.flex.flex-row.h-full {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.flex-1.flex.flex-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* Media query for responsiveness */
+@media (max-width: 768px) {
+    .lead-sidebar-container {
+        width: 100%;
+        height: auto;
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .flex.flex-row.h-full {
+        flex-direction: column;
+    }
+}

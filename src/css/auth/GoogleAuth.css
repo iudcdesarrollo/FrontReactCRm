@@ -1,0 +1,37 @@
+/* auth/GoogleAuth.css */
+
+.google-auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+    /* Fondo claro */
+}
+
+.google-login-button {
+    padding: 10px;
+    background-color: #4285f4;
+    /* Azul característico de Google */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.google-login-button:hover {
+    background-color: #357ae8;
+    /* Azul oscuro para hover */
+}
+
+.google-login-button:active {
+    background-color: #2c6ae1;
+    /* Azul aún más oscuro para cuando se hace click */
+}
+
+.google-login-button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}

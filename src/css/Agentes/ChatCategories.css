@@ -1,0 +1,85 @@
+/* Contenedor principal */
+.Nav_Categories_Container {
+    background-color: #ffffff;
+    padding: 6px 12px;
+    border-bottom: 1px solid #e9edef;
+}
+
+/* Contenedor del scroll */
+.Nav_Categories_Scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 2px;
+}
+
+.Nav_Categories_Scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Lista de categorías */
+.Nav_Categories_List {
+    display: flex;
+    gap: 8px;
+    min-width: max-content;
+}
+
+/* Botones de categoría */
+.Nav_Category_Btn {
+    display: flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #f0f2f5;
+    color: #667781;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    height: 32px;
+}
+
+.Nav_Category_Btn:hover {
+    background-color: #e9edef;
+    color: #1f2937;
+}
+
+.Nav_Category_Btn.active {
+    background-color: #e7f0f7;
+    color: #0a7cff;
+}
+
+/* Icono */
+.Nav_Category_Btn svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    color: inherit;
+}
+
+.Nav_Category_Btn.active svg {
+    color: #0a7cff;
+}
+
+/* Animación */
+@keyframes selectCategory {
+    from {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.Nav_Category_Btn.active {
+    animation: selectCategory 0.2s ease;
+}
+
+/* Ajuste específico para el texto */
+.Nav_Category_Btn span {
+    color: inherit;
+}

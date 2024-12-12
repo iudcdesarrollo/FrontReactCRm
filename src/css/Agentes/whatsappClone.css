@@ -1,0 +1,316 @@
+/* General layout */
+.flex {
+    display: flex;
+}
+
+.h-screen {
+    height: 100vh;
+    overflow: hidden;
+    /* Evita el scroll en el contenedor principal */
+}
+
+.bg-gray-100 {
+    background-color: #f7fafc;
+}
+
+/* Left sidebar */
+.w-1\/3 {
+    width: 33.3333%;
+}
+
+.bg-white {
+    background-color: #ffffff;
+}
+
+.border-r {
+    border-right-width: 1px;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.bg-gray-200 {
+    background-color: #edf2f7;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+    color: black;
+}
+
+.font-semibold {
+    font-weight: 600;
+    color: black;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.text-gray-500 {
+    color: #a0aec0;
+}
+
+.ml-2 {
+    margin-left: 0.5rem;
+}
+
+.outline-none {
+    outline: none;
+}
+
+.overflow-y-auto {
+    overflow-y: auto;
+}
+
+.h-\[calc\(100\%-120px\)\] {
+    height: calc(100% - 120px);
+}
+
+/* Chat item */
+.p-3 {
+    padding: 0.75rem;
+}
+
+.hover\:bg-gray-100:hover {
+    background-color: #f7fafc;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.w-12 {
+    width: 3rem;
+}
+
+.h-12 {
+    height: 3rem;
+}
+
+.bg-gray-300 {
+    background-color: #e2e8f0;
+}
+
+.mr-3 {
+    margin-right: 0.75rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.text-gray-600 {
+    color: #718096;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Right chat area */
+.flex-1 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.w-10 {
+    width: 2.5rem;
+}
+
+.h-10 {
+    height: 2.5rem;
+}
+
+.space-x-4>*+* {
+    margin-left: 1rem;
+}
+
+.bg-transparent {
+    background-color: transparent;
+}
+
+/* Messages */
+.message {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.cliente {
+    background-color: #e6f7ff;
+    color: #333;
+    align-self: flex-start;
+}
+
+.agente {
+    background-color: #cce5ff;
+    color: #333;
+    align-self: flex-end;
+}
+
+.justify-start {
+    justify-content: flex-start;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+/* Chat input */
+.w-full {
+    width: 100%;
+}
+
+.border {
+    border-width: 1px;
+}
+
+.border-gray-300 {
+    border-color: #e2e8f0;
+}
+
+.focus\:outline-none:focus {
+    outline: none;
+}
+
+.focus\:border-blue-500:focus {
+    border-color: #4299e1;
+}
+
+/* Placeholder when no chat is selected */
+.flex.items-center.justify-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-gray-500 {
+    color: #a0aec0;
+}
+
+/* Split container and gutter */
+.split {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.gutter {
+    background-color: #eee;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
+    width: 10px !important;
+}
+
+/* Ajustes para quitar el scroll de la derecha */
+.flex-1.flex.flex-col.overflow-hidden {
+    overflow: hidden;
+}
+
+.flex-1.overflow-y-auto {
+    overflow-y: auto;
+    height: calc(100vh - 120px);
+}
+
+.bg-gray-100.p-4 {
+    position: sticky;
+    bottom: 0;
+    background-color: #f7fafc;
+}
+
+/* Ajustes para el panel izquierdo */
+.bg-white.border-r.overflow-hidden {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.overflow-y-auto {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: calc(100% - 120px);
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .split {
+        flex-direction: column;
+    }
+
+    .split>div:first-child,
+    .split>div:last-child {
+        width: 100%;
+        max-width: none;
+        height: 50vh;
+    }
+
+    .gutter-horizontal {
+        display: none;
+    }
+
+    .flex-1.overflow-y-auto {
+        height: calc(50vh - 60px);
+    }
+}
+
+@media (max-width: 640px) {
+    .h-screen {
+        min-height: 100vh;
+    }
+
+    .p-4 {
+        padding: 0.5rem;
+    }
+
+    .text-xl {
+        font-size: 1rem;
+    }
+
+    .w-12,
+    .h-12 {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+}

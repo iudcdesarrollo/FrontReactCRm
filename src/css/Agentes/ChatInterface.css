@@ -1,0 +1,23 @@
+.Btn_Cerrar_Sesion {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #075e54;
+    border: 1px solid #075e54;
+    border-radius: 15px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px;
+}
+
+.Btn_Cerrar_Sesion:hover {
+    background-color: #075e54;
+    color: white;
+}
+
+.Btn_Cerrar_Sesion:active {
+    transform: translateY(1px);
+}
