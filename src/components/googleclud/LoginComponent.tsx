@@ -1,7 +1,7 @@
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { authService } from '../../services/authService';
-import backgroundImage from '../../assets/login/fachadaUniversitariaDeColombia.jpg';
+import backgroundImage from '../../assets/login/fachadaUniversitariaDeColombia.webp';
 import '../../css/Admins/googleClaud/Login.css';
 
 interface LoginProps {

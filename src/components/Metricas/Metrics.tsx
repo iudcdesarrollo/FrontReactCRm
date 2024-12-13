@@ -1,144 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  MessageCircle, 
-  PhoneCall, 
+import {
+  Users,
+  UserPlus,
+  MessageCircle,
+  PhoneCall,
   PhoneForwarded,
   ClipboardCheck,
   UserCheck,
   XCircle,
-  User,
   ArrowLeft
 } from 'lucide-react';
 import axios from 'axios';
 import '../../css/Admins/Metrics.css';
+import { MetricsResponseData, MetricData } from './types/types.ts'
+import { LeadsView } from './LeadsView.tsx';
+import { MetricCard } from './MetricCard.tsx';
+import { AgentCard } from './AgentCard.tsx';
+import { Socket } from 'socket.io-client';
 
-interface Cliente {
-  numero: string;
+interface MetricsProps {
+  socket: Socket | null;
 }
 
-interface MetricData {
-  title: string;
-  value: string;
-  change: string;
-  icon: React.ReactNode;
-  color: string;
-  clients: Cliente[];
-}
-
-interface MetricsResponseData {
-  agente: string;
-  total: number;
-  sinGestionar: number;
-  clientesSinGestionar: Cliente[];
-  conversacion: number;
-  clientesConversacion: Cliente[];
-  depuracion: number;
-  clientesDepuracion: Cliente[];
-  llamada: number;
-  clientesLlamada: Cliente[];
-  segundaLlamada: number;
-  clientesSegundaLlamada: Cliente[];
-  inscrito: number;
-  clientesInscrito: Cliente[];
-  ventaPerdida: number;
-  clientesVentaPerdida: Cliente[];
-  metricsByTime: {
-    daily: number;
-    weekly: number;
-    monthly: number;
-  };
-}
-
-const LeadsView: React.FC<{
-  metric: MetricData;
-  onBack: () => void;
-}> = ({ metric, onBack }) => (
-  <div className="p-6">
-    <div className="flex items-center gap-4 mb-6">
-      <button 
-        onClick={onBack}
-        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-      >
-        <ArrowLeft size={20} />
-        <span>Volver</span>
-      </button>
-      <h2 className="text-xl font-semibold text-white">
-        {metric.title} - Lista de Leads
-      </h2>
-    </div>
-    <div className="metrics-grid">
-      {metric.clients.length > 0 ? (
-        metric.clients.map((lead, index) => (
-          <div key={index} className="metric-card">
-            <div className="metric-content">
-              <div className="metric-icon" style={{ backgroundColor: metric.color }}>
-                <User size={24} />
-              </div>
-              <div className="metric-info">
-                <h3 className="text-gray-400">Número de Contacto</h3>
-                <div className="metric-value">{lead.numero}</div>
-              </div>
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="metric-card">
-          <div className="metric-content">
-            <div className="metric-info">
-              <div className="text-gray-400 text-center">No hay leads disponibles</div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-const MetricCard: React.FC<MetricData & { onClick: () => void }> = ({ 
-  title, 
-  value, 
-  change, 
-  icon, 
-  color,
-  onClick 
-}) => (
-  <div 
-    className="metric-card group cursor-pointer hover:bg-gray-800 transition-all duration-200" 
-    onClick={onClick}
-  >
-    <div className="metric-content">
-      <div className="metric-icon" style={{ backgroundColor: color }}>
-        {icon}
-      </div>
-      <div className="metric-info">
-        <h3>{title}</h3>
-        <div className="metric-value">{value}</div>
-        <div className="metric-change">{change}</div>
-      </div>
-    </div>
-  </div>
-);
-
-const AgentCard: React.FC<{ name: string; onClick: () => void }> = ({ name, onClick }) => (
-  <div
-    className="metric-card group cursor-pointer hover:bg-gray-800 transition-all duration-200"
-    onClick={onClick}
-  >
-    <div className="metric-content">
-      <div className="metric-icon" style={{ backgroundColor: '#4F46E5' }}>
-        <User size={24} />
-      </div>
-      <div className="metric-info">
-        <h3 className="text-gray-400">Agente</h3>
-        <div className="metric-value">{name}</div>
-      </div>
-    </div>
-  </div>
-);
-
-const Metrics: React.FC = () => {
+const Metrics: React.FC<MetricsProps> = ({socket}) => {
   const [metricsData, setMetricsData] = useState<{ [key: string]: MetricData[] }>({});
   const [agents, setAgents] = useState<string[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -150,12 +34,12 @@ const Metrics: React.FC = () => {
     const fetchMetrics = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL_GENERAL}/metricas`);
-        
+
         if (response.data.success && response.data.data.length > 0) {
           const agentsData = response.data.data as MetricsResponseData[];
           const agentNames = agentsData.map(data => data.agente);
           const metricsMap: { [key: string]: MetricData[] } = {};
-          
+
           agentsData.forEach(apiData => {
             const calculateChange = (current: number, previous: number) => {
               return previous === 0 ? "N/A" : `${((current - previous) / previous * 100).toFixed(1)}% desde el mes pasado`;
@@ -265,22 +149,21 @@ const Metrics: React.FC = () => {
     );
   }
 
-  // Show leads view if a metric is selected
   if (selectedMetric) {
     return (
       <LeadsView
         metric={selectedMetric}
         onBack={() => setSelectedMetric(null)}
+        socket={socket}
       />
     );
   }
 
-  // Show metrics view if an agent is selected
   if (selectedAgent) {
     return (
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <button 
+          <button
             onClick={() => setSelectedAgent(null)}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
@@ -291,9 +174,9 @@ const Metrics: React.FC = () => {
         </div>
         <div className="metrics-grid">
           {metricsData[selectedAgent]?.map((metric, i) => (
-            <MetricCard 
-              key={i} 
-              {...metric} 
+            <MetricCard
+              key={i}
+              {...metric}
               onClick={() => setSelectedMetric(metric)}
             />
           ))}
@@ -302,7 +185,6 @@ const Metrics: React.FC = () => {
     );
   }
 
-  // Show agents list
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold text-white mb-4">Seleccionar Agente</h2>

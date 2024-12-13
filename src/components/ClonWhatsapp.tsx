@@ -110,7 +110,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
         if (showMetrics) {
-            return <Metrics />;
+            return <Metrics socket={this.props.socket}  />;
         }
 
         if (showSettings) {

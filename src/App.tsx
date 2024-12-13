@@ -22,7 +22,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
-
   const [isConnected, setIsConnected] = useState(false);
 
   const handleLogout = () => {
@@ -32,19 +31,45 @@ function App() {
     setRawData([]);
     setError(null);
     socket?.disconnect();
+    localStorage.removeItem('dataTimestamp');
+    localStorage.removeItem('agenteData');
+    localStorage.removeItem('rawData');
   };
 
-  const fetchData = async (retryAttempt = 0) => {
+  const handleEmailSet = async (newEmail: string) => {
     try {
+      if (!newEmail || !newEmail.trim()) {
+        setError('El correo electrónico es requerido');
+        return;
+      }
+      setEmail(newEmail);
+      authService.refreshSession(newEmail);
+      await fetchData(0, newEmail);
+    } catch (err) {
+      console.error('Error al establecer email:', err);
+      handleLogout();
+    }
+  };
+
+  const fetchData = async (retryAttempt = 0, currentEmail?: string) => {
+    try {
+      const emailToUse = currentEmail || email;
+
+      if (!emailToUse || !emailToUse.trim()) {
+        setError('Se requiere un correo electrónico válido');
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
+      // Verificar caché
       const cachedTimestamp = localStorage.getItem('dataTimestamp');
       const cachedData = localStorage.getItem('agenteData');
       const isValidCache = cachedTimestamp && cachedData &&
         (Date.now() - parseInt(cachedTimestamp)) < CACHE_DURATION;
 
-      if (isValidCache) {
+      if (isValidCache && emailToUse === email) {
         const parsedData = JSON.parse(cachedData);
         if (!parsedData || Object.keys(parsedData).length === 0) {
           handleLogout();
@@ -53,18 +78,22 @@ function App() {
         }
         setAgente(parsedData);
         setRawData(JSON.parse(localStorage.getItem('rawData') || '[]'));
-        setLoading(false);
         return;
       }
 
       const response = await axios.get<BackendResponse[]>(
-        `${endpointRestGeneral}/getLeadsTipoGestion?correoAgente=${email}`
+        `${endpointRestGeneral}/getLeadsTipoGestion`,
+        { 
+          params: { correoAgente: emailToUse },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
       if (!response.data || response.data.length === 0) {
-        handleLogout();
-        setError('No se encontraron conversaciones para este usuario.');
-        return;
+        throw new Error('No se encontraron conversaciones para este usuario.');
       }
 
       const rawData = response.data;
@@ -76,14 +105,26 @@ function App() {
       localStorage.setItem('rawData', JSON.stringify(rawData));
       localStorage.setItem('dataTimestamp', Date.now().toString());
 
-      authService.refreshSession(email);
+      authService.refreshSession(emailToUse);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
-      setError('Error al cargar los datos. Por favor, intente más tarde.');
-      handleLogout();
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 400) {
+          setError('Se requiere un correo electrónico válido');
+        } else {
+          setError('Error al cargar los datos. Por favor, intente más tarde.');
+        }
+      } else if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Error desconocido al cargar los datos');
+      }
 
       if (retryAttempt < 3) {
-        setTimeout(() => fetchData(retryAttempt + 1), 2000);
+        setTimeout(() => fetchData(retryAttempt + 1, currentEmail), 2000);
+      } else {
+        handleLogout();
       }
     } finally {
       setLoading(false);
@@ -100,6 +141,13 @@ function App() {
     const intervalId = setInterval(checkSession, 60000);
     return () => clearInterval(intervalId);
   }, [email]);
+
+  useEffect(() => {
+    const session = authService.getSession();
+    if (session?.email) {
+      handleEmailSet(session.email);
+    }
+  }, []);
 
   useEffect(() => {
     if (email) {
@@ -417,12 +465,14 @@ function App() {
     return 'document';
   };
 
-  if (loading) return <div className="loading">Cargando...</div>;
+  if (loading) {
+    return <div className="loading">Cargando...</div>;
+  }
 
   if (!email || error) {
     return (
       <Login
-        setEmail={setEmail}
+        setEmail={handleEmailSet}
         error={error}
         setError={setError}
         fetchData={fetchData}
@@ -433,24 +483,13 @@ function App() {
   return (
     <>
       <ConnectionOverlay isConnected={isConnected} />
-      {loading ? (
-        <div className="loading">Cargando...</div>
-      ) : !email || error ? (
-        <Login
-          setEmail={setEmail}
-          error={error}
-          setError={setError}
-          fetchData={fetchData}
-        />
-      ) : (
-        <WhatsAppClone
-          email={email}
-          setEmail={handleLogout}
-          initialAgente={agente}
-          initialData={rawData}
-          socket={socket}
-        />
-      )}
+      <WhatsAppClone
+        email={email}
+        setEmail={handleLogout}
+        initialAgente={agente}
+        initialData={rawData}
+        socket={socket}
+      />
     </>
   );
 }
