@@ -7,6 +7,7 @@ import { authService } from './services/authService.ts';
 import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
+// import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx';
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
 const socketEndpoint = import.meta.env.VITE_SOCKET_URL;
