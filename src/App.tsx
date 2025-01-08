@@ -14,10 +14,17 @@ const socketEndpoint = import.meta.env.VITE_SOCKET_URL;
 const CACHE_DURATION = 3600000;
 
 function App() {
+  const cambioArroba = (email: string) => {
+    return email.replace('%40', '@');
+  };
+
   const [email, setEmail] = useState(() => {
     const session = authService.getSession();
     return session?.email || '';
   });
+
+  const formattedEmail = cambioArroba(email);
+
   const [agente, setAgente] = useState<Agente | null>(null);
   const [rawData, setRawData] = useState<BackendResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,7 +61,7 @@ function App() {
 
   const fetchData = async (retryAttempt = 0, currentEmail?: string) => {
     try {
-      const emailToUse = currentEmail || email;
+      const emailToUse = currentEmail || formattedEmail;
 
       if (!emailToUse || !emailToUse.trim()) {
         setError('Se requiere un correo electrónico válido');
@@ -70,7 +77,7 @@ function App() {
       const isValidCache = cachedTimestamp && cachedData &&
         (Date.now() - parseInt(cachedTimestamp)) < CACHE_DURATION;
 
-      if (isValidCache && emailToUse === email) {
+      if (isValidCache && emailToUse === formattedEmail) {
         const parsedData = JSON.parse(cachedData);
         if (!parsedData || Object.keys(parsedData).length === 0) {
           handleLogout();
@@ -84,7 +91,7 @@ function App() {
 
       const response = await axios.get<BackendResponse[]>(
         `${endpointRestGeneral}/getLeadsTipoGestion`,
-        { 
+        {
           params: { correoAgente: emailToUse },
           headers: {
             'Accept': 'application/json',
@@ -110,6 +117,7 @@ function App() {
 
       authService.refreshSession(emailToUse);
     } catch (error) {
+      console.error(`este es el email que se pasa: ${formattedEmail}`);
       console.error('Error al obtener los datos:', error);
 
       if (axios.isAxiosError(error)) {
@@ -136,14 +144,14 @@ function App() {
 
   useEffect(() => {
     const checkSession = () => {
-      if (email && !authService.isAuthenticated()) {
+      if (formattedEmail && !authService.isAuthenticated()) {
         handleLogout();
       }
     };
 
     const intervalId = setInterval(checkSession, 60000);
     return () => clearInterval(intervalId);
-  }, [email]);
+  }, [formattedEmail]);
 
   useEffect(() => {
     const session = authService.getSession();
@@ -153,13 +161,13 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (email) {
+    if (formattedEmail) {
       fetchData();
     }
-  }, [email]);
+  }, [formattedEmail]);
 
   useEffect(() => {
-    if (!email) return;
+    if (!formattedEmail) return;
 
     const newSocket = io(socketEndpoint);
     setSocket(newSocket);
@@ -454,7 +462,7 @@ function App() {
       newSocket.disconnect();
     };
 
-  }, [email]);
+  }, [formattedEmail]);
 
   const getFileType = (fileName: string): string => {
     const extension = fileName.split('.').pop()?.toLowerCase();
@@ -472,7 +480,7 @@ function App() {
     return <div className="loading">Cargando...</div>;
   }
 
-  if (!email || error) {
+  if (!formattedEmail || error) {
     return (
       <Login
         setEmail={handleEmailSet}
@@ -487,7 +495,7 @@ function App() {
     <>
       <ConnectionOverlay isConnected={isConnected} />
       <WhatsAppClone
-        email={email}
+        email={formattedEmail}
         setEmail={handleLogout}
         initialAgente={agente}
         initialData={rawData}
