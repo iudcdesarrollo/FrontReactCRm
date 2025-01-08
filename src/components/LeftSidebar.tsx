@@ -1,6 +1,15 @@
 import React from 'react';
 import '../css/Admins/LeftSidebar.css';
-import { Home, UserCheck, MessageCircle, File, Settings, HelpCircle, LogOut, BarChart } from 'lucide-react';
+import { 
+    Home, 
+    //UserCheck, 
+    //MessageCircle, 
+    //File, 
+    Settings, 
+    //HelpCircle, 
+    LogOut, 
+    BarChart
+ } from 'lucide-react';
 
 interface LeftSidebarProps {
     handleLogout: () => void;
