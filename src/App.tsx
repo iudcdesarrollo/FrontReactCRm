@@ -93,6 +93,8 @@ function App() {
         }
       );
 
+      console.log(`email en uso: ${emailToUse}`);
+
       if (!response.data || response.data.length === 0) {
         throw new Error('No se encontraron conversaciones para este usuario.');
       }
