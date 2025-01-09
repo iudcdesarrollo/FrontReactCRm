@@ -22,7 +22,36 @@ interface TemplateData {
     to: string;
     templateName: string;
     language: string;
+    templateText?: string;
     components: { type: string; parameters: { type: string; text: string }[] }[];
+}
+
+interface TemplateParameter {
+    type: string;
+    text: string;
+}
+
+interface MetaComponent {
+    type: string;
+    parameters: TemplateParameter[];
+}
+
+interface MetaResponse {
+    messaging_product: string;
+    contacts: { wa_id: string }[];
+    messages: { id: string }[];
+}
+
+interface TemplateFormado {
+    to: string;
+    components: MetaComponent[];
+    templateText: string;
+}
+
+interface TemplateResponse {
+    message: string;
+    templateFormado: TemplateFormado;
+    response: MetaResponse;
 }
 
 interface TemplateFormProps {
@@ -69,13 +98,37 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
-            const templateData: TemplateData = { to, templateName, language, components: [{ type: 'body', parameters: components.map(comp => ({ type: 'text', text: comp.text })) }] };
+            const templateData: TemplateData = {
+                to,
+                templateName,
+                language,
+                templateText,
+                components: [{
+                    type: 'body',
+                    parameters: components.map(comp => ({ type: 'text', text: comp.text }))
+                }]
+            };
+
+            console.log('Datos del template a enviar:', JSON.stringify(templateData, null, 2));
             socket.emit('sendTemplate', templateData);
 
             setMessage('');
             setError('');
-            socket.on('templateSent', (data: { message: string }) => setMessage(data.message));
-            socket.on('error', (data: { message: string, error: string }) => setError(`${data.message}: ${data.error}`));
+
+            socket.on('templateSent', (data: TemplateResponse) => {
+                console.log('Respuesta del template enviado:');
+                console.log('- Mensaje:', data.message);
+                console.log('- Template Formado:', JSON.stringify(data.templateFormado, null, 2));
+                console.log('- Respuesta Meta:', JSON.stringify(data.response, null, 2));
+                console.log('Respuesta completa:', JSON.stringify(data, null, 2));
+
+                // setMessage(`${data.message}\nTemplate enviado: ${data.templateFormado.templateText}`);
+            });
+
+            socket.on('error', (data: { message: string, error: string }) => {
+                console.error('Error en el envío del template:', data);
+                setError(`${data.message}: ${data.error}`);
+            });
         } else {
             setError('No se pudo establecer la conexión con el servidor');
         }
@@ -91,7 +144,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         setTemplateName(template.name);
         setTemplateText(template.components[0].text);
 
-        console.log(template.name);
+        console.log('Template seleccionado:', template.name);
         const variableRegex = /\{\{(\d+)\}\}/g;
         const newComponents: TemplateComponent[] = [];
 
