@@ -7,6 +7,7 @@ import { authService } from './services/authService.ts';
 import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
+import { extractTemplateInfo, TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
 // import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx';
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
@@ -238,6 +239,54 @@ function App() {
         }
       } catch (err) {
         console.error('Error procesando nuevo mensaje:', err);
+        handleLogout();
+      }
+    });
+
+    newSocket.on('templateSent', (data: TemplateResponse) => {
+      console.log(JSON.stringify({
+        message: "Esto es lo que llega de la solicitud del envio del template",
+        response: data
+      }, null, 2));
+
+      try {
+        const { phoneNumber, processedText } = extractTemplateInfo(data);
+        const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
+        const conversationIndex = existingRawData.findIndex(
+          (conv: BackendResponse) => conv.numero_cliente === phoneNumber
+        );
+
+        if (conversationIndex !== -1) {
+          const newMessage = {
+            _id: data.response.messages[0].id,
+            tipo: 'saliente',
+            contenido: processedText,
+            fecha: new Date().toISOString(),
+            usuario_destino: phoneNumber,
+            mensaje_id: data.response.messages[0].id,
+            estado: 'sent',
+            Cliente: false,
+            status: 'sent'
+          };
+
+         
+          existingRawData[conversationIndex].mensajes.push(newMessage);
+
+          const updatedAgente = transformBackendToFrontend(existingRawData);
+
+          localStorage.setItem('rawData', JSON.stringify(existingRawData));
+          localStorage.setItem('agenteData', JSON.stringify(updatedAgente));
+          localStorage.setItem('dataTimestamp', Date.now().toString());
+
+          setRawData(existingRawData);
+          setAgente(updatedAgente);
+
+          console.log('Template message added:', newMessage);
+        } else {
+          console.warn('Conversation not found for phone number:', phoneNumber);
+        }
+      } catch (err) {
+        console.error('Error updating template message in local storage:', err);
         handleLogout();
       }
     });
