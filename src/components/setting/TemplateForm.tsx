@@ -150,7 +150,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
                             value={component.text}
                             onChange={(e) => handleComponentChange(index, e.target.value)}
                             placeholder={`Variable ${index + 1}`}
-                            style={{ color: 'white' }}
+                            style={{ color: 'black' }}
                         />
                     </div>
                 ))}
