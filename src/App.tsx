@@ -14,6 +14,25 @@ const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
 const socketEndpoint = import.meta.env.VITE_SOCKET_URL;
 const CACHE_DURATION = 3600000;
 
+// Add these interfaces at the top of the file or in a separate types file
+interface MediaMessage {
+  numero_cliente: string;
+  correo_agente: string;
+  tipo: 'entrante' | 'saliente';
+  contenido: string;
+  archivo: string;
+  mensaje: string;
+  fecha: string;
+  usuario_destino: string;
+  mensaje_id: string;
+}
+
+interface MediaResponse {
+  success: boolean;
+  count: number;
+  data: MediaMessage[];
+}
+
 function App() {
   const cambioArroba = (email: string) => {
     return email.replace('%40', '@');
@@ -143,6 +162,62 @@ function App() {
     }
   };
 
+  const updateMediaUrls = async (emailToUse: string) => {
+    try {
+      const mediaResponse = await axios.get<MediaResponse>(
+        `${endpointRestGeneral}/MediaUrls`,
+        {
+          params: { correo_agente: emailToUse },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (mediaResponse.data?.success) {
+        const mediaMessages = mediaResponse.data.data;
+        const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
+        let hasUpdates = false;
+
+        // Iterar sobre cada conversación
+        existingRawData.forEach((conversation: BackendResponse) => {
+          conversation.mensajes = conversation.mensajes.map(mensaje => {
+            // Buscar si hay un mensaje multimedia correspondiente
+            const mediaMatch = mediaMessages.find((media: MediaMessage) =>
+              media.mensaje_id === mensaje.mensaje_id &&
+              media.numero_cliente === conversation.numero_cliente
+            );
+
+            if (mediaMatch) {
+              hasUpdates = true;
+              // Actualizar el mensaje con la información multimedia
+              return {
+                ...mensaje,
+                contenido: mediaMatch.archivo, // URL del archivo
+                tipo_archivo: mediaMatch.contenido.split('/')[0], // 'image', 'audio', 'video'
+                url_archivo: mediaMatch.archivo,
+                nombre_archivo: mediaMatch.mensaje,
+                mime_type: mediaMatch.contenido
+              };
+            }
+            return mensaje;
+          });
+        });
+
+        if (hasUpdates) {
+          const transformedData = transformBackendToFrontend(existingRawData);
+          setRawData(existingRawData);
+          setAgente(transformedData);
+          localStorage.setItem('rawData', JSON.stringify(existingRawData));
+          localStorage.setItem('agenteData', JSON.stringify(transformedData));
+        }
+      }
+    } catch (error) {
+      console.error('Error actualizando URLs de medios:', error);
+    }
+  };
+
   useEffect(() => {
     const checkSession = () => {
       if (formattedEmail && !authService.isAuthenticated()) {
@@ -163,7 +238,11 @@ function App() {
 
   useEffect(() => {
     if (formattedEmail) {
-      fetchData();
+      const initializeData = async () => {
+        await fetchData();
+        await updateMediaUrls(formattedEmail);
+      };
+      initializeData();
     }
   }, [formattedEmail]);
 
@@ -173,9 +252,40 @@ function App() {
     const newSocket = io(socketEndpoint);
     setSocket(newSocket);
 
-    newSocket.on('connect', () => {
+    newSocket.on('connect', async () => {
       console.log('WebSocket conectado');
       setIsConnected(true);
+
+      try {
+        const response = await axios.get<BackendResponse[]>(
+          `${endpointRestGeneral}/getLeadsTipoGestion`,
+          {
+            params: { correoAgente: formattedEmail },
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data && response.data.length > 0) {
+          const rawData = response.data;
+          const transformedData = transformBackendToFrontend(rawData);
+
+          setRawData(rawData);
+          setAgente(transformedData);
+          localStorage.setItem('agenteData', JSON.stringify(transformedData));
+          localStorage.setItem('rawData', JSON.stringify(rawData));
+          localStorage.setItem('dataTimestamp', Date.now().toString());
+
+          // Actualizar URLs de medios después de cargar los datos
+          await updateMediaUrls(formattedEmail);
+
+          console.log('Datos actualizados después de la conexión del socket');
+        }
+      } catch (error) {
+        console.error('Error al actualizar datos en la conexión del socket:', error);
+      }
     });
 
     newSocket.on('messageSent', (data) => {
@@ -269,7 +379,7 @@ function App() {
             status: 'sent'
           };
 
-         
+
           existingRawData[conversationIndex].mensajes.push(newMessage);
 
           const updatedAgente = transformBackendToFrontend(existingRawData);
