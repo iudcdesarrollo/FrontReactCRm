@@ -87,7 +87,7 @@ const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownload }) =
                         description: 'Click to play video',
                         icon: <Video className="preview-icon" />
                     });
-                } else if (['mp3', 'wav'].includes(ext)) {
+                } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
                     setPreviewData({
                         title: 'Audio File',
                         description: 'Click to play audio',
@@ -248,7 +248,7 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     const isAudioFile = (extension?: string): boolean =>
-        extension === 'mp3' || extension === 'wav';
+        ['mp3', 'wav', 'ogg'].includes(extension || '');
 
     const isImageFile = (extension?: string): boolean =>
         ['jpg', 'jpeg', 'png', 'gif'].includes(extension || '');
