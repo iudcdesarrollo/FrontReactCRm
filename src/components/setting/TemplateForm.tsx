@@ -35,13 +35,21 @@ const cleanTemplateText = (text: string): string => {
     if (!text) return '';
 
     return text
-        .replace(/[•●■◆]/g, '-')
-        .replace(/\n\s*\n/g, '. ')
+        // Remover emojis
+        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '')
+        // Reemplazar \n literales por espacios
+        .replace(/\\n/g, ' ')
+        // Reemplazar saltos de línea reales por espacios
         .replace(/\n/g, ' ')
+        // Reemplazar viñetas y símbolos similares por guiones
+        .replace(/[•●■◆]/g, '-')
+        // Reemplazar tabulaciones por espacios  
         .replace(/\t/g, ' ')
-        .replace(/\s{2,}/g, ' ')
+        // Normalizar espacios alrededor de los dos puntos
         .replace(/\s*:\s*/g, ': ')
-        .replace(/ {4,}/g, '   ')
+        // Reemplazar múltiples espacios por uno solo
+        .replace(/\s+/g, ' ')
+        // Limpiar espacios al inicio y final
         .trim();
 };
 
@@ -84,16 +92,24 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
+            // Limpiar cada componente
             const cleanComponents = components.map(comp => ({
                 ...comp,
                 text: cleanTemplateText(comp.text)
+                    .replace(/\\n/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
             }));
 
             const templateData: TemplateData = {
                 to,
                 templateName,
                 language,
-                templateText: templateText ? cleanTemplateText(templateText) : undefined,
+                // Asegurarnos de que el templateText esté limpio
+                templateText: templateText ? cleanTemplateText(templateText)
+                    .replace(/\\n/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim() : undefined,
                 components: [{
                     type: 'body',
                     parameters: cleanComponents.map(comp => ({
@@ -104,10 +120,13 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
             };
 
             socket.emit('sendTemplate', templateData);
-
             setMessage('Template enviado correctamente');
             setError('');
 
+            // Remover listener anterior si existe
+            socket.off('error');
+
+            // Agregar nuevo listener
             socket.on('error', (data: { message: string, error: string }) => {
                 console.error('Error en el envío del template:', data);
                 setError(`${data.message}: ${data.error}`);
@@ -126,7 +145,15 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
 
     const handleTemplateChange = (template: Template): void => {
         setTemplateName(template.name);
-        setTemplateText(template.components[0].text);
+
+        // Limpiar el texto del template antes de establecerlo
+        const cleanedTemplateText = cleanTemplateText(template.components[0].text)
+            .replace(/\\n/g, ' ')  // Reemplazar \n literales por espacios
+            .replace(/🇨🇴/g, '')   // Remover emojis
+            .replace(/\s+/g, ' ')  // Normalizar espacios
+            .trim();
+
+        setTemplateText(cleanedTemplateText);
 
         const variableRegex = /\{\{(\d+)\}\}/g;
         const newComponents: TemplateComponent[] = [];
