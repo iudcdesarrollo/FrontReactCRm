@@ -7,7 +7,7 @@ import { authService } from './services/authService.ts';
 import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
-import { extractTemplateInfo, TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
+import { TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
 // import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx';
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
@@ -244,9 +244,12 @@ function App() {
     });
 
     newSocket.on('templateSent', (data: TemplateResponse) => {
-      console.log(`Esto es lo que llega de la solicitud del envio del template esta es la response que devulve el server: ${data}`);
+      console.log(`Esto es lo que llega de la solicitud del envio del template, esta es la response que devuelve el server: ${JSON.stringify(data, null, 2)}`);
       try {
-        const { phoneNumber, templateText } = extractTemplateInfo(data);
+        // Extraer información del template
+        const phoneNumber = data.templateFormado.to;
+        const templateText = data.templateFormado.processedText;
+
         const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
         const conversationIndex = existingRawData.findIndex(
           (conv: BackendResponse) => conv.numero_cliente === phoneNumber
@@ -259,10 +262,7 @@ function App() {
             contenido: templateText,
             fecha: new Date().toISOString(),
             usuario_destino: phoneNumber,
-            mensaje_id: data.response.messages[0].id,
-            estado: 'sent',
-            Cliente: false,
-            status: 'sent'
+            mensaje_id: data.response.messages[0].id
           };
 
           // Actualizamos los mensajes de la conversación
@@ -283,12 +283,46 @@ function App() {
           console.log('Template message added:', newMessage);
         } else {
           console.warn('Conversation not found for phone number:', phoneNumber);
+
+          // Opcional: Crear nueva conversación si no existe
+          const newConversation: BackendResponse = {
+            _id: new Date().getTime().toString(),
+            numero_cliente: phoneNumber,
+            nombre_cliente: 'Nuevo Cliente',
+            nombre_agente: '',
+            correo_agente: '',
+            rol_agente: 'agent',
+            tipo_gestion: 'sin gestionar',
+            mensajes: [{
+              _id: data.response.messages[0].id,
+              tipo: 'saliente',
+              contenido: templateText,
+              fecha: new Date().toISOString(),
+              usuario_destino: phoneNumber,
+              mensaje_id: data.response.messages[0].id
+            }]
+          };
+
+          existingRawData.push(newConversation);
+
+          // Transformamos y actualizamos el estado
+          const updatedAgente = transformBackendToFrontend(existingRawData);
+
+          // Actualizamos localStorage
+          localStorage.setItem('rawData', JSON.stringify(existingRawData));
+          localStorage.setItem('agenteData', JSON.stringify(updatedAgente));
+          localStorage.setItem('dataTimestamp', Date.now().toString());
+
+          // Actualizamos el estado de la aplicación
+          setRawData(existingRawData);
+          setAgente(updatedAgente);
         }
       } catch (err) {
         console.error('Error updating template message in local storage:', err);
         handleLogout();
       }
     });
+
 
     newSocket.on('fileSent', (data) => {
       try {
