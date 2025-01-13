@@ -35,21 +35,24 @@ const cleanTemplateText = (text: string): string => {
     if (!text) return '';
 
     return text
-        // Remover emojis
+        // Remove emojis (including specific country flags)
         .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '')
-        // Reemplazar \n literales por espacios
+        .replace(/🇨🇴/g, '')
+        // Replace literal \n with space
         .replace(/\\n/g, ' ')
-        // Reemplazar saltos de línea reales por espacios
+        // Replace actual newlines with space
         .replace(/\n/g, ' ')
-        // Reemplazar viñetas y símbolos similares por guiones
+        // Replace bullets and similar symbols with hyphens
         .replace(/[•●■◆]/g, '-')
-        // Reemplazar tabulaciones por espacios  
+        // Replace tabs with single space
         .replace(/\t/g, ' ')
-        // Normalizar espacios alrededor de los dos puntos
+        // Remove more than 4 consecutive spaces
+        .replace(/\s{4,}/g, '   ')
+        // Normalize spaces around colons
         .replace(/\s*:\s*/g, ': ')
-        // Reemplazar múltiples espacios por uno solo
+        // Replace multiple spaces with single space
         .replace(/\s+/g, ' ')
-        // Limpiar espacios al inicio y final
+        // Clean leading/trailing spaces
         .trim();
 };
 
@@ -92,24 +95,17 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
-            // Limpiar cada componente
+            // Clean each component with enhanced cleaning
             const cleanComponents = components.map(comp => ({
                 ...comp,
                 text: cleanTemplateText(comp.text)
-                    .replace(/\\n/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim()
             }));
 
             const templateData: TemplateData = {
                 to,
                 templateName,
                 language,
-                // Asegurarnos de que el templateText esté limpio
-                templateText: templateText ? cleanTemplateText(templateText)
-                    .replace(/\\n/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim() : undefined,
+                templateText: templateText ? cleanTemplateText(templateText) : undefined,
                 components: [{
                     type: 'body',
                     parameters: cleanComponents.map(comp => ({
@@ -123,10 +119,10 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
             setMessage('Template enviado correctamente');
             setError('');
 
-            // Remover listener anterior si existe
+            // Remove previous error listener
             socket.off('error');
 
-            // Agregar nuevo listener
+            // Add new error listener
             socket.on('error', (data: { message: string, error: string }) => {
                 console.error('Error en el envío del template:', data);
                 setError(`${data.message}: ${data.error}`);
@@ -146,13 +142,8 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     const handleTemplateChange = (template: Template): void => {
         setTemplateName(template.name);
 
-        // Limpiar el texto del template antes de establecerlo
-        const cleanedTemplateText = cleanTemplateText(template.components[0].text)
-            .replace(/\\n/g, ' ')  // Reemplazar \n literales por espacios
-            .replace(/🇨🇴/g, '')   // Remover emojis
-            .replace(/\s+/g, ' ')  // Normalizar espacios
-            .trim();
-
+        // Clean template text with enhanced cleaning
+        const cleanedTemplateText = cleanTemplateText(template.components[0].text);
         setTemplateText(cleanedTemplateText);
 
         const variableRegex = /\{\{(\d+)\}\}/g;
