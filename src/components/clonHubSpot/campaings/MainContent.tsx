@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import CampaignTable from './CampaignTable';
 
 interface MenuClickEvent extends CustomEvent {
@@ -7,7 +7,7 @@ interface MenuClickEvent extends CustomEvent {
     };
 }
 
-const MainContent: React.FC = () => {
+const MainContent = (): JSX.Element => {
     const [activeSection, setActiveSection] = useState('Dashboard');
 
     useEffect(() => {
@@ -16,15 +16,21 @@ const MainContent: React.FC = () => {
         };
 
         window.addEventListener('menuClick', handleMenuClick as EventListener);
-        return () => window.removeEventListener('menuClick', handleMenuClick as EventListener);
-    }, []);
+
+        // Cleanup function to remove event listener
+        return () => {
+            window.removeEventListener('menuClick', handleMenuClick as EventListener);
+        };
+    }, []); // Empty dependency array as we don't have any dependencies
 
     return (
-        <div className="flex-1 overflow-auto bg-[#1a1f2b]">
+        <div className="flex flex-col flex-1 h-screen overflow-hidden bg-white min-w-0">
             {activeSection === 'Campaigns' ? (
-                <CampaignTable />
+                <div className="flex-1 overflow-hidden">
+                    <CampaignTable />
+                </div>
             ) : (
-                <div className="p-6 bg-white rounded-lg shadow">
+                <div className="flex-1 p-6 bg-white rounded-lg shadow">
                     <h2 className="text-2xl font-semibold text-gray-800">{activeSection}</h2>
                     <p className="mt-2 text-gray-600">Contenido de {activeSection}</p>
                 </div>

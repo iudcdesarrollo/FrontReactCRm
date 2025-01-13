@@ -284,7 +284,6 @@ function App() {
         } else {
           console.warn('Conversation not found for phone number:', phoneNumber);
 
-          // Opcional: Crear nueva conversación si no existe
           const newConversation: BackendResponse = {
             _id: new Date().getTime().toString(),
             numero_cliente: phoneNumber,

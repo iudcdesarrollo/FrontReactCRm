@@ -1,141 +1,167 @@
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Filter, Edit3, Check } from 'lucide-react';
+import '../../../css/Admins/campañas/CampaignTable.css';
 
-// Define interfaces for our data types
 interface Campaign {
-    id: number;
-    campaign: string;
+    estado: boolean;
+    titulo: string;
+    tipoDeTarea: string;
+    campana: string;
+    fechaVencimiento: string;
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20] as const;
+type SubTab = 'Todos' | 'Vencen hoy' | 'Atrasado' | 'Completadas';
 
-const campaignData: Campaign[] = [
-    { id: 1, campaign: 'Campaña Navidad 2024' },
-    { id: 2, campaign: 'Black Friday Q4' },
-    { id: 3, campaign: 'Lanzamiento Producto Nuevo' },
-    { id: 4, campaign: 'Campaña Redes Sociales' },
-    { id: 5, campaign: 'Email Marketing Q1' },
-    { id: 6, campaign: 'Promoción Verano' },
-    { id: 7, campaign: 'Campaña Fidelización' },
-    { id: 8, campaign: 'Marketing de Contenidos' },
-    { id: 9, campaign: 'Campaña SEO/SEM' },
-    { id: 10, campaign: 'Evento Virtual' }
-];
+const CampaignTable = (): JSX.Element => {
+    const [selectedSubTab, setSelectedSubTab] = useState<SubTab>('Todos');
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
-const CampaignTable: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState<string>('');
-    const [currentPage, setCurrentPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(5);
+    const campaigns: Campaign[] = [
+        {
+            estado: true,
+            titulo: 'Update co-marketing team p...',
+            tipoDeTarea: '--',
+            campana: 'Biglytics Ebook - Compe...',
+            fechaVencimiento: '12 de abril de 2021'
+        },
+        {
+            estado: true,
+            titulo: 'Review Campaign copy with...',
+            tipoDeTarea: '--',
+            campana: '--',
+            fechaVencimiento: '22 de abril de 2021'
+        },
+        {
+            estado: true,
+            titulo: 'Add social Images',
+            tipoDeTarea: 'Publicación de...',
+            campana: 'Biglytics Ebook - Compe...',
+            fechaVencimiento: '30 de abril de 2021'
+        },
+        {
+            estado: true,
+            titulo: 'Review impact of campaign...',
+            tipoDeTarea: '--',
+            campana: 'Biglytics Ebook - Compe...',
+            fechaVencimiento: '19 de mayo de 2021'
+        },
+        {
+            estado: true,
+            titulo: 'Close out form submissions',
+            tipoDeTarea: '--',
+            campana: 'Biglytics Ebook - Compe...',
+            fechaVencimiento: '31 de mayo de 2021'
+        }
+    ];
 
-    // Filter campaigns based on search query
-    const filteredCampaigns = campaignData.filter(campaign =>
-        campaign.campaign.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    // Calculate pagination
-    const pageCount = Math.ceil(filteredCampaigns.length / pageSize);
-    const paginatedCampaigns = filteredCampaigns.slice(
-        currentPage * pageSize,
-        (currentPage + 1) * pageSize
-    );
-
-    // Navigation handlers
-    const handlePreviousPage = (): void => {
-        setCurrentPage(prev => Math.max(0, prev - 1));
+    const handleSubTabChange = (tab: SubTab) => {
+        setSelectedSubTab(tab);
     };
 
-    const handleNextPage = (): void => {
-        setCurrentPage(prev => Math.min(pageCount - 1, prev + 1));
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
     };
 
-    const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-        setPageSize(Number(e.target.value));
-        setCurrentPage(0);
-    };
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(0); // Reset to first page when searching
-    };
+    const tabButtons: Array<{ id: SubTab; label: string }> = [
+        { id: 'Todos', label: 'Todos (5)' },
+        { id: 'Vencen hoy', label: 'Vencen hoy' },
+        { id: 'Atrasado', label: 'Atrasado' },
+        { id: 'Completadas', label: 'Completadas' }
+    ];
 
     return (
-        <div className="campaign-table-container">
-            {/* Header */}
-            <div className="campaign-controls">
-                <h2 className="text-2xl font-semibold text-white">Campañas</h2>
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        placeholder="Buscar campaña..."
-                        className="search-input"
-                    />
-                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+        <div className="campaign-wrapper">
+            <div className="filter-section">
+                <div className="flex items-center gap-4">
+                    {tabButtons.map(({ id, label }) => (
+                        <button
+                            key={id}
+                            className={`nav-item ${selectedSubTab === id ? 'active' : ''}`}
+                            onClick={() => handleSubTabChange(id)}
+                        >
+                            {label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="flex-1 overflow-x-auto min-h-0">
+            <div className="controls-bar">
+                <div className="flex items-center gap-4">
+                    <div className="search-box">
+                        <Search className="search-icon" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Buscar"
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                        />
+                    </div>
+                    <button className="filter-button">
+                        <Filter size={20} />
+                        Filtro
+                    </button>
+                </div>
+                <div className="flex items-center gap-4">
+                    <button className="action-button secondary">
+                        <Edit3 size={20} />
+                        Editar columnas
+                    </button>
+                    <button className="action-button primary">
+                        Crear tarea
+                    </button>
+                </div>
+            </div>
+            <div className="table-container">
                 <table className="campaign-table">
                     <thead>
                         <tr>
-                            <th className="px-8 py-4">#</th>
-                            <th className="px-8 py-4">CAMPAÑA</th>
+                            <th>
+                                <div className="checkbox-wrapper">
+                                    <input type="checkbox" className="checkbox-input" />
+                                </div>
+                            </th>
+                            <th>ESTADO</th>
+                            <th>TÍTULO</th>
+                            <th>TIPO DE TAREA</th>
+                            <th>CAMPAÑA</th>
+                            <th>FECHA DE VENCIMIENTO</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedCampaigns.map((campaign) => (
-                            <tr
-                                key={campaign.id}
-                                className="table-row-hover"
-                            >
-                                <td className="px-8 py-4">
-                                    {campaign.id}
+                        {campaigns.map((campaign, index) => (
+                            <tr key={index}>
+                                <td>
+                                    <div className="checkbox-wrapper">
+                                        <input type="checkbox" className="checkbox-input" />
+                                    </div>
                                 </td>
-                                <td className="px-8 py-4">
-                                    {campaign.campaign}
+                                <td>
+                                    <div className="status-circle">
+                                        <Check className="text-white" size={16} />
+                                    </div>
                                 </td>
+                                <td>
+                                    <a href="#" className="title-link">{campaign.titulo}</a>
+                                </td>
+                                <td>{campaign.tipoDeTarea}</td>
+                                <td>{campaign.campana}</td>
+                                <td className="due-date">{campaign.fechaVencimiento}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-8 py-4 border-t border-gray-700">
-                <div className="flex items-center gap-2">
-                    <select
-                        value={pageSize}
-                        onChange={handlePageSizeChange}
-                        className="page-size-select"
-                    >
-                        {ITEMS_PER_PAGE_OPTIONS.map(size => (
-                            <option key={size} value={size}>
-                                Mostrar {size}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="text-sm text-gray-400">
-                        Página {currentPage + 1} de {pageCount}
-                    </span>
-                </div>
+            <div className="pagination-bar">
                 <div className="pagination-controls">
-                    <button
-                        onClick={handlePreviousPage}
-                        disabled={currentPage === 0}
-                        className="pagination-button"
-                    >
-                        Anterior
-                    </button>
-                    <button
-                        onClick={handleNextPage}
-                        disabled={currentPage === pageCount - 1}
-                        className="pagination-button"
-                    >
-                        Siguiente
-                    </button>
+                    <button className="page-button">Anterior</button>
+                    <button className="page-button active">1</button>
+                    <button className="page-button">Siguiente</button>
                 </div>
+                <select className="page-size-select">
+                    <option>25 por página</option>
+                </select>
             </div>
         </div>
     );

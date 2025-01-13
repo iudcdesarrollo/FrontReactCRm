@@ -31,6 +31,20 @@ interface TemplateFormProps {
     to: string;
 }
 
+const cleanTemplateText = (text: string): string => {
+    if (!text) return '';
+
+    return text
+        .replace(/[•●■◆]/g, '-')
+        .replace(/\n\s*\n/g, '. ')
+        .replace(/\n/g, ' ')
+        .replace(/\t/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\s*:\s*/g, ': ')
+        .replace(/ {4,}/g, '   ')
+        .trim();
+};
+
 const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     const [templateName, setTemplateName] = useState<string>('');
     const [language] = useState<string>('es');
@@ -70,20 +84,28 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
+            const cleanComponents = components.map(comp => ({
+                ...comp,
+                text: cleanTemplateText(comp.text)
+            }));
+
             const templateData: TemplateData = {
                 to,
                 templateName,
                 language,
-                templateText,
+                templateText: templateText ? cleanTemplateText(templateText) : undefined,
                 components: [{
                     type: 'body',
-                    parameters: components.map(comp => ({ type: 'text', text: comp.text }))
+                    parameters: cleanComponents.map(comp => ({
+                        type: 'text',
+                        text: comp.text
+                    }))
                 }]
             };
 
             socket.emit('sendTemplate', templateData);
 
-            setMessage('');
+            setMessage('Template enviado correctamente');
             setError('');
 
             socket.on('error', (data: { message: string, error: string }) => {
@@ -96,8 +118,9 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     };
 
     const handleComponentChange = (index: number, value: string) => {
+        const cleanedValue = cleanTemplateText(value);
         const updatedComponents = [...components];
-        updatedComponents[index] = { text: value };
+        updatedComponents[index] = { text: cleanedValue };
         setComponents(updatedComponents);
     };
 
@@ -105,7 +128,6 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         setTemplateName(template.name);
         setTemplateText(template.components[0].text);
 
-        // console.log('Template seleccionado:', template.name);
         const variableRegex = /\{\{(\d+)\}\}/g;
         const newComponents: TemplateComponent[] = [];
 
@@ -131,6 +153,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
                             type="button"
                             key={index}
                             onClick={() => handleTemplateChange(template)}
+                            className={`template-button ${templateName === template.name ? 'active' : ''}`}
                         >
                             {template.name}
                         </button>
@@ -138,7 +161,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
                 </div>
 
                 {templateText && (
-                    <div className="template-text" style={{ color: 'black' }}>
+                    <div className="template-text">
                         <p>{templateText}</p>
                     </div>
                 )}
@@ -150,16 +173,21 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
                             value={component.text}
                             onChange={(e) => handleComponentChange(index, e.target.value)}
                             placeholder={`Variable ${index + 1}`}
-                            style={{ color: 'black' }}
                         />
                     </div>
                 ))}
 
-                <button type="submit" className="submit-btn" disabled={!areAllComponentsFilled()} style={{ color: 'black' }}>Enviar</button>
+                <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={!areAllComponentsFilled()}
+                >
+                    Enviar
+                </button>
             </form>
 
-            {message && <div className="success-message" style={{ color: 'black' }}>{message}</div>}
-            {error && <div className="error-message" style={{ color: 'black' }}>{error}</div>}
+            {message && <div className="success-message">{message}</div>}
+            {error && <div className="error-message">{error}</div>}
         </div>
     );
 };

@@ -1,0 +1,314 @@
+.campaign-wrapper {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.filter-section {
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    width: 100%;
+}
+
+.nav-item {
+    padding: 0.75rem 1rem;
+    color: #666;
+    border: none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.nav-item.active {
+    color: #00a4bd;
+    position: relative;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #00a4bd;
+}
+
+.nav-item:hover {
+    color: #00a4bd;
+}
+
+.controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+    width: 100%;
+}
+
+.search-box {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.search-input {
+    padding: 0.5rem 2.5rem;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    color: #333;
+    width: 240px;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #00a4bd;
+    box-shadow: 0 0 0 1px rgba(0, 164, 189, 0.2);
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.filter-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    color: #666;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+    border-color: #00a4bd;
+    color: #00a4bd;
+}
+
+.action-button.secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: #00a4bd;
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.action-button.secondary:hover {
+    color: #008299;
+}
+
+.action-button.primary {
+    padding: 0.5rem 1rem;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.action-button.primary:hover {
+    background-color: #f8fafc;
+    border-color: #00a4bd;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.campaign-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.campaign-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #666;
+    background-color: #f8fafc;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.campaign-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #333;
+    background-color: #fff;
+}
+
+.campaign-table tr:hover td {
+    background-color: #f8fafc;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-input {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.checkbox-input:checked {
+    background-color: #00a4bd;
+    border-color: #00a4bd;
+}
+
+.status-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #00bda5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.status-circle:hover {
+    transform: scale(1.1);
+}
+
+.title-link {
+    color: #00a4bd;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+    display: block;
+    transition: color 0.2s ease;
+}
+
+.title-link:hover {
+    text-decoration: underline;
+    color: #008299;
+}
+
+.due-date {
+    color: #f5564e;
+    white-space: nowrap;
+}
+
+.pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid #e5e7eb;
+    width: 100%;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.page-button {
+    padding: 0.375rem 0.75rem;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.25rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-button:hover {
+    background-color: #f8fafc;
+    border-color: #00a4bd;
+}
+
+.page-button.active {
+    background-color: #00a4bd;
+    border-color: #00a4bd;
+    color: #fff;
+}
+
+.page-size-select {
+    padding: 0.375rem 0.75rem;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-size-select:hover {
+    border-color: #00a4bd;
+}
+
+@media (max-width: 1024px) {
+    .campaign-wrapper {
+        padding: 1rem;
+    }
+
+    .controls-bar {
+        flex-wrap: wrap;
+    }
+
+    .title-link {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .controls-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .title-link {
+        max-width: 150px;
+    }
+}
