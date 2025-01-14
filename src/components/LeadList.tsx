@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Lead, Message } from './types';
 import '../css/Agentes/LeadList.css'
 
@@ -38,16 +38,16 @@ const LeadList: React.FC<LeadListProps> = ({
         unreadMessages: countUnreadMessages(lead.messages || [])
     }));
 
-    const logLeads = () => {
-        console.log('Leads:', leadsWithUnreadCount);
-        leadsWithUnreadCount.forEach((lead, index) => {
-            console.log(`Lead ${index + 1}:`, lead);
-        });
-    };
+    // const logLeads = () => {
+    //     console.log('Leads:', leadsWithUnreadCount);
+    //     leadsWithUnreadCount.forEach((lead, index) => {
+    //         console.log(`Lead ${index + 1}:`, lead);
+    //     });
+    // };
 
-    useEffect(() => {
-        logLeads();
-    }, [leadsWithUnreadCount]);
+    // useEffect(() => {
+    //     logLeads();
+    // }, [leadsWithUnreadCount]);
 
     // Ordenar los leads por el número de mensajes sin leer, de mayor a menor
     const sortedLeads = leadsWithUnreadCount.sort((a, b) => b.unreadMessages - a.unreadMessages);

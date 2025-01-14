@@ -22,6 +22,7 @@ interface MessageStatus {
     status: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
     timestamp: string;
     recipientId: string;
+    phoneNumberStatus: string
 }
 
 interface UrlPreviewProps {
@@ -191,6 +192,7 @@ const MessageList: React.FC<MessageListProps> = ({
     const [audioPlaying, setAudioPlaying] = useState<{ [key: string]: boolean }>({});
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [messageStatuses, setMessageStatuses] = useState<{ [key: string]: string }>({});
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -203,14 +205,17 @@ const MessageList: React.FC<MessageListProps> = ({
     useEffect(() => {
         if (socket) {
             socket.on('messageStatus', (status: MessageStatus) => {
-                console.log('Estado de mensaje recibido:', status.status, status.recipientId, status.messageId);
+                setMessageStatuses(prev => ({
+                    ...prev,
+                    [status.messageId]: status.status
+                }));
             });
         }
 
         return () => {
             socket?.off('messageStatus');
         };
-    }, [socket]);
+    }, [socket, messages]);
 
     const handleFileDownload = async (url: string, fileName: string) => {
         try {
@@ -267,6 +272,18 @@ const MessageList: React.FC<MessageListProps> = ({
         const extension = fileName.split('.').pop()?.toLowerCase();
         const isDownloaded = downloads.some(d =>
             d.url.includes(msg.message) && d.chatId === selectedChat);
+
+        // En MessageList:
+        const getMessageStatus = () => {
+            const messageId = msg.id;
+
+            // Verificamos que messageId exista antes de usarlo como índice
+            if (messageId && messageStatuses[messageId]) {
+                return messageStatuses[messageId];
+            }
+
+            return msg.status || 'sent'; // Cambiado a 'sent' como valor por defecto
+        };
 
         const renderContent = () => {
             if (isUrl) {
@@ -366,7 +383,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 )}
                 <div className="message-bubble">
                     {renderContent()}
-                    <div className="message-status">{`Estado: ${msg.status}`}</div>
+                    <div className="message-status">{`Estado: ${getMessageStatus()}`}</div>
                 </div>
             </div>
         );

@@ -26,6 +26,7 @@ export interface Message {
     message: string;
     timestamp?: string;
     status?: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
+    id?: string;
 }
 
 export interface Download {
@@ -151,6 +152,11 @@ export interface BackendMensaje {
     nombre_archivo?: string;
     mime_type?: string;
     caption?: string;
+    statusHistory?: {
+        status: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
+        timestamp: Date;
+        _id?: string;
+    }[];
 }
 
 export interface WebSocketMessage {
@@ -168,7 +174,14 @@ export const transformBackendToFrontend = (backendData: BackendResponse[]): Agen
         const messages = item.mensajes.map(mensaje => ({
             [mensaje.tipo === 'entrante' ? 'Cliente' : 'Agente']: mensaje.usuario_destino,
             message: mensaje.contenido || mensaje.mensaje || '',
-            timestamp: mensaje.fecha
+            timestamp: mensaje.fecha,
+            id: mensaje.mensaje_id,
+            _id: mensaje._id,
+            status: 'sent' as 'sent' | 'delivered' | 'read' | 'failed' | 'queued',
+            messageType: mensaje.messageType || 'text',
+            tipo_archivo: mensaje.tipo_archivo,
+            nombre_archivo: mensaje.nombre_archivo,
+            caption: mensaje.caption
         }));
 
         return {
@@ -202,7 +215,9 @@ export const transformBackendMessages = (backendMensajes: BackendMensaje[]): Mes
         messageType: mensaje.messageType || 'text',
         tipo_archivo: mensaje.tipo_archivo,
         nombre_archivo: mensaje.nombre_archivo,
-        caption: mensaje.caption
+        caption: mensaje.caption,
+        id: mensaje.mensaje_id,
+        status: 'sent' as 'sent' | 'delivered' | 'read' | 'failed' | 'queued'
     }));
 };
 

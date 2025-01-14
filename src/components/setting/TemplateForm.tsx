@@ -79,7 +79,6 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
-            // Sanitize all component texts before sending
             const sanitizedComponents = components.map(comp => ({
                 text: sanitizeForWhatsApp(comp.text)
             }));

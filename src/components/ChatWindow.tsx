@@ -52,7 +52,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             Cliente: isClient ? msg.Cliente : undefined,
             Agente: !isClient ? msg.Agente : undefined,
             message: msg.message,
-            timestamp: msg.timestamp
+            timestamp: msg.timestamp,
+            id: msg.id, // Incluir el ID del mensaje
+            _id: msg._id, // Incluir también _id si existe
         };
     }) || [];
 
