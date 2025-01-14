@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 
-// Frontend Interfaces
 export interface Lead {
     id: number;
     nombre: string;
@@ -41,7 +40,6 @@ export interface ChatCategory {
     label: string;
 }
 
-// Socket Types
 export interface SocketMessagePayload {
     to: string;
     message: string;

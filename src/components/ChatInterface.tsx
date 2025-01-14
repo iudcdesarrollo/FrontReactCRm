@@ -8,7 +8,7 @@ import ChatWindow from './ChatWindow';
 import '../css/Agentes/ChatInterface.css';
 
 interface ExtendedChatInterfaceProps extends ChatInterfaceProps {
-  role: 'agent' | 'admin';
+    role: 'agent' | 'admin';
 }
 
 const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
@@ -29,7 +29,7 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
         const savedLeads = localStorage.getItem('filteredLeads');
         return savedLeads ? JSON.parse(savedLeads) : agente?.leads || [];
     });
-    
+
     const [currentCategory, setCurrentCategory] = useState(() => {
         return localStorage.getItem('currentCategory') || 'Todos';
     });
@@ -47,11 +47,11 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
     const handleCategoryChange = (category: string) => {
         setCurrentCategory(category);
         setSelectedCategory(category);
-        
+
         const filtered = agente?.leads.filter((lead: Lead) =>
             category === 'Todos' || lead.TipoGestion === category
         ) || [];
-        
+
         setFilteredLeads(filtered);
         localStorage.setItem('filteredLeads', JSON.stringify(filtered));
         localStorage.setItem('currentCategory', category);
@@ -101,7 +101,7 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
                     )}
                 </div>
                 <SearchBar searchTerm={searchTerm} setSearchTerm={handleSearch} />
-                <ChatCategories 
+                <ChatCategories
                     onCategoryChange={handleCategoryChange}
                     initialCategory={currentCategory}
                 />
