@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import React, { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import '../../css/Admins/TemplateForm.css'
+import '../../css/Admins/TemplateForm.css';
 
 interface Component {
     text: string;
@@ -31,31 +31,6 @@ interface TemplateFormProps {
     to: string;
 }
 
-const cleanTemplateText = (text: string): string => {
-    if (!text) return '';
-
-    return text
-        // Remove emojis (including specific country flags)
-        .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '')
-        .replace(/🇨🇴/g, '')
-        // Replace literal \n with space
-        .replace(/\\n/g, ' ')
-        // Replace actual newlines with space
-        .replace(/\n/g, ' ')
-        // Replace bullets and similar symbols with hyphens
-        .replace(/[•●■◆]/g, '-')
-        // Replace tabs with single space
-        .replace(/\t/g, ' ')
-        // Remove more than 4 consecutive spaces
-        .replace(/\s{4,}/g, '   ')
-        // Normalize spaces around colons
-        .replace(/\s*:\s*/g, ': ')
-        // Replace multiple spaces with single space
-        .replace(/\s+/g, ' ')
-        // Clean leading/trailing spaces
-        .trim();
-};
-
 const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     const [templateName, setTemplateName] = useState<string>('');
     const [language] = useState<string>('es');
@@ -64,6 +39,15 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     const [error, setError] = useState<string>('');
     const [templates, setTemplates] = useState<Template[]>([]);
     const [templateText, setTemplateText] = useState<string>('');
+
+    // Function to sanitize text for WhatsApp API
+    const sanitizeForWhatsApp = (text: string): string => {
+        return text
+            .replace(/\n/g, ' ') // Replace newlines with spaces
+            .replace(/\t/g, ' ') // Replace tabs with spaces
+            .replace(/ {4,}/g, '   ') // Replace 4 or more spaces with 3 spaces
+            .trim(); // Trim any leading/trailing spaces
+    };
 
     useEffect(() => {
         const fetchTemplates = async () => {
@@ -95,20 +79,19 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
         }
 
         if (socket) {
-            // Clean each component with enhanced cleaning
-            const cleanComponents = components.map(comp => ({
-                ...comp,
-                text: cleanTemplateText(comp.text)
+            // Sanitize all component texts before sending
+            const sanitizedComponents = components.map(comp => ({
+                text: sanitizeForWhatsApp(comp.text)
             }));
 
             const templateData: TemplateData = {
                 to,
                 templateName,
                 language,
-                templateText: templateText ? cleanTemplateText(templateText) : undefined,
+                templateText: templateText ? sanitizeForWhatsApp(templateText) : undefined,
                 components: [{
                     type: 'body',
-                    parameters: cleanComponents.map(comp => ({
+                    parameters: sanitizedComponents.map(comp => ({
                         type: 'text',
                         text: comp.text
                     }))
@@ -119,10 +102,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
             setMessage('Template enviado correctamente');
             setError('');
 
-            // Remove previous error listener
             socket.off('error');
-
-            // Add new error listener
             socket.on('error', (data: { message: string, error: string }) => {
                 console.error('Error en el envío del template:', data);
                 setError(`${data.message}: ${data.error}`);
@@ -133,18 +113,14 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to }) => {
     };
 
     const handleComponentChange = (index: number, value: string) => {
-        const cleanedValue = cleanTemplateText(value);
         const updatedComponents = [...components];
-        updatedComponents[index] = { text: cleanedValue };
+        updatedComponents[index] = { text: value };
         setComponents(updatedComponents);
     };
 
     const handleTemplateChange = (template: Template): void => {
         setTemplateName(template.name);
-
-        // Clean template text with enhanced cleaning
-        const cleanedTemplateText = cleanTemplateText(template.components[0].text);
-        setTemplateText(cleanedTemplateText);
+        setTemplateText(template.components[0].text);
 
         const variableRegex = /\{\{(\d+)\}\}/g;
         const newComponents: TemplateComponent[] = [];
