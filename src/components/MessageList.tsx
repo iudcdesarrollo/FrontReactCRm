@@ -19,7 +19,7 @@ interface MessageListProps {
 
 interface MessageStatus {
     messageId: string;
-    status: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
+    status: string;
     timestamp: string;
     recipientId: string;
     phoneNumberStatus: string
@@ -282,7 +282,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 return messageStatuses[messageId];
             }
 
-            return msg.status || 'sent'; // Cambiado a 'sent' como valor por defecto
+            return msg.status || undefined; // Cambiado a 'sent' como valor por defecto
         };
 
         const renderContent = () => {

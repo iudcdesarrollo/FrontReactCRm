@@ -152,6 +152,8 @@ export interface BackendMensaje {
     nombre_archivo?: string;
     mime_type?: string;
     caption?: string;
+    status?: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
+    statusTimestamp?: Date;
     statusHistory?: {
         status: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
         timestamp: Date;
@@ -177,7 +179,9 @@ export const transformBackendToFrontend = (backendData: BackendResponse[]): Agen
             timestamp: mensaje.fecha,
             id: mensaje.mensaje_id,
             _id: mensaje._id,
-            status: 'sent' as 'sent' | 'delivered' | 'read' | 'failed' | 'queued',
+            status: mensaje.statusHistory && mensaje.statusHistory.length > 0
+                ? mensaje.statusHistory[mensaje.statusHistory.length - 1].status
+                : 'sent',
             messageType: mensaje.messageType || 'text',
             tipo_archivo: mensaje.tipo_archivo,
             nombre_archivo: mensaje.nombre_archivo,
@@ -217,7 +221,7 @@ export const transformBackendMessages = (backendMensajes: BackendMensaje[]): Mes
         nombre_archivo: mensaje.nombre_archivo,
         caption: mensaje.caption,
         id: mensaje.mensaje_id,
-        status: 'sent' as 'sent' | 'delivered' | 'read' | 'failed' | 'queued'
+        status: mensaje.status || 'sent'
     }));
 };
 

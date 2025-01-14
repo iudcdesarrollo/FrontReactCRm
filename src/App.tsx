@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import WhatsAppClone from './components/ClonWhatsapp';
 import axios from 'axios';
-import { BackendResponse, transformBackendToFrontend, Agente } from './components/types';
+import { BackendResponse, transformBackendToFrontend, Agente, BackendMensaje } from './components/types';
 import { authService } from './services/authService.ts';
 import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
@@ -163,41 +163,76 @@ function App() {
         const processedData = response.data.map(conv => ({
           ...conv,
           mensajes: conv.mensajes.map(msg => {
-            // Si es un mensaje de tipo image
+            let processedMsg: BackendMensaje = {
+              _id: msg._id,
+              tipo: msg.tipo,
+              contenido: msg.contenido,
+              fecha: msg.fecha,
+              usuario_destino: msg.usuario_destino,
+              mensaje_id: msg.mensaje_id || msg.id_message || msg._id, // Aseguramos que siempre haya un mensaje_id
+              id_message: msg.id_message,
+              messageType: msg.messageType || 'text'
+            };
+
+            // Process message status from statusHistory first
+            if (msg.statusHistory && msg.statusHistory.length > 0) {
+              const sortedHistory = [...msg.statusHistory].sort((a, b) =>
+                new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+              );
+
+              const currentStatus = sortedHistory[0];
+              if (currentStatus) {
+                processedMsg.status = currentStatus.status;
+                processedMsg.statusTimestamp = new Date(currentStatus.timestamp); // Convertir a Date
+                processedMsg.statusHistory = msg.statusHistory.map(history => ({
+                  ...history,
+                  timestamp: new Date(history.timestamp) // Convertir cada timestamp a Date
+                }));
+              }
+            } else {
+              processedMsg.status = 'sent';
+              processedMsg.statusTimestamp = new Date(msg.fecha);
+            }
+
+            // Process file types
             if (msg.contenido.startsWith('image/') || msg.archivo === 'image/jpeg') {
-              return {
-                ...msg,
+              processedMsg = {
+                ...processedMsg,
                 contenido: msg.url_archivo || msg.archivo || msg.contenido,
                 tipo_archivo: 'image',
-                url_archivo: msg.url_archivo || msg.archivo,
-                nombre_archivo: msg.mensaje || msg.nombre_archivo
+                url_archivo: msg.url_archivo,
+                archivo: msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo,
+                messageType: 'image',
+                mime_type: msg.mime_type,
+                caption: msg.caption
               };
-            }
-
-            // Si es un mensaje de tipo audio
-            if (msg.contenido.startsWith('audio/') || msg.archivo === 'audio/ogg') {
-              return {
-                ...msg,
+            } else if (msg.contenido.startsWith('audio/') || msg.archivo === 'audio/ogg') {
+              processedMsg = {
+                ...processedMsg,
                 contenido: msg.url_archivo || msg.archivo || msg.contenido,
                 tipo_archivo: 'audio',
-                url_archivo: msg.url_archivo || msg.archivo,
-                nombre_archivo: msg.mensaje || msg.nombre_archivo
+                url_archivo: msg.url_archivo,
+                archivo: msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo,
+                messageType: 'audio',
+                mime_type: msg.mime_type
               };
-            }
-
-            // Si es un mensaje de tipo documento
-            if (msg.contenido.includes('/') && !msg.contenido.startsWith('image/') && !msg.contenido.startsWith('audio/')) {
-              return {
-                ...msg,
+            } else if (msg.contenido.includes('/') && !msg.contenido.startsWith('image/') && !msg.contenido.startsWith('audio/')) {
+              processedMsg = {
+                ...processedMsg,
                 contenido: msg.url_archivo || msg.archivo || msg.contenido,
                 tipo_archivo: 'document',
-                url_archivo: msg.url_archivo || msg.archivo,
-                nombre_archivo: msg.mensaje || msg.nombre_archivo
+                url_archivo: msg.url_archivo,
+                archivo: msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo,
+                messageType: 'document',
+                mime_type: msg.mime_type,
+                caption: msg.caption
               };
             }
 
-            // Si es un mensaje de texto normal
-            return msg;
+            return processedMsg;
           })
         }));
 
