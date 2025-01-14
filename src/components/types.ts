@@ -139,13 +139,20 @@ export interface BackendResponse {
 
 export interface BackendMensaje {
     _id: string;
-    tipo: 'entrante' | 'saliente';
+    tipo: 'entrante' | 'saliente' | 'sistema';
     contenido: string;
     fecha: string;
     usuario_destino: string;
     mensaje_id: string;
+    id_message?: string;
     archivo?: string;
     mensaje?: string;
+    messageType?: string;
+    tipo_archivo?: string;
+    url_archivo?: string;
+    nombre_archivo?: string;
+    mime_type?: string;
+    caption?: string;
 }
 
 export interface WebSocketMessage {
@@ -190,18 +197,24 @@ export const transformBackendToFrontend = (backendData: BackendResponse[]): Agen
 export const transformBackendMessages = (backendMensajes: BackendMensaje[]): Message[] => {
     return backendMensajes.map(mensaje => ({
         [mensaje.tipo === 'entrante' ? 'Cliente' : 'Agente']: mensaje.usuario_destino,
-        message: mensaje.contenido || mensaje.mensaje || '',
-        timestamp: mensaje.fecha
+        message: mensaje.tipo_archivo ?
+            (mensaje.url_archivo || mensaje.archivo || mensaje.contenido) :
+            (mensaje.contenido || mensaje.mensaje || ''),
+        timestamp: mensaje.fecha,
+        messageType: mensaje.messageType || 'text',
+        tipo_archivo: mensaje.tipo_archivo,
+        nombre_archivo: mensaje.nombre_archivo,
+        caption: mensaje.caption
     }));
 };
 
 export const getDownloadsFromMessages = (backendData: BackendResponse[]): Download[] => {
     return backendData.flatMap(item =>
         item.mensajes
-            .filter(msg => msg.archivo)
+            .filter(msg => msg.url_archivo || msg.archivo)
             .map(msg => ({
-                url: msg.archivo!,
-                fileName: msg.archivo!.split('/').pop() || 'archivo',
+                url: msg.url_archivo || msg.archivo!,
+                fileName: msg.nombre_archivo || msg.archivo!.split('/').pop() || 'archivo',
                 downloaded: false,
                 chatId: parseInt(item._id.slice(-6), 16)
             }))

@@ -13,6 +13,7 @@ import { TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
 const socketEndpoint = import.meta.env.VITE_SOCKET_URL;
 const CACHE_DURATION = 3600000;
+const SYNC_INTERVAL = 30000;
 
 function App() {
   const cambioArroba = (email: string) => {
@@ -143,6 +144,84 @@ function App() {
     }
   };
 
+  const syncData = async () => {
+    if (!formattedEmail || !isConnected) return;
+
+    try {
+      const response = await axios.get<BackendResponse[]>(
+        `${endpointRestGeneral}/getLeadsTipoGestion`,
+        {
+          params: { correoAgente: formattedEmail },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data && response.data.length > 0) {
+        const processedData = response.data.map(conv => ({
+          ...conv,
+          mensajes: conv.mensajes.map(msg => {
+            // Si es un mensaje de tipo image
+            if (msg.contenido.startsWith('image/') || msg.archivo === 'image/jpeg') {
+              return {
+                ...msg,
+                contenido: msg.url_archivo || msg.archivo || msg.contenido,
+                tipo_archivo: 'image',
+                url_archivo: msg.url_archivo || msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo
+              };
+            }
+
+            // Si es un mensaje de tipo audio
+            if (msg.contenido.startsWith('audio/') || msg.archivo === 'audio/ogg') {
+              return {
+                ...msg,
+                contenido: msg.url_archivo || msg.archivo || msg.contenido,
+                tipo_archivo: 'audio',
+                url_archivo: msg.url_archivo || msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo
+              };
+            }
+
+            // Si es un mensaje de tipo documento
+            if (msg.contenido.includes('/') && !msg.contenido.startsWith('image/') && !msg.contenido.startsWith('audio/')) {
+              return {
+                ...msg,
+                contenido: msg.url_archivo || msg.archivo || msg.contenido,
+                tipo_archivo: 'document',
+                url_archivo: msg.url_archivo || msg.archivo,
+                nombre_archivo: msg.mensaje || msg.nombre_archivo
+              };
+            }
+
+            // Si es un mensaje de texto normal
+            return msg;
+          })
+        }));
+
+        const rawData = processedData;
+        const transformedData = transformBackendToFrontend(rawData);
+
+        setRawData(rawData);
+        setAgente(transformedData);
+        localStorage.setItem('rawData', JSON.stringify(rawData));
+        localStorage.setItem('agenteData', JSON.stringify(transformedData));
+        localStorage.setItem('dataTimestamp', Date.now().toString());
+      }
+    } catch (error) {
+      console.error('Error durante la sincronización:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (formattedEmail && isConnected) {
+      const intervalId = setInterval(syncData, SYNC_INTERVAL);
+      return () => clearInterval(intervalId);
+    }
+  }, [formattedEmail, isConnected]);
+
   useEffect(() => {
     const checkSession = () => {
       if (formattedEmail && !authService.isAuthenticated()) {
@@ -176,6 +255,7 @@ function App() {
     newSocket.on('connect', () => {
       console.log('WebSocket conectado');
       setIsConnected(true);
+      syncData();
     });
 
     newSocket.on('messageSent', (data) => {
