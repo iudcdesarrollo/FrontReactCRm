@@ -53,8 +53,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             Agente: !isClient ? msg.Agente : undefined,
             message: msg.message,
             timestamp: msg.timestamp,
-            id: msg.id, // Incluir el ID del mensaje
-            _id: msg._id, // Incluir también _id si existe
+            id: msg.id,
+            _id: msg._id,
         };
     }) || [];
 
@@ -74,6 +74,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         enpointAwsBucked={enpointAwsBucked}
                         profilePictureUrl={selectedLead.urlPhotoPerfil}
                         socket={socket}
+                        numberWhatsApp={selectedLead.numeroWhatsapp}
                     />
                 </div>
                 <MessageSender

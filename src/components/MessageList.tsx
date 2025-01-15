@@ -1,183 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Message, Download } from './types';
+import { Message } from './types';
 import { saveAs } from 'file-saver';
-import { Link, FileText, Video, Music, Image as ImageIcon, X } from 'lucide-react';
+import { FileText, Music } from 'lucide-react';
 import '../css/Agentes/MessageList.css';
 import { isValidUrl } from '../utils/isValidUrl.ts';
 import { getFileExtensionFromUrl } from '../utils/getFileExtensionFromUrl.ts';
-import { Socket } from 'socket.io-client';
+import { MessageListProps, MessageStatus } from './@types/mensajeList.ts';
+import { ImageModal, UrlPreview } from './preview/UrlPreview.tsx';
 
-interface MessageListProps {
-    messages: Message[];
-    selectedChat: number;
-    downloads: Download[];
-    downloadFile: (url: string, fileName: string, chatId: number) => Promise<void>;
-    enpointAwsBucked: string;
-    profilePictureUrl: string | null;
-    socket: Socket | null;
-}
+const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
 
-interface MessageStatus {
-    messageId: string;
-    status: string;
-    timestamp: string;
-    recipientId: string;
-    phoneNumberStatus: string
-}
-
-interface UrlPreviewProps {
-    url: string;
-    extension: string | null;
-    onDownload: () => void;
-}
-
-interface PreviewData {
-    title?: string;
-    description?: string;
-    image?: string;
-    icon?: React.ReactNode;
-}
-
-interface ImageModalProps {
-    imageUrl: string;
-    onClose: () => void;
-}
-
-const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
-    return (
-        <div className="modal" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="modal-close">
-                    <X className="modal-close-icon" />
-                </button>
-                <img src={imageUrl} alt="Preview" className="modal-image" />
-            </div>
-        </div>
-    );
-};
-
-const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownload }) => {
-    const [previewData, setPreviewData] = useState<PreviewData>({});
-    const [loading, setLoading] = useState(true);
-    const [showImageModal, setShowImageModal] = useState(false);
-
-    useEffect(() => {
-        const fetchPreview = async () => {
-            try {
-                setLoading(true);
-                if (!extension) {
-                    setPreviewData({
-                        title: 'Link Preview',
-                        description: url,
-                        icon: <Link className="preview-icon" />
-                    });
-                    return;
-                }
-
-                const ext = extension.toLowerCase();
-
-                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-                    setPreviewData({
-                        title: 'Image Preview',
-                        image: url,
-                        icon: <ImageIcon className="preview-icon" />
-                    });
-                } else if (['mp4', 'mov'].includes(ext)) {
-                    setPreviewData({
-                        title: 'Video File',
-                        description: 'Click to play video',
-                        icon: <Video className="preview-icon" />
-                    });
-                } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
-                    setPreviewData({
-                        title: 'Audio File',
-                        description: 'Click to play audio',
-                        icon: <Music className="preview-icon" />
-                    });
-                } else if (['doc', 'docx', 'pdf', 'xlsx', 'xls'].includes(ext)) {
-                    const fileTypeNames = {
-                        doc: 'Word',
-                        docx: 'Word',
-                        pdf: 'PDF',
-                        xlsx: 'Excel',
-                        xls: 'Excel'
-                    };
-                    setPreviewData({
-                        title: `${fileTypeNames[ext as keyof typeof fileTypeNames]} Document`,
-                        description: 'Click para descargar',
-                        icon: <FileText className="preview-icon" />
-                    });
-                } else {
-                    setPreviewData({
-                        title: 'Link Preview',
-                        description: url,
-                        icon: <Link className="preview-icon" />
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching preview:', error);
-                setPreviewData({
-                    title: 'Link Preview',
-                    description: url,
-                    icon: <Link className="preview-icon" />
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPreview();
-    }, [url, extension]);
-
-    const handleDownload = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onDownload();
-    };
-
-    if (loading) {
-        return <div className="preview-loading" />;
-    }
-
-    return (
-        <>
-            <div className="file-preview-container">
-                {previewData.image ? (
-                    <div className="image-preview">
-                        <img
-                            src={previewData.image}
-                            alt={previewData.title}
-                            className="preview-image"
-                            onClick={() => setShowImageModal(true)}
-                        />
-                        <div className="file-icon-container">
-                            {previewData.icon}
-                            <div className="file-details">{previewData.title}</div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="file-icon-container">
-                        {previewData.icon}
-                        <div className="file-details">
-                            <div className="file-title">{previewData.title}</div>
-                            <div className="file-description">
-                                {previewData.description}
-                            </div>
-                        </div>
-                        <button onClick={handleDownload} className="download-button">
-                            <FileText className="download-icon" />
-                        </button>
-                    </div>
-                )}
-            </div>
-            {showImageModal && (
-                <ImageModal
-                    imageUrl={previewData.image || ''}
-                    onClose={() => setShowImageModal(false)}
-                />
-            )}
-        </>
-    );
+const statusTranslations: { [key: string]: string } = {
+    'sent': 'enviado',
+    'delivered': 'entregado',
+    'read': 'leído',
+    'pending': 'pendiente',
+    'error': 'error'
 };
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -187,7 +25,8 @@ const MessageList: React.FC<MessageListProps> = ({
     downloadFile,
     enpointAwsBucked,
     profilePictureUrl,
-    socket
+    socket,
+    numberWhatsApp
 }) => {
     const [audioPlaying, setAudioPlaying] = useState<{ [key: string]: boolean }>({});
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -252,6 +91,37 @@ const MessageList: React.FC<MessageListProps> = ({
         }
     };
 
+    const fetchMessageStatuses = async () => {
+        try {
+            const response = await fetch(`${endpointRestGeneral}/getStatusHistory/${numberWhatsApp}`);
+            const data = await response.json();
+
+            if (data.success && data.data) {
+                const latestStatuses: { [key: string]: string } = {};
+
+                data.data.forEach((message: {
+                    mensaje_id: string,
+                    statusHistory: Array<{ status: string, timestamp: string }>
+                }) => {
+                    if (message.statusHistory.length > 0) {
+                        const lastStatus = message.statusHistory[message.statusHistory.length - 1].status;
+                        latestStatuses[message.mensaje_id] = lastStatus;
+                    }
+                });
+
+                setMessageStatuses(latestStatuses);
+            }
+        } catch (error) {
+            console.error('Error al obtener el historial de estados:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (numberWhatsApp) {
+            fetchMessageStatuses();
+        }
+    }, [numberWhatsApp]);
+
     const isAudioFile = (extension?: string): boolean =>
         ['mp3', 'wav', 'ogg'].includes(extension || '');
 
@@ -260,6 +130,17 @@ const MessageList: React.FC<MessageListProps> = ({
 
     const isVideoFile = (extension?: string): boolean =>
         ['mp4', 'mov'].includes(extension || '');
+
+    const getMessageStatus = (msg: Message) => {
+        const messageId = msg.id;
+
+        let status = messageId && messageStatuses[messageId]
+            ? messageStatuses[messageId]
+            : msg.status || 'pending';
+
+        status = status.toLowerCase();
+        return statusTranslations[status] || status;
+    };
 
     const renderMessage = (msg: Message, index: number) => {
         if (!msg.message.trim()) {
@@ -272,18 +153,6 @@ const MessageList: React.FC<MessageListProps> = ({
         const extension = fileName.split('.').pop()?.toLowerCase();
         const isDownloaded = downloads.some(d =>
             d.url.includes(msg.message) && d.chatId === selectedChat);
-
-        // En MessageList:
-        const getMessageStatus = () => {
-            const messageId = msg.id;
-
-            // Verificamos que messageId exista antes de usarlo como índice
-            if (messageId && messageStatuses[messageId]) {
-                return messageStatuses[messageId];
-            }
-
-            return msg.status || undefined; // Cambiado a 'sent' como valor por defecto
-        };
 
         const renderContent = () => {
             if (isUrl) {
@@ -383,7 +252,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 )}
                 <div className="message-bubble">
                     {renderContent()}
-                    <div className="message-status">{`Estado: ${getMessageStatus()}`}</div>
+                    <div className="message-status">{`Estado: ${getMessageStatus(msg)}`}</div>
                 </div>
             </div>
         );

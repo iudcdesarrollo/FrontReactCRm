@@ -25,7 +25,7 @@ export interface Message {
     Agente?: string;
     message: string;
     timestamp?: string;
-    status?: 'sent' | 'delivered' | 'read' | 'failed' | 'queued';
+    status?: string;
     id?: string;
 }
 
@@ -166,7 +166,6 @@ export interface WebSocketMessage {
     conversacion: Message[];
 }
 
-// Transformation Functions
 export const transformBackendToFrontend = (backendData: BackendResponse[]): Agente => {
     if (!backendData || backendData.length === 0) {
         return { id: 0, nombre: '', correo: '', rol: '', leads: [] };

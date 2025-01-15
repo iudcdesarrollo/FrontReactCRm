@@ -138,7 +138,7 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                     ✏️
                 </button>
             </div> */}
-            <div className="lead-actions">
+            <div className="meta-campaign-label">
                 <label>Campaña de Meta: {programaMeta || 'Cargando...'}</label>
             </div>
             <div className="conversation-actions">
