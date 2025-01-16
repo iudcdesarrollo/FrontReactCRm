@@ -142,7 +142,27 @@ const MessageList: React.FC<MessageListProps> = ({
         return statusTranslations[status] || status;
     };
 
+    const formatDateTime = (timestamp: string | undefined) => {
+        if (!timestamp) return '';
+
+        const date = new Date(timestamp);
+        return date.toLocaleString('es-ES', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
     const renderMessage = (msg: Message, index: number) => {
+        console.log('Mensaje timestamp:', {
+            msgId: msg.id,
+            timestamp: msg.timestamp,
+            timestampType: typeof msg.timestamp
+        });
+
         if (!msg.message.trim()) {
             return null;
         }
@@ -252,7 +272,9 @@ const MessageList: React.FC<MessageListProps> = ({
                 )}
                 <div className="message-bubble">
                     {renderContent()}
-                    <div className="message-status">{`Estado: ${getMessageStatus(msg)}`}</div>
+                    <div className="message-status">
+                        {`Estado: ${getMessageStatus(msg)} - ${formatDateTime(msg.timestamp)}`}
+                    </div>
                 </div>
             </div>
         );

@@ -1,24 +1,26 @@
 import React from 'react';
 import '../css/Admins/LeftSidebar.css';
-import { 
-    Home, 
+import {
+    Home,
     //UserCheck, 
     //MessageCircle, 
     //File, 
-    Settings, 
+    Settings,
     //HelpCircle, 
-    LogOut, 
-    BarChart
- } from 'lucide-react';
+    LogOut,
+    BarChart,
+    Kanban
+} from 'lucide-react';
 
 interface LeftSidebarProps {
     handleLogout: () => void;
     toggleSettings: () => void;
     onSelectHome: () => void;
     onSelectMetrics: () => void;
+    onSelectKanban?: () => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ handleLogout, toggleSettings, onSelectHome, onSelectMetrics }) => {
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ handleLogout, toggleSettings, onSelectHome, onSelectMetrics, onSelectKanban }) => {
     return (
         <div className="left-sidebar">
             <div className="icons">
@@ -30,6 +32,11 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ handleLogout, toggleSettings,
                 {/* Home Icon */}
                 <div className="icon" onClick={onSelectHome}>
                     <Home size={24} />
+                </div>
+
+
+                <div className="icon" onClick={onSelectKanban}>
+                    <Kanban size={24} />
                 </div>
 
                 {/* User Check Icon */}
