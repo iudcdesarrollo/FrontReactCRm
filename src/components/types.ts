@@ -85,6 +85,7 @@ export interface WhatsAppCloneState {
     downloads: Download[];
     showMetrics: boolean;
     showSettings: boolean;
+    showKanban: boolean;
 }
 
 export interface ChatWindowProps {

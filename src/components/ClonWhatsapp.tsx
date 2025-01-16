@@ -9,6 +9,7 @@ import {
     getDownloadsFromMessages
 } from './types';
 import Metrics from './Metricas/Metrics';
+import KanbanBoard from './Kanban/KanbanBoard';
 
 class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     constructor(props: WhatsAppCloneProps) {
@@ -20,13 +21,23 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
             agente: props.initialAgente || null,
             downloads: [],
             showMetrics: false,
-            showSettings: false
+            showSettings: false,
+            showKanban: false
         };
     }
 
     onSelectMetrics = () => {
         this.setState({
             showMetrics: true,
+            showSettings: false,
+            showKanban: false
+        });
+    };
+
+    onSelectKanban = () => {
+        this.setState({
+            showKanban: true,
+            showMetrics: false,
             showSettings: false
         });
     };
@@ -48,14 +59,16 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     toggleSettings = () => {
         this.setState(prevState => ({
             showSettings: !prevState.showSettings,
-            showMetrics: false
+            showMetrics: false,
+            showKanban: false
         }));
     };
 
     onSelectHome = () => {
         this.setState({
             showMetrics: false,
-            showSettings: false
+            showSettings: false,
+            showKanban: false
         });
     };
 
@@ -104,13 +117,18 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
             agente,
             downloads,
             showMetrics,
-            showSettings
+            showSettings,
+            showKanban
         } = this.state;
 
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
+        if (showKanban) {
+            return <KanbanBoard />;
+        }
+
         if (showMetrics) {
-            return <Metrics socket={this.props.socket}  />;
+            return <Metrics socket={this.props.socket} />;
         }
 
         if (showSettings) {
@@ -155,6 +173,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
                             toggleSettings={this.toggleSettings}
                             onSelectHome={this.onSelectHome}
                             onSelectMetrics={this.onSelectMetrics}
+                            onSelectKanban={this.onSelectKanban}
                         />
                     </div>
                 )}
