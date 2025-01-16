@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import '../css/Agentes/LeadSidebar.css';
-
-interface Lead {
-    nombre: string;
-    numeroWhatsapp: string;
-    urlPhotoPerfil: string;
-    TipoGestion: string;
-}
+import { Lead, LeadSidebarData } from './types';
 
 interface LeadSidebarProps {
-    lead: Lead;
+    lead: LeadSidebarData;
     onUpdate: (updatedData: Partial<Lead>) => void;
 }
 
@@ -30,7 +24,6 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
         'venta perdida',
     ];
 
-    // Realizar la solicitud para obtener el programa de Meta
     useEffect(() => {
         const obtenerProgramaMeta = async () => {
             try {
@@ -40,14 +33,14 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                 }
 
                 const data = await response.json();
-                setProgramaMeta(data.programa); // Asumiendo que el servidor devuelve { programa: string }
+                setProgramaMeta(data.programa);
             } catch (error) {
                 console.error('Error al obtener el programa:', error);
             }
         };
 
         obtenerProgramaMeta();
-    }, [lead.numeroWhatsapp]); // Dependencia en lead.numeroWhatsapp
+    }, [lead.numeroWhatsapp]);
 
     const formatTipoGestion = (tipo: string) =>
         tipo.split(' ')
@@ -106,11 +99,27 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
         <div className="lead-sidebar">
             <div className="lead-info">
                 <div className="lead-avatar">
-                    <img
-                        src={lead.urlPhotoPerfil}
-                        alt={lead.nombre}
-                        className="lead-avatar-img"
-                    />
+                    <div className="w-12 h-12 rounded-md mr-3 overflow-hidden">
+                        {lead.profilePictureUrl ? (
+                            <img
+                                src={lead.profilePictureUrl}
+                                alt={lead.nombre}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.parentElement!.innerHTML = `
+                            <div class="w-full h-full bg-gray-300 flex items-center justify-center">
+                                ${lead.nombre.charAt(0).toUpperCase()}
+                            </div>`;
+                                }}
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                                {lead.nombre.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div>
                     {isEditing ? (
@@ -129,15 +138,6 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                     <p>{lead.numeroWhatsapp}</p>
                 </div>
             </div>
-            {/* <div className="lead-actions">
-                <button
-                    className="action-btn edit"
-                    onClick={handleEditClick}
-                    disabled={isUpdating}
-                >
-                    ✏️
-                </button>
-            </div> */}
             <div className="meta-campaign-label">
                 <label>Campaña de Meta: {programaMeta || 'Cargando...'}</label>
             </div>

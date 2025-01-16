@@ -7,9 +7,9 @@ export interface MessageListProps {
     downloads: Download[];
     downloadFile: (url: string, fileName: string, chatId: number) => Promise<void>;
     enpointAwsBucked: string;
-    profilePictureUrl: string | null;
+    profilePictureUrl?: string;
     socket: Socket | null;
-    numberWhatsApp:string
+    numberWhatsApp: string
 }
 
 export interface MessageStatus {

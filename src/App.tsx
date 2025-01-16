@@ -8,7 +8,7 @@ import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
 import { TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
-// import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx';
+// import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx'; esto pertenese a adriana pirazan esta en pausa por cambios al call center.
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
 const socketEndpoint = import.meta.env.VITE_SOCKET_URL;

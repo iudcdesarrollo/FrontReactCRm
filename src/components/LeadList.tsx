@@ -62,9 +62,9 @@ const LeadList: React.FC<LeadListProps> = ({
                 >
                     <div className="relative">
                         <div className="w-12 h-12 rounded-md mr-3 overflow-hidden">
-                            {lead.urlPhotoPerfil ? (
+                            {lead.profilePictureUrl ? (
                                 <img
-                                    src={lead.urlPhotoPerfil}
+                                    src={lead.profilePictureUrl}
                                     alt={lead.nombre}
                                     className="w-full h-full object-cover"
                                 />

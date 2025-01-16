@@ -9,6 +9,7 @@ export interface Lead {
     urlPhotoPerfil: string;
     TipoGestion: string;
     messages?: Message[];
+    profilePictureUrl?: string;
 }
 
 export interface Agente {
@@ -17,6 +18,14 @@ export interface Agente {
     correo: string;
     rol: string;
     leads: Lead[];
+}
+
+export interface LeadSidebarData {
+    nombre: string;
+    numeroWhatsapp: string;
+    urlPhotoPerfil: string;
+    TipoGestion: string;
+    profilePictureUrl?: string;
 }
 
 export interface Message {
@@ -56,7 +65,6 @@ export interface SocketResponse {
     data?: unknown;
 }
 
-// Props Interfaces
 export interface ChatCategoriesProps {
     onCategoryChange: (category: string) => void;
 }
@@ -124,7 +132,6 @@ export interface MessageSenderProps {
     profilePictureUrl: string;
 }
 
-// Backend Interfaces
 export interface BackendResponse {
     correo_agente: string;
     mensajes: BackendMensaje[];
@@ -134,6 +141,7 @@ export interface BackendResponse {
     rol_agente: string;
     tipo_gestion: string;
     _id: string;
+    profilePictureUrl?: string;
 }
 
 export interface BackendMensaje {
@@ -194,7 +202,8 @@ export const transformBackendToFrontend = (backendData: BackendResponse[]): Agen
             conversacion: messages[messages.length - 1]?.message || 'Sin mensajes',
             urlPhotoPerfil: '',
             TipoGestion: item.tipo_gestion || 'sin-gestionar',
-            messages
+            messages,
+            profilePictureUrl: item.profilePictureUrl
         };
     });
 

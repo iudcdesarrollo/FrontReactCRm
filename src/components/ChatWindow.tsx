@@ -72,7 +72,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         downloads={downloads}
                         downloadFile={downloadFile}
                         enpointAwsBucked={enpointAwsBucked}
-                        profilePictureUrl={selectedLead.urlPhotoPerfil}
+                        profilePictureUrl={selectedLead.profilePictureUrl}
                         socket={socket}
                         numberWhatsApp={selectedLead.numeroWhatsapp}
                     />
@@ -95,7 +95,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                             nombre: selectedLead.nombre,
                             numeroWhatsapp: selectedLead.numeroWhatsapp,
                             urlPhotoPerfil: selectedLead.urlPhotoPerfil,
-                            TipoGestion: selectedLead.TipoGestion
+                            TipoGestion: selectedLead.TipoGestion,
+                            profilePictureUrl: selectedLead.profilePictureUrl
                         }}
                         onUpdate={handleLeadUpdate}
                     />

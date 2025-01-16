@@ -23,18 +23,33 @@
 }
 
 .lead-avatar {
+    margin-right: 16px;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
+    position: relative;
+}
+
+.lead-avatar .w-12 {
+    width: 48px;
+    height: 48px;
+}
+
+.lead-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.lead-avatar .bg-gray-300 {
     background-color: #e0e0e0;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
     font-weight: bold;
     font-size: 24px;
     color: #555555;
-    overflow: hidden;
+    border-radius: 8px;
 }
 
 .lead-avatar-img {
@@ -143,6 +158,19 @@
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+
+/* Tailwind override classes */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.rounded-md {
+    border-radius: 0.375rem;
+}
+
+.object-cover {
+    object-fit: cover;
 }
 
 /* Media query for responsiveness */
