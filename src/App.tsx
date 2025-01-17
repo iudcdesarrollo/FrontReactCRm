@@ -8,6 +8,7 @@ import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
 import { TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
+import { useKanbanStore } from './components/Kanban/store/kanbanStore.ts';
 // import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx'; esto pertenese a adriana pirazan esta en pausa por cambios al call center.
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
@@ -556,10 +557,21 @@ function App() {
     });
 
     newSocket.on('UpdateTipogestion', (updateTipoGestion) => {
+      console.log(JSON.stringify(updateTipoGestion, null, 2));
       try {
         const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
         const conversationIndex = existingRawData.findIndex(
           (conv: BackendResponse) => conv.numero_cliente === updateTipoGestion.numero_cliente
+        );
+
+        const kanbanStore = useKanbanStore.getState();
+        if (Object.keys(kanbanStore.lists).length === 0) {
+          kanbanStore.initializeLists();
+        }
+
+        kanbanStore.updateTaskListByTipoGestion(
+          updateTipoGestion.numero_cliente,
+          updateTipoGestion.tipo_gestion
         );
 
         if (conversationIndex !== -1) {

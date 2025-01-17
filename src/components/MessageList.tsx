@@ -157,11 +157,11 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     const renderMessage = (msg: Message, index: number) => {
-        console.log('Mensaje timestamp:', {
-            msgId: msg.id,
-            timestamp: msg.timestamp,
-            timestampType: typeof msg.timestamp
-        });
+        // console.log('Mensaje timestamp:', {
+        //     msgId: msg.id,
+        //     timestamp: msg.timestamp,
+        //     timestampType: typeof msg.timestamp
+        // });
 
         if (!msg.message.trim()) {
             return null;

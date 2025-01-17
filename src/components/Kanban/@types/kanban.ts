@@ -1,12 +1,13 @@
 export type ListId =
-    | "inbox"
-    | "defined"
-    | "backlog"
-    | "blocked"
-    | "inProgress"
-    | "validating"
-    | "done"
-    | "cancelled";
+    | "sinGestionar"
+    | "conversacion"
+    | "depurar"
+    | "llamada"
+    | "segundaLlamada"
+    | "gestionado"
+    | "estudiante"
+    | "revision";
+
 export type TaskId = string;
 
 export interface Task {
@@ -30,23 +31,23 @@ export type Lists = {
 };
 
 export const INITIAL_LISTS: ListId[] = [
-    "inbox",
-    "defined",
-    "backlog",
-    "blocked",
-    "inProgress",
-    "validating",
-    "done",
-    "cancelled",
+    "sinGestionar",
+    "conversacion",
+    "depurar",
+    "llamada",
+    "segundaLlamada",
+    "gestionado",
+    "estudiante",
+    "revision"
 ];
 
 export const LIST_TITLES: Record<ListId, string> = {
-    inbox: "Inbox",
-    defined: "Defined",
-    backlog: "Backlog",
-    blocked: "Blocked",
-    inProgress: "In Progress",
-    validating: "Validating",
-    done: "Done",
-    cancelled: "Cancelled",
+    sinGestionar: "Sin gestionar",
+    conversacion: "Conversación",
+    depurar: "Depuración",
+    llamada: "Llamada",
+    segundaLlamada: "Segunda Llamada",
+    gestionado: "Gestionado",
+    estudiante: "Inscrito",
+    revision: "Venta Perdida"
 };

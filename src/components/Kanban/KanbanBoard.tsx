@@ -15,7 +15,7 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useKanbanStore } from "../Kanban/store/kanbanStore";
 import {
     INITIAL_LISTS,
@@ -25,10 +25,46 @@ import {
 } from "../Kanban/@types/kanban";
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
+import { Lead } from "../types";
 
-export default function KanbanBoard() {
-    const { lists, initializeLists, moveTask, reorderTask } = useKanbanStore();
+interface KanbanBoardProps {
+    leads: Lead[] | undefined;
+}
+
+export default function KanbanBoard({ leads }: KanbanBoardProps) {
+    const { lists, initializeLists, moveTask, reorderTask, updateTaskListByTipoGestion } = useKanbanStore();
     const [activeTask, setActiveTask] = useState<TaskType | null>(null);
+    const [processedLeads] = useState(new Set<number>());
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // Inicialización de las listas
+    useEffect(() => {
+        const init = async () => {
+            await initializeLists();
+            setIsInitialized(true);
+        };
+        init();
+    }, [initializeLists]);
+
+    // Procesamiento de leads usando updateTaskListByTipoGestion
+    useEffect(() => {
+        if (!isInitialized || !leads?.length) return;
+
+        leads.forEach(lead => {
+            if (!processedLeads.has(lead.id)) {
+                const taskExists = Object.values(lists).some(list =>
+                    list?.tasks.some(task =>
+                        task.content.includes(`WhatsApp: ${lead.numeroWhatsapp}`)
+                    )
+                );
+
+                if (!taskExists) {
+                    updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion);
+                    processedLeads.add(lead.id);
+                }
+            }
+        });
+    }, [leads, lists, processedLeads, isInitialized, updateTaskListByTipoGestion]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -43,17 +79,13 @@ export default function KanbanBoard() {
         })
     );
 
-    useEffect(() => {
-        initializeLists();
-    }, []);
-
-    const findListByTaskId = (allLists: Lists, taskId: string) => {
+    const findListByTaskId = useCallback((allLists: Lists, taskId: string) => {
         return Object.values(allLists).find((list) =>
             list?.tasks.some((task: TaskType) => task.id === taskId)
         );
-    };
+    }, []);
 
-    const handleDragStart = (event: DragStartEvent) => {
+    const handleDragStart = useCallback((event: DragStartEvent) => {
         const { active } = event;
         const activeList = findListByTaskId(lists, active.id as string);
         if (!activeList) return;
@@ -62,9 +94,9 @@ export default function KanbanBoard() {
         if (task) {
             setActiveTask(task);
         }
-    };
+    }, [lists, findListByTaskId]);
 
-    const handleDragOver = (event: DragOverEvent) => {
+    const handleDragOver = useCallback((event: DragOverEvent) => {
         const { active, over } = event;
         if (!over) return;
 
@@ -91,13 +123,12 @@ export default function KanbanBoard() {
 
         if (activeList.id !== overList.id) {
             const overIndex = overList.tasks.findIndex((t: TaskType) => t.id === overId);
-            const finalIndex =
-                overIndex === -1 ? overList.tasks.length : overIndex;
+            const finalIndex = overIndex === -1 ? overList.tasks.length : overIndex;
             moveTask(activeId, activeList.id, overList.id, finalIndex);
         }
-    };
+    }, [lists, findListByTaskId, moveTask]);
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
         setActiveTask(null);
         const { active, over } = event;
         if (!over) return;
@@ -133,11 +164,14 @@ export default function KanbanBoard() {
             }
         } else {
             const overIndex = overList.tasks.findIndex((t: TaskType) => t.id === overId);
-            const finalIndex =
-                overIndex === -1 ? overList.tasks.length : overIndex;
+            const finalIndex = overIndex === -1 ? overList.tasks.length : overIndex;
             moveTask(activeId, activeList.id, overList.id, finalIndex);
         }
-    };
+    }, [lists, findListByTaskId, moveTask, reorderTask]);
+
+    if (!isInitialized) {
+        return <div>Cargando tablero...</div>;
+    }
 
     return (
         <DndContext

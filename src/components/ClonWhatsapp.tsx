@@ -124,7 +124,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
         if (showKanban) {
-            return <KanbanBoard />;
+            return <KanbanBoard leads={agente?.leads} socket={this.props.socket} />;
         }
 
         if (showMetrics) {

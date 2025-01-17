@@ -9,7 +9,6 @@ import {
     type TaskId,
 } from "../../Kanban/@types/kanban";
 
-// Interface para el estado persistido
 interface PersistedState {
     version: number;
     lastSynced: string | null;
@@ -31,11 +30,27 @@ interface KanbanState {
         newIndex: number
     ) => void;
     reorderTask: (listId: ListId, oldIndex: number, newIndex: number) => void;
+    updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string) => void;
     syncWithRemote?: () => Promise<void>;
 }
 
 const STORE_VERSION = 1;
 const STORE_NAME = "kanban-store";
+
+const mapTipoGestionToListId = (tipoGestion: string): ListId => {
+    const tipoGestionLower = tipoGestion.toLowerCase().trim();
+    const mappings: Record<string, ListId> = {
+        'sin gestionar': 'sinGestionar',
+        'conversacion': 'conversacion',
+        'depuracion': 'depurar',
+        'llamada': 'llamada',
+        'segunda llamada': 'segundaLlamada',
+        'inscrito': 'estudiante',
+        'venta perdida': 'revision',
+        'todos': 'sinGestionar'
+    };
+    return mappings[tipoGestionLower] || 'sinGestionar';
+};
 
 export const useKanbanStore = create<KanbanState>()(
     persist(
@@ -144,6 +159,91 @@ export const useKanbanStore = create<KanbanState>()(
                             },
                         },
                         lastSynced: new Date().toISOString(),
+                    };
+                });
+            },
+
+            updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string) => {
+                set((state) => {
+                    const updatedLists: Lists = JSON.parse(JSON.stringify(state.lists));
+
+                    let taskToMove: Task | null = null;
+                    let originalListId: ListId | null = null;
+
+                    // Buscar la tarea existente
+                    const listKeys = Object.keys(updatedLists) as Array<keyof typeof updatedLists>;
+                    for (const listId of listKeys) {
+                        const list = updatedLists[listId];
+                        if (!list) continue;
+
+                        const taskIndex = list.tasks.findIndex((task: Task) =>
+                            task.content.includes(`WhatsApp: ${numeroWhatsapp}`)
+                        );
+
+                        if (taskIndex !== -1) {
+                            taskToMove = list.tasks[taskIndex];
+                            originalListId = listId;
+                            break;
+                        }
+                    }
+
+                    const newListId = mapTipoGestionToListId(newTipoGestion);
+                    const targetList = updatedLists[newListId];
+
+                    if (!targetList) {
+                        return state;
+                    }
+
+                    // Si existe la tarea, actualizarla y moverla
+                    if (taskToMove && originalListId) {
+                        const originalList = updatedLists[originalListId];
+
+                        if (originalList) {
+                            // Remover la tarea de la lista original
+                            originalList.tasks = originalList.tasks.filter(
+                                (task: Task) => task.id !== taskToMove!.id
+                            );
+
+                            // Actualizar el contenido de la tarea
+                            const updatedTaskContent = taskToMove.content.replace(
+                                /Tipo de Gestión: [^\n]+/,
+                                `Tipo de Gestión: ${newTipoGestion}`
+                            );
+
+                            // Crear la tarea actualizada
+                            const updatedTask: Task = {
+                                ...taskToMove,
+                                listId: newListId,
+                                content: updatedTaskContent,
+                                updatedAt: new Date().toISOString(),
+                                order: targetList.tasks.length
+                            };
+
+                            // Añadir la tarea actualizada a la nueva lista
+                            targetList.tasks.push(updatedTask);
+                        }
+                    } else {
+                        // Si la tarea no existe, crear una nueva
+                        const newTask: Task = {
+                            id: crypto.randomUUID(),
+                            content: `
+Nombre: Pendiente
+WhatsApp: ${numeroWhatsapp}
+Tipo de Gestión: ${newTipoGestion}
+                            `.trim(),
+                            listId: newListId,
+                            order: targetList.tasks.length,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                        };
+
+                        targetList.tasks.push(newTask);
+                    }
+
+                    return {
+                        ...state,
+                        lists: updatedLists,
+                        lastSynced: new Date().toISOString()
                     };
                 });
             },
