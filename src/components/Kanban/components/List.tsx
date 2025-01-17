@@ -1,4 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
+import { memo } from "react";
 import { useKanbanStore } from "../store/kanbanStore";
 import { type ListId } from "../../Kanban/@types/kanban";
 import CreateTask from "./CreateTask";
@@ -9,9 +10,15 @@ interface ListProps {
     listId: ListId;
 }
 
-const List = ({ listId }: ListProps) => {
+const List = memo(({ listId }: ListProps) => {
     const list = useKanbanStore((state) => state.lists[listId]);
-    const { setNodeRef, isOver } = useDroppable({ id: listId });
+    const { setNodeRef, isOver } = useDroppable({
+        id: listId,
+        data: {
+            type: 'List',
+            listId
+        }
+    });
 
     if (!list) return null;
 
@@ -37,6 +44,8 @@ const List = ({ listId }: ListProps) => {
             </div>
         </div>
     );
-};
+});
+
+List.displayName = 'List';
 
 export default List;

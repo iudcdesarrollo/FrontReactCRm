@@ -219,11 +219,9 @@ export const useKanbanStore = create<KanbanState>()(
                                 order: targetList.tasks.length
                             };
 
-                            // Añadir la tarea actualizada a la nueva lista
                             targetList.tasks.push(updatedTask);
                         }
                     } else {
-                        // Si la tarea no existe, crear una nueva
                         const newTask: Task = {
                             id: crypto.randomUUID(),
                             content: `
@@ -325,7 +323,6 @@ Tipo de Gestión: ${newTipoGestion}
             storage: createJSONStorage(() => localStorage),
             version: STORE_VERSION,
             onRehydrateStorage: () => () => {
-                // No-op
             },
             migrate: (persistedState: unknown, version: number) => {
                 if (version < STORE_VERSION) {

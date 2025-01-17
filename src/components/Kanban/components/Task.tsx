@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { useKanbanStore } from "../store/kanbanStore";
 import { type Task as TaskType } from "../../Kanban/@types/kanban";
 import '../css/Task.css';
@@ -9,7 +9,7 @@ interface TaskProps {
     task: TaskType;
 }
 
-const Task = ({ task }: TaskProps) => {
+const Task = memo(({ task }: TaskProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(task.content);
     const updateTask = useKanbanStore((state) => state.updateTask);
@@ -25,35 +25,46 @@ const Task = ({ task }: TaskProps) => {
     } = useSortable({
         id: task.id,
         disabled: isEditing,
+        data: {
+            type: 'Task',
+            task,
+        },
     });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
+        transform: transform ? CSS.Transform.toString(transform) : undefined,
+        transition: transition || undefined,
     };
 
-    const handleSave = () => {
-        if (editContent.trim() !== task.content) {
-            updateTask(task.id, editContent.trim());
+    const handleSave = useCallback(() => {
+        const trimmedContent = editContent.trim();
+        if (trimmedContent !== task.content) {
+            updateTask(task.id, trimmedContent);
         }
         setIsEditing(false);
-    };
+    }, [editContent, task.content, task.id, updateTask]);
 
-    const handleCancel = () => {
+    const handleCancel = useCallback(() => {
         setEditContent(task.content);
         setIsEditing(false);
-    };
+    }, [task.content]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         deleteTask(task.id);
-    };
+    }, [deleteTask, task.id]);
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             handleSave();
         }
-    };
+    }, [handleSave]);
+
+    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setIsEditing(true);
+    }, []);
 
     if (isDragging) {
         return (
@@ -81,13 +92,22 @@ const Task = ({ task }: TaskProps) => {
                     rows={2}
                 />
                 <div className="task-edit-buttons">
-                    <button onClick={handleSave} className="task-save-button">
+                    <button
+                        onClick={handleSave}
+                        className="task-save-button"
+                    >
                         Save
                     </button>
-                    <button onClick={handleCancel} className="task-cancel-button">
+                    <button
+                        onClick={handleCancel}
+                        className="task-cancel-button"
+                    >
                         Cancel
                     </button>
-                    <button onClick={handleDelete} className="task-delete-button">
+                    <button
+                        onClick={handleDelete}
+                        className="task-delete-button"
+                    >
                         Delete
                     </button>
                 </div>
@@ -102,15 +122,13 @@ const Task = ({ task }: TaskProps) => {
             className="task-container"
             {...attributes}
             {...listeners}
-            onDoubleClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsEditing(true);
-            }}
+            onDoubleClick={handleDoubleClick}
         >
             <p className="task-content">{task.content}</p>
         </div>
     );
-};
+});
+
+Task.displayName = 'Task';
 
 export default Task;

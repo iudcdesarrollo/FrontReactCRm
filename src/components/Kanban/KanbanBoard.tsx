@@ -15,7 +15,7 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useKanbanStore } from "../Kanban/store/kanbanStore";
 import {
     INITIAL_LISTS,
@@ -34,37 +34,8 @@ interface KanbanBoardProps {
 export default function KanbanBoard({ leads }: KanbanBoardProps) {
     const { lists, initializeLists, moveTask, reorderTask, updateTaskListByTipoGestion } = useKanbanStore();
     const [activeTask, setActiveTask] = useState<TaskType | null>(null);
-    const [processedLeads] = useState(new Set<number>());
+    const processedLeadsRef = useRef(new Set<number>());
     const [isInitialized, setIsInitialized] = useState(false);
-
-    // Inicialización de las listas
-    useEffect(() => {
-        const init = async () => {
-            await initializeLists();
-            setIsInitialized(true);
-        };
-        init();
-    }, [initializeLists]);
-
-    // Procesamiento de leads usando updateTaskListByTipoGestion
-    useEffect(() => {
-        if (!isInitialized || !leads?.length) return;
-
-        leads.forEach(lead => {
-            if (!processedLeads.has(lead.id)) {
-                const taskExists = Object.values(lists).some(list =>
-                    list?.tasks.some(task =>
-                        task.content.includes(`WhatsApp: ${lead.numeroWhatsapp}`)
-                    )
-                );
-
-                if (!taskExists) {
-                    updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion);
-                    processedLeads.add(lead.id);
-                }
-            }
-        });
-    }, [leads, lists, processedLeads, isInitialized, updateTaskListByTipoGestion]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -78,6 +49,44 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const init = async () => {
+            if (!isInitialized) {
+                await initializeLists();
+                if (isMounted) {
+                    setIsInitialized(true);
+                }
+            }
+        };
+
+        init();
+        return () => {
+            isMounted = false;
+        };
+    }, [isInitialized, initializeLists]);
+
+    useEffect(() => {
+        if (!isInitialized || !leads?.length) return;
+
+        const unprocessedLeads = leads.filter(lead => !processedLeadsRef.current.has(lead.id));
+        if (!unprocessedLeads.length) return;
+
+        unprocessedLeads.forEach(lead => {
+            const taskExists = Object.values(lists).some(list =>
+                list?.tasks.some(task =>
+                    task.content.includes(`WhatsApp: ${lead.numeroWhatsapp}`)
+                )
+            );
+
+            if (!taskExists) {
+                updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion);
+                processedLeadsRef.current.add(lead.id);
+            }
+        });
+    }, [leads, lists, isInitialized, updateTaskListByTipoGestion]);
 
     const findListByTaskId = useCallback((allLists: Lists, taskId: string) => {
         return Object.values(allLists).find((list) =>
@@ -109,12 +118,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
         if (INITIAL_LISTS.includes(overId as ListId)) {
             const overList = lists[overId as ListId];
             if (!overList || activeList.id === overList.id) return;
-            moveTask(
-                activeId,
-                activeList.id,
-                overList.id,
-                overList.tasks.length
-            );
+            moveTask(activeId, activeList.id, overList.id, overList.tasks.length);
             return;
         }
 
@@ -129,8 +133,9 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
     }, [lists, findListByTaskId, moveTask]);
 
     const handleDragEnd = useCallback((event: DragEndEvent) => {
-        setActiveTask(null);
         const { active, over } = event;
+        setActiveTask(null);
+
         if (!over) return;
 
         const activeId = active.id as string;
@@ -142,12 +147,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
         if (INITIAL_LISTS.includes(overId as ListId)) {
             const overList = lists[overId as ListId];
             if (!overList || activeList.id === overList.id) return;
-            moveTask(
-                activeId,
-                activeList.id,
-                overList.id,
-                overList.tasks.length
-            );
+            moveTask(activeId, activeList.id, overList.id, overList.tasks.length);
             return;
         }
 
@@ -155,17 +155,14 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
         if (!overList) return;
 
         if (activeList.id === overList.id) {
-            const oldIndex = activeList.tasks.findIndex(
-                (t: TaskType) => t.id === activeId
-            );
-            const newIndex = overList.tasks.findIndex((t: TaskType) => t.id === overId);
+            const oldIndex = activeList.tasks.findIndex(t => t.id === activeId);
+            const newIndex = overList.tasks.findIndex(t => t.id === overId);
             if (oldIndex !== newIndex) {
                 reorderTask(activeList.id, oldIndex, newIndex);
             }
         } else {
-            const overIndex = overList.tasks.findIndex((t: TaskType) => t.id === overId);
-            const finalIndex = overIndex === -1 ? overList.tasks.length : overIndex;
-            moveTask(activeId, activeList.id, overList.id, finalIndex);
+            const overIndex = overList.tasks.findIndex(t => t.id === overId);
+            moveTask(activeId, activeList.id, overList.id, overIndex === -1 ? overList.tasks.length : overIndex);
         }
     }, [lists, findListByTaskId, moveTask, reorderTask]);
 
@@ -205,13 +202,13 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
                     </div>
                 </div>
                 <DragOverlay>
-                    {activeTask ? (
+                    {activeTask && (
                         <div className="task-overlay">
                             <p className="task-overlay-content">
                                 {activeTask.content}
                             </p>
                         </div>
-                    ) : null}
+                    )}
                 </DragOverlay>
             </div>
         </DndContext>
