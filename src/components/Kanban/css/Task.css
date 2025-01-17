@@ -1,0 +1,110 @@
+/* Task.css */
+
+.task-container {
+    padding: 1rem;
+    background-color: black;
+    border-radius: 0.5rem;
+    cursor: grab;
+    border: 1px solid #374151;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    user-select: none;
+    transition: all 0.2s ease;
+    margin-bottom: 0.75rem;
+}
+
+.task-container:hover {
+    background-color: #1F2937;
+}
+
+.task-content {
+    font-size: 0.875rem;
+    color: #F3F4F6;
+    font-weight: 500;
+}
+
+.task-dragging {
+    padding: 0.75rem;
+    border: 2px dashed #60A5FA;
+    background-color: black;
+    border-radius: 0.5rem;
+    height: 5rem;
+    margin-bottom: 0.75rem;
+}
+
+.task-edit-container {
+    padding: 1rem;
+    background-color: #1F2937;
+    border-radius: 0.5rem;
+    border: 1px solid #60A5FA;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.75rem;
+}
+
+.task-edit-textarea {
+    width: 100%;
+    background-color: #374151;
+    color: white;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #4B5563;
+    resize: none;
+}
+
+.task-edit-textarea:focus {
+    outline: none;
+    border-color: #60A5FA;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+}
+
+.task-edit-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.task-save-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background-color: #3B82F6;
+    color: white;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.task-save-button:hover {
+    background-color: #2563EB;
+}
+
+.task-cancel-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background-color: transparent;
+    color: #D1D5DB;
+    border: 1px solid #4B5563;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.task-cancel-button:hover {
+    background-color: #374151;
+}
+
+.task-delete-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background-color: #EF4444;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    margin-left: auto;
+    transition: background-color 0.2s;
+}
+
+.task-delete-button:hover {
+    background-color: #DC2626;
+}

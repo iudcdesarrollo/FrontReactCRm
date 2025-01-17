@@ -1,0 +1,83 @@
+.kanban-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.kanban-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, #60A5FA, #A855F7);
+    border-radius: 2px;
+}
+
+.kanban-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 8rem);
+}
+
+.kanban-board {
+    flex: 1;
+    overflow-x: auto;
+}
+
+.kanban-lists {
+    display: inline-flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.kanban-list {
+    width: 20rem;
+}
+
+.list-header {
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 0.75rem;
+}
+
+.list-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #374151;
+}
+
+.task-overlay {
+    padding: 0.75rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    cursor: grabbing;
+}
+
+.task-overlay-content {
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+/* Custom scrollbar */
+.kanban-board::-webkit-scrollbar {
+    height: 8px;
+}
+
+.kanban-board::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+.kanban-board::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.kanban-board::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
