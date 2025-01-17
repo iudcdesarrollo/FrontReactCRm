@@ -27,6 +27,42 @@ import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
 import { Lead } from "../types";
 
+// Helper function to map list IDs to tipo gestion values
+const mapListIdToTipoGestion = (listId: string): string => {
+    const mappings: Record<string, string> = {
+        'sinGestionar': 'sin gestionar',
+        'conversacion': 'conversacion',
+        'depurar': 'depuracion',
+        'llamada': 'llamada',
+        'segundaLlamada': 'segunda llamada',
+        'estudiante': 'inscrito',
+        'revision': 'venta perdida'
+    };
+    return mappings[listId] || 'sin gestionar';
+};
+
+// Function to make API call for updating tipo gestion
+const updateTipoGestion = async (numeroWhatsapp: string, tipoGestion: string) => {
+    try {
+        const response = await fetch('https://w4zv821b-3000.use2.devtunnels.ms/api/UpdateTipoGestion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                numero_cliente: numeroWhatsapp,
+                tipo_gestion: tipoGestion
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update tipo gestion');
+        }
+    } catch (error) {
+        console.error('Error updating tipo gestion:', error);
+    }
+};
+
 interface KanbanBoardProps {
     leads: Lead[] | undefined;
 }
@@ -132,7 +168,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
         }
     }, [lists, findListByTaskId, moveTask]);
 
-    const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const handleDragEnd = useCallback(async (event: DragEndEvent) => {
         const { active, over } = event;
         setActiveTask(null);
 
@@ -147,6 +183,20 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
         if (INITIAL_LISTS.includes(overId as ListId)) {
             const overList = lists[overId as ListId];
             if (!overList || activeList.id === overList.id) return;
+
+            // Extract WhatsApp number and make API call before moving task
+            const task = activeList.tasks.find(t => t.id === activeId);
+            if (task) {
+                const whatsappMatch = task.content.match(/WhatsApp: (\d+)/);
+                if (whatsappMatch && whatsappMatch[1]) {
+                    const numeroWhatsapp = whatsappMatch[1];
+                    const newTipoGestion = mapListIdToTipoGestion(overId);
+
+                    // Make API call before moving the task
+                    await updateTipoGestion(numeroWhatsapp, newTipoGestion);
+                }
+            }
+
             moveTask(activeId, activeList.id, overList.id, overList.tasks.length);
             return;
         }
@@ -161,8 +211,25 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
                 reorderTask(activeList.id, oldIndex, newIndex);
             }
         } else {
+            // Extract WhatsApp number and make API call before moving task
+            const task = activeList.tasks.find(t => t.id === activeId);
+            if (task) {
+                const whatsappMatch = task.content.match(/WhatsApp: (\d+)/);
+                if (whatsappMatch && whatsappMatch[1]) {
+                    const numeroWhatsapp = whatsappMatch[1];
+                    const newTipoGestion = mapListIdToTipoGestion(overList.id);
+
+                    await updateTipoGestion(numeroWhatsapp, newTipoGestion);
+                }
+            }
+
             const overIndex = overList.tasks.findIndex(t => t.id === overId);
-            moveTask(activeId, activeList.id, overList.id, overIndex === -1 ? overList.tasks.length : overIndex);
+            moveTask(
+                activeId,
+                activeList.id,
+                overList.id,
+                overIndex === -1 ? overList.tasks.length : overIndex
+            );
         }
     }, [lists, findListByTaskId, moveTask, reorderTask]);
 
