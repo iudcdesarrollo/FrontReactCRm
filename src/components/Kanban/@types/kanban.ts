@@ -4,8 +4,10 @@ export type ListId =
     | "depurar"
     | "llamada"
     | "segundaLlamada"
-    | "gestionado"
+    | "duplicado"
+    | "inscrito"
     | "estudiante"
+    | "ventaPerdida"
     | "revision";
 
 export type TaskId = string;
@@ -36,8 +38,10 @@ export const INITIAL_LISTS: ListId[] = [
     "depurar",
     "llamada",
     "segundaLlamada",
-    "gestionado",
+    "duplicado",
+    "inscrito",
     "estudiante",
+    "ventaPerdida",
     "revision"
 ];
 
@@ -47,7 +51,9 @@ export const LIST_TITLES: Record<ListId, string> = {
     depurar: "Depuración",
     llamada: "Llamada",
     segundaLlamada: "Segunda Llamada",
-    gestionado: "Gestionado",
-    estudiante: "Inscrito",
-    revision: "Venta Perdida"
+    duplicado: "Duplicado",
+    inscrito: "Inscripción",
+    estudiante: "Estudiante",
+    ventaPerdida: "Venta Perdida",
+    revision: "Revisión"
 };

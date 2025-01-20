@@ -27,7 +27,8 @@ import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
 import { Lead } from "../types";
 
-// Helper function to map list IDs to tipo gestion values
+const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
+
 const mapListIdToTipoGestion = (listId: string): string => {
     const mappings: Record<string, string> = {
         'sinGestionar': 'sin gestionar',
@@ -41,10 +42,9 @@ const mapListIdToTipoGestion = (listId: string): string => {
     return mappings[listId] || 'sin gestionar';
 };
 
-// Function to make API call for updating tipo gestion
 const updateTipoGestion = async (numeroWhatsapp: string, tipoGestion: string) => {
     try {
-        const response = await fetch('https://w4zv821b-3000.use2.devtunnels.ms/api/UpdateTipoGestion', {
+        const response = await fetch(`${enpoinyBasic}/UpdateTipoGestion`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -169,67 +169,142 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
     }, [lists, findListByTaskId, moveTask]);
 
     const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-        const { active, over } = event;
-        setActiveTask(null);
-
-        if (!over) return;
-
-        const activeId = active.id as string;
-        const overId = over.id as string;
-
-        const activeList = findListByTaskId(lists, activeId);
-        if (!activeList) return;
-
-        if (INITIAL_LISTS.includes(overId as ListId)) {
-            const overList = lists[overId as ListId];
-            if (!overList || activeList.id === overList.id) return;
-
-            // Extract WhatsApp number and make API call before moving task
-            const task = activeList.tasks.find(t => t.id === activeId);
-            if (task) {
-                const whatsappMatch = task.content.match(/WhatsApp: (\d+)/);
-                if (whatsappMatch && whatsappMatch[1]) {
-                    const numeroWhatsapp = whatsappMatch[1];
-                    const newTipoGestion = mapListIdToTipoGestion(overId);
-
-                    // Make API call before moving the task
-                    await updateTipoGestion(numeroWhatsapp, newTipoGestion);
+        try {
+            const findTaskDetails = (taskId: string) => {
+                for (const [listId, list] of Object.entries(lists)) {
+                    const task = list?.tasks.find(t => t.id === taskId);
+                    if (task) {
+                        const whatsappMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
+                        return {
+                            task,
+                            phoneNumber: whatsappMatch ? whatsappMatch[1] : 'No encontrado',
+                            listId,
+                            fullContent: task.content
+                        };
+                    }
                 }
-            }
+                return null;
+            };
 
-            moveTask(activeId, activeList.id, overList.id, overList.tasks.length);
-            return;
-        }
+            const activeTaskDetails = findTaskDetails(event.active.id as string);
 
-        const overList = findListByTaskId(lists, overId);
-        if (!overList) return;
+            console.log('🚀 Detalles Completos del Evento:', {
+                activeId: event.active.id,
+                overId: event.over?.id,
+                activeType: event.active.data.current?.type,
+                overType: event.over?.data.current?.type,
+                taskContent: activeTaskDetails?.fullContent,
+                phoneNumber: activeTaskDetails?.phoneNumber,
+                fromList: activeTaskDetails?.listId
+            });
 
-        if (activeList.id === overList.id) {
-            const oldIndex = activeList.tasks.findIndex(t => t.id === activeId);
-            const newIndex = overList.tasks.findIndex(t => t.id === overId);
-            if (oldIndex !== newIndex) {
-                reorderTask(activeList.id, oldIndex, newIndex);
-            }
-        } else {
-            // Extract WhatsApp number and make API call before moving task
-            const task = activeList.tasks.find(t => t.id === activeId);
-            if (task) {
-                const whatsappMatch = task.content.match(/WhatsApp: (\d+)/);
-                if (whatsappMatch && whatsappMatch[1]) {
-                    const numeroWhatsapp = whatsappMatch[1];
-                    const newTipoGestion = mapListIdToTipoGestion(overList.id);
-
-                    await updateTipoGestion(numeroWhatsapp, newTipoGestion);
-                }
-            }
-
-            const overIndex = overList.tasks.findIndex(t => t.id === overId);
-            moveTask(
-                activeId,
-                activeList.id,
-                overList.id,
-                overIndex === -1 ? overList.tasks.length : overIndex
+            await updateTipoGestion(
+                activeTaskDetails?.phoneNumber || '', 
+                activeTaskDetails?.listId || ''
             );
+
+            if (!event.active || !event.over) {
+                console.warn('❌ No hay objetivo de destino válido');
+                return;
+            }
+
+            const activeId = event.active.id as string;
+            const overId = event.over.id as string;
+
+            if (!activeId || !overId) {
+                console.warn('❌ IDs inválidos en el evento');
+                return;
+            }
+
+            const activeList = findListByTaskId(lists, activeId);
+            if (!activeList) {
+                console.warn(`❌ No se encontró lista para la tarea activa: ${activeId}`);
+                return;
+            }
+
+            if (INITIAL_LISTS.includes(overId as ListId)) {
+                const overList = lists[overId as ListId];
+
+                if (!overList || activeList.id === overList.id) {
+                    console.warn('❌ Movimiento inválido entre listas iguales o inexistentes');
+                    return;
+                }
+
+                const task = activeList.tasks.find(t => t.id === activeId);
+                if (task) {
+                    const whatsappMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
+
+                    if (whatsappMatch && whatsappMatch[1]) {
+                        const numeroWhatsapp = whatsappMatch[1];
+                        const newTipoGestion = mapListIdToTipoGestion(overId);
+
+                        console.log(`📞 Moviendo tarea de WhatsApp ${numeroWhatsapp} a columna: ${overId}`);
+                        console.log(`🔄 Nuevo Tipo de Gestión: ${newTipoGestion}`);
+                        console.log(`📋 Contenido completo de la tarea:\n${task.content}`);
+
+                        try {
+                            await updateTipoGestion(numeroWhatsapp, newTipoGestion);
+                        } catch (error) {
+                            console.error('🚨 Error actualizando tipo de gestión:', error);
+                        }
+                    } else {
+                        console.warn(`⚠️ No se encontró número de WhatsApp en la tarea: ${task.content}`);
+                    }
+                }
+
+                moveTask(activeId, activeList.id, overList.id, overList.tasks.length);
+                return;
+            }
+
+            const overList = findListByTaskId(lists, overId);
+            if (!overList) {
+                console.warn(`❌ No se encontró lista de destino para la tarea: ${overId}`);
+                return;
+            }
+
+            if (activeList.id === overList.id) {
+                const oldIndex = activeList.tasks.findIndex(t => t.id === activeId);
+                const newIndex = overList.tasks.findIndex(t => t.id === overId);
+
+                if (oldIndex !== newIndex) {
+                    console.log(`🔀 Reordenando tarea dentro de la misma lista: ${activeList.id}`);
+                    reorderTask(activeList.id, oldIndex, newIndex);
+                }
+            }
+            else {
+                const task = activeList.tasks.find(t => t.id === activeId);
+                if (task) {
+                    const whatsappMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
+
+                    if (whatsappMatch && whatsappMatch[1]) {
+                        const numeroWhatsapp = whatsappMatch[1];
+                        const newTipoGestion = mapListIdToTipoGestion(overList.id);
+
+                        console.log(`📞 Moviendo tarea de WhatsApp ${numeroWhatsapp} a columna: ${overList.id}`);
+                        console.log(`🔄 Nuevo Tipo de Gestión: ${newTipoGestion}`);
+                        console.log(`📋 Contenido completo de la tarea:\n${task.content}`);
+
+                        try {
+                            await updateTipoGestion(numeroWhatsapp, newTipoGestion);
+                        } catch (error) {
+                            console.error('🚨 Error actualizando tipo de gestión:', error);
+                        }
+                    } else {
+                        console.warn(`⚠️ No se encontró número de WhatsApp en la tarea: ${task.content}`);
+                    }
+                }
+
+                const overIndex = overList.tasks.findIndex(t => t.id === overId);
+                moveTask(
+                    activeId,
+                    activeList.id,
+                    overList.id,
+                    overIndex === -1 ? overList.tasks.length : overIndex
+                );
+            }
+        } catch (error) {
+            console.error('💥 Error crítico en handleDragEnd:', error);
+            setActiveTask(null);
         }
     }, [lists, findListByTaskId, moveTask, reorderTask]);
 
