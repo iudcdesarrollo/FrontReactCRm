@@ -30,7 +30,7 @@ interface KanbanState {
         newIndex: number
     ) => void;
     reorderTask: (listId: ListId, oldIndex: number, newIndex: number) => void;
-    updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string) => void;
+    updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string) => void;
     syncWithRemote?: () => Promise<void>;
 }
 
@@ -166,7 +166,7 @@ export const useKanbanStore = create<KanbanState>()(
                 });
             },
 
-            updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string) => {
+            updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string) => {
                 set((state) => {
                     const updatedLists: Lists = JSON.parse(JSON.stringify(state.lists));
 
@@ -207,11 +207,10 @@ export const useKanbanStore = create<KanbanState>()(
                                 (task: Task) => task.id !== taskToMove!.id
                             );
 
-                            // Actualizar el contenido de la tarea
-                            const updatedTaskContent = taskToMove.content.replace(
-                                /Tipo de Gestión: [^\n]+/,
-                                `Tipo de Gestión: ${newTipoGestion}`
-                            );
+                            // Actualizar el contenido de la tarea con nuevo tipo de gestión y nombre
+                            const updatedTaskContent = taskToMove.content
+                                .replace(/Tipo de Gestión: [^\n]+/, `Tipo de Gestión: ${newTipoGestion}`)
+                                .replace(/Nombre: [^\n]+/, `Nombre: ${nameLead}`);
 
                             // Crear la tarea actualizada
                             const updatedTask: Task = {
@@ -225,12 +224,13 @@ export const useKanbanStore = create<KanbanState>()(
                             targetList.tasks.push(updatedTask);
                         }
                     } else {
+                        // Crear nueva tarea con nombre del lead
                         const newTask: Task = {
                             id: crypto.randomUUID(),
                             content: `
-Nombre: Pendiente
-WhatsApp: ${numeroWhatsapp}
-Tipo de Gestión: ${newTipoGestion}
+            Nombre: ${nameLead}
+            WhatsApp: ${numeroWhatsapp}
+            Tipo de Gestión: ${newTipoGestion}
                             `.trim(),
                             listId: newListId,
                             order: targetList.tasks.length,

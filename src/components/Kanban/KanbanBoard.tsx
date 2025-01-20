@@ -26,6 +26,7 @@ import {
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
 import { Lead } from "../types";
+import SearchOverlay from "./components/SearchOverlay";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
@@ -72,6 +73,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
     const [activeTask, setActiveTask] = useState<TaskType | null>(null);
     const processedLeadsRef = useRef(new Set<number>());
     const [isInitialized, setIsInitialized] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -118,7 +120,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             );
 
             if (!taskExists) {
-                updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion);
+                updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion, lead.nombre);
                 processedLeadsRef.current.add(lead.id);
             }
         });
@@ -199,7 +201,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             });
 
             await updateTipoGestion(
-                activeTaskDetails?.phoneNumber || '', 
+                activeTaskDetails?.phoneNumber || '',
                 activeTaskDetails?.listId || ''
             );
 
@@ -324,6 +326,13 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
                 <h1 className="kanban-title">
                     Tablero Kanban
                 </h1>
+                <div className="search-wrapper">
+                    <SearchOverlay
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        lists={lists}
+                    />
+                </div>
                 <div className="kanban-content">
                     <div className="kanban-board">
                         <div className="kanban-lists">

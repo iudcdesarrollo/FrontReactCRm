@@ -22,6 +22,9 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
         'segunda llamada',
         'inscrito',
         'venta perdida',
+        'revision',
+        'duplicado',
+        'estudiante'
     ];
 
     useEffect(() => {

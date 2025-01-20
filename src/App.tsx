@@ -571,7 +571,8 @@ function App() {
 
         kanbanStore.updateTaskListByTipoGestion(
           updateTipoGestion.numero_cliente,
-          updateTipoGestion.tipo_gestion
+          updateTipoGestion.tipo_gestion,
+          updateTipoGestion.nameLead
         );
 
         if (conversationIndex !== -1) {
