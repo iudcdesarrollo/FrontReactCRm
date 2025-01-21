@@ -1,6 +1,46 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import axios from 'axios';
 import '../css/CreateLeadForm.css';
-import { LeadFormData } from '../@types/kanban';
+
+interface Agent {
+    agente: string;
+    correo: string;
+}
+
+interface MetricsResponse {
+    success: boolean;
+    data: MetricsData[];
+}
+
+interface MetricsData {
+    agente: string;
+    correo: string;
+    total: number;
+    sinGestionar: number;
+    conversacion: number;
+    depuracion: number;
+    llamada: number;
+    segundaLlamada: number;
+    inscrito: number;
+    ventaPerdida: number;
+    metricsByTime: {
+        daily: number;
+        weekly: number;
+        monthly: number;
+    };
+}
+
+interface LeadFormData {
+    nombre: string;
+    apellido: string;
+    correo: string;
+    telefono: string;
+    programa: string;
+    agente: {
+        nombre: string;
+        correo: string;
+    };
+}
 
 interface CreateLeadFormProps {
     tipoGestion: string;
@@ -14,8 +54,37 @@ const CreateLeadForm = ({ tipoGestion, onSubmit, onCancel }: CreateLeadFormProps
         apellido: '',
         correo: '',
         telefono: '',
-        programa: ''
+        programa: '',
+        agente: {
+            nombre: '',
+            correo: ''
+        }
     });
+
+    const [agentes, setAgentes] = useState<Agent[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchAgentes = async () => {
+            try {
+                const response = await axios.get<MetricsResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/metricas`);
+                if (response.data.success && Array.isArray(response.data.data)) {
+                    setAgentes(response.data.data.map((item: MetricsData) => ({
+                        agente: item.agente,
+                        correo: item.correo
+                    })));
+                }
+                setLoading(false);
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : 'Error al cargar los agentes';
+                setError(errorMessage);
+                setLoading(false);
+            }
+        };
+
+        fetchAgentes();
+    }, []);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -25,17 +94,43 @@ const CreateLeadForm = ({ tipoGestion, onSubmit, onCancel }: CreateLeadFormProps
             apellido: '',
             correo: '',
             telefono: '',
-            programa: ''
+            programa: '',
+            agente: {
+                nombre: '',
+                correo: ''
+            }
         });
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+        if (name === "agente") {
+            const selectedAgent = agentes.find(agent => agent.agente === value);
+            if (selectedAgent) {
+                setFormData(prev => ({
+                    ...prev,
+                    agente: {
+                        nombre: selectedAgent.agente,
+                        correo: selectedAgent.correo
+                    }
+                }));
+            }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
+
+    if (loading) {
+        return <div className="lead-form-container">Cargando agentes...</div>;
+    }
+
+    if (error) {
+        return <div className="lead-form-container">Error: {error}</div>;
+    }
 
     return (
         <div className="lead-form-container">
@@ -95,7 +190,7 @@ const CreateLeadForm = ({ tipoGestion, onSubmit, onCancel }: CreateLeadFormProps
                             />
                         </div>
 
-                        <div className="form-group full-width">
+                        <div className="form-group">
                             <label htmlFor="programa">Programa</label>
                             <input
                                 id="programa"
@@ -106,6 +201,27 @@ const CreateLeadForm = ({ tipoGestion, onSubmit, onCancel }: CreateLeadFormProps
                                 placeholder="Nombre del programa"
                                 required
                             />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="agente">Agente</label>
+                            <select
+                                id="agente"
+                                name="agente"
+                                value={formData.agente.nombre}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Seleccione un agente</option>
+                                {agentes.map((agente) => (
+                                    <option
+                                        key={agente.correo}
+                                        value={agente.agente}
+                                    >
+                                        {agente.agente}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
