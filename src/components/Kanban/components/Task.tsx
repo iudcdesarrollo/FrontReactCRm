@@ -10,8 +10,7 @@ interface TaskProps {
 }
 
 const Task = memo(({ task }: TaskProps) => {
-
-    console.log('esto es lo que trae task:', JSON.stringify(task, null, 2));
+    // console.log('esto es lo que trae task:', JSON.stringify(task, null, 2));
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(task.content);
     const updateTask = useKanbanStore((state) => state.updateTask);

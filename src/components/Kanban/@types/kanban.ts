@@ -57,3 +57,11 @@ export const LIST_TITLES: Record<ListId, string> = {
     ventaPerdida: "Venta Perdida",
     revision: "Revisión"
 };
+
+export interface LeadFormData {
+    nombre: string;
+    apellido: string;
+    correo: string;
+    telefono: string;
+    programa: string;
+}
