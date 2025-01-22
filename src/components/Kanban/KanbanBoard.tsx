@@ -28,6 +28,7 @@ import './css/KanbanBoardPrincipal.css';
 import { Lead, Agente, BackendResponse } from "../types";
 import SearchOverlay from "./components/SearchOverlay";
 import { ChatView } from "../preview/ChatView";
+import { Socket } from "socket.io-client";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
@@ -75,9 +76,10 @@ const updateTipoGestion = async (numeroWhatsapp: string, tipoGestion: string) =>
 
 interface KanbanBoardProps {
     leads: Lead[] | undefined;
+    soket: Socket | null;
 }
 
-export default function KanbanBoard({ leads }: KanbanBoardProps) {
+export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
     const { lists, initializeLists, moveTask, reorderTask, updateTaskListByTipoGestion } = useKanbanStore();
     const [activeTask, setActiveTask] = useState<TaskType | null>(null);
     const processedLeadsRef = useRef(new Set<number>());
@@ -353,7 +355,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             <ChatView
                 selectedLead={selectedLeadData}
                 onBack={() => setSelectedLeadData(null)}
-                socket={null}
+                socket={soket}
             />
         );
     }
@@ -379,6 +381,7 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                         lists={lists}
+                        onLeadSelect={handleLeadClick}
                     />
                 </div>
                 <div className="kanban-content">

@@ -13,9 +13,15 @@ interface SearchOverlayProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     lists: Lists;
+    onLeadSelect?: (phoneNumber: string) => void; // Nueva prop para manejar la selección
 }
 
-const SearchOverlay: React.FC<SearchOverlayProps> = ({ searchTerm, setSearchTerm, lists }) => {
+const SearchOverlay: React.FC<SearchOverlayProps> = ({
+    searchTerm,
+    setSearchTerm,
+    lists,
+    onLeadSelect
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const overlayRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -64,6 +70,14 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ searchTerm, setSearchTerm
         setIsOpen(false);
     };
 
+    const handleResultClick = (phone: string) => {
+        if (onLeadSelect && phone !== 'No encontrado') {
+            onLeadSelect(phone);
+            setIsOpen(false);
+            setSearchTerm('');
+        }
+    };
+
     const results = getSearchResults();
 
     return (
@@ -96,7 +110,19 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ searchTerm, setSearchTerm
                         </h3>
                         <div className="results-list">
                             {results.map((result, index) => (
-                                <div key={index} className="result-item">
+                                <div
+                                    key={index}
+                                    className="result-item"
+                                    onClick={() => handleResultClick(result.phone)}
+                                    style={{ cursor: 'pointer' }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleResultClick(result.phone);
+                                        }
+                                    }}
+                                >
                                     <div className="result-header">
                                         <span className="result-phone">{result.phone}</span>
                                         <span className="result-list-name">{result.listName}</span>
