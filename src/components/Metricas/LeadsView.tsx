@@ -84,44 +84,6 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
             const data: ConversacionData = await response.json();
 
             const formattedMessages: Message[] = data.mensajes.map((msg) => {
-                // console.log('Mensaje Original:', msg);
-
-                // console.log('ID:', {
-                //     mensaje_id: msg.mensaje_id,
-                //     id_formateado: msg.mensaje_id
-                // });
-
-                // console.log('Cliente/Agente:', {
-                //     tipo: msg.tipo,
-                //     cliente: msg.tipo === 'entrante' ? data.numero_cliente : undefined,
-                //     agente: msg.tipo === 'saliente' ? data.correo_agente : undefined
-                // });
-
-                // console.log('Contenido:', {
-                //     archivo: msg.archivo,
-                //     contenido: msg.contenido,
-                //     mensaje_final: msg.archivo || msg.contenido
-                // });
-
-                // console.log('Timestamp:', {
-                //     fecha_original: msg.fecha,
-                //     fecha_formateada: msg.fecha
-                // });
-
-                // console.log('Archivo:', {
-                //     url: msg.archivo,
-                //     tipo: msg.contenido.includes('/') ? msg.contenido : undefined,
-                //     nombre: msg.mensaje
-                // });
-
-                // console.log('Status:', {
-                //     historial: msg.statusHistory,
-                //     ultimo_status: msg.statusHistory?.length > 0
-                //         ? msg.statusHistory[msg.statusHistory.length - 1].status
-                //         : 'pending'
-                // });
-
-                // console.log('------------------------');
 
                 return {
                     id: msg.mensaje_id,

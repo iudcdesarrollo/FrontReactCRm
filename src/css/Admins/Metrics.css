@@ -1,140 +1,211 @@
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 1rem;
+.metrics-container {
+    background-color: #0B1120;
+    min-height: 100vh;
     padding: 1.5rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    background-color: #F3F4F6;
 }
 
-@media (min-width: 640px) {
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
     .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1025px) {
     .metrics-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
 .metric-card {
-    background-color: #1A1A1A;
+    background: #1A1F2E;
+    border: 1px solid rgba(49, 58, 85, 0.5);
     border-radius: 1rem;
-    padding: 1.25rem;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
     cursor: pointer;
-    min-height: 120px;
+    min-height: 140px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-4px);
+    border-color: #3B82F6;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
 .metric-content {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
     align-items: flex-start;
 }
 
 .metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
     flex-shrink: 0;
 }
 
 .metric-info {
     flex: 1;
+    min-width: 0;
 }
 
-.metric-info h3 {
-    color: #9CA3AF;
+.metric-title {
+    color: #94A3B8;
     font-size: 0.875rem;
     font-weight: 500;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .metric-value {
-    color: white;
+    color: #E2E8F0;
     font-size: 1.5rem;
     font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .metric-change {
-    color: #6B7280;
-    font-size: 0.75rem;
+    color: #94A3B8;
+    font-size: 0.875rem;
 }
 
-.error-container {
-    background-color: #FEE2E2;
-    border: 1px solid #DC2626;
-    color: #DC2626;
-    padding: 1rem;
+.metrics-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94A3B8;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    text-align: center;
-    margin: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
 }
 
-/* Colores específicos para cada tipo de métrica */
-.metric-icon.total-leads {
-    background-color: #4F46E5;
+.back-btn:hover {
+    color: #E2E8F0;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.metric-icon.sin-gestionar {
-    background-color: #7C3AED;
+.page-title {
+    color: #E2E8F0;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
-.metric-icon.conversacion {
-    background-color: #2563EB;
+/* Metric Types */
+.metric-type-total {
+    background: rgba(79, 70, 229, 0.15);
+    color: #818CF8;
 }
 
-.metric-icon.depuracion {
-    background-color: #0891B2;
+.metric-type-pending {
+    background: rgba(124, 58, 237, 0.15);
+    color: #A78BFA;
 }
 
-.metric-icon.llamada {
-    background-color: #059669;
+.metric-type-chat {
+    background: rgba(37, 99, 235, 0.15);
+    color: #60A5FA;
 }
 
-.metric-icon.segunda-llamada {
-    background-color: #0D9488;
+.metric-type-review {
+    background: rgba(8, 145, 178, 0.15);
+    color: #67E8F9;
 }
 
-.metric-icon.inscritos {
-    background-color: #16A34A;
+.metric-type-call {
+    background: rgba(5, 150, 105, 0.15);
+    color: #34D399;
 }
 
-.metric-icon.venta-perdida {
-    background-color: #DC2626;
+.metric-type-followup {
+    background: rgba(13, 148, 136, 0.15);
+    color: #2DD4BF;
 }
 
-/* Loading state */
-.animate-pulse {
-    background: #262626;
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.metric-type-success {
+    background: rgba(22, 163, 74, 0.15);
+    color: #4ADE80;
+}
+
+.metric-type-lost {
+    background: rgba(220, 38, 38, 0.15);
+    color: #F87171;
+}
+
+.metric-card.animate-pulse {
+    background: linear-gradient(90deg,
+            #1A1F2E 0%,
+            #2A3142 50%,
+            #1A1F2E 100%);
+    background-size: 200% 100%;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-    0%, 100% {
-        opacity: 1;
+    0% {
+        background-position: 200% 0;
     }
-    50% {
-        opacity: .5;
+
+    100% {
+        background-position: -200% 0;
     }
+}
+
+.error-container {
+    background-color: rgba(220, 38, 38, 0.1);
+    border: 1px solid #DC2626;
+    color: #EF4444;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin: 1rem auto;
+    max-width: 400px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #94A3B8;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    margin: 2rem auto;
+    max-width: 400px;
 }
