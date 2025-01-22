@@ -4,7 +4,7 @@ import { Agente, Download, Lead, Message } from './types';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import MessageSender from './MessageSender';
-import LeadSidebar from './LeadSidebar';
+import LeadSidebar from './LeadSideBar/LeadSidebar';
 
 export interface ChatWindowProps {
     selectedChat: number | null;
