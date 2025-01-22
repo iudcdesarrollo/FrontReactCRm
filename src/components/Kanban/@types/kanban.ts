@@ -1,3 +1,6 @@
+import { Socket } from "socket.io-client";
+import { Agente, Lead } from "../../types";
+
 export type ListId =
     | "sinGestionar"
     | "conversacion"
@@ -64,4 +67,17 @@ export interface LeadFormData {
     correo: string;
     telefono: string;
     programa: string;
+}
+
+export interface SelectedLeadData {
+    conversacionData: {
+        _id: string;
+    };
+    formattedLead: Lead;
+    formattedAgente: Agente;
+}
+
+export interface KanbanBoardProps {
+    leads: Lead[] | undefined;
+    soket: Socket | null;
 }

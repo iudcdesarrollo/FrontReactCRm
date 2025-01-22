@@ -1,83 +1,17 @@
-import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    DragOverEvent,
-    DragOverlay,
-    DragStartEvent,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-} from "@dnd-kit/core";
-import {
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import {closestCenter,DndContext,DragEndEvent,DragOverEvent,DragOverlay,DragStartEvent,KeyboardSensor,PointerSensor,useSensor,useSensors} from "@dnd-kit/core";
+import {SortableContext,sortableKeyboardCoordinates,verticalListSortingStrategy} from "@dnd-kit/sortable";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useKanbanStore } from "../Kanban/store/kanbanStore";
-import {
-    INITIAL_LISTS,
-    type ListId,
-    type Lists,
-    type Task as TaskType,
-} from "../Kanban/@types/kanban";
+import {INITIAL_LISTS,KanbanBoardProps,SelectedLeadData,type ListId,type Lists,type Task as TaskType,} from "../Kanban/@types/kanban";
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
 import { Lead, Agente, BackendResponse } from "../types";
 import SearchOverlay from "./components/SearchOverlay";
 import { ChatView } from "../preview/ChatView";
-import { Socket } from "socket.io-client";
+import { mapListIdToTipoGestion } from "./utils/mapListIdToTipoGestion";
+import { updateTipoGestion } from "./utils/updateTipoGestion";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
-
-interface SelectedLeadData {
-    conversacionData: {
-        _id: string;
-    };
-    formattedLead: Lead;
-    formattedAgente: Agente;
-}
-
-const mapListIdToTipoGestion = (listId: string): string => {
-    const mappings: Record<string, string> = {
-        'sinGestionar': 'sin gestionar',
-        'conversacion': 'conversacion',
-        'depurar': 'depuracion',
-        'llamada': 'llamada',
-        'segundaLlamada': 'segunda llamada',
-        'estudiante': 'inscrito',
-        'revision': 'venta perdida'
-    };
-    return mappings[listId] || 'sin gestionar';
-};
-
-const updateTipoGestion = async (numeroWhatsapp: string, tipoGestion: string) => {
-    try {
-        const response = await fetch(`${enpoinyBasic}/UpdateTipoGestion`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                numero_cliente: numeroWhatsapp,
-                tipo_gestion: tipoGestion
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to update tipo gestion');
-        }
-    } catch (error) {
-        console.error('Error updating tipo gestion:', error);
-    }
-};
-
-interface KanbanBoardProps {
-    leads: Lead[] | undefined;
-    soket: Socket | null;
-}
 
 export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
     const { lists, initializeLists, moveTask, reorderTask, updateTaskListByTipoGestion } = useKanbanStore();
@@ -162,7 +96,6 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
     useEffect(() => {
         const handlePhoneClick = async (event: Event) => {
             const { phoneNumber } = (event as CustomEvent).detail;
-            // console.log('🚀 Iniciando carga de conversación para:', phoneNumber);
             await handleLeadClick(phoneNumber);
         };
 

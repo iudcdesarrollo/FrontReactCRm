@@ -309,8 +309,8 @@ function App() {
             contenido: data.message,
             fecha: new Date().toISOString(),
             usuario_destino: data.to,
-            mensaje_id: data.metaMessageId || '', // Asegurarse de que este campo exista
-            status: 'sent' // Agregar estado inicial
+            mensaje_id: data.metaMessageId || '',
+            status: 'sent'
           });
 
           const updatedAgente = transformBackendToFrontend(existingRawData);
