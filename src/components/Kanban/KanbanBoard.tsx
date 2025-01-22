@@ -25,10 +25,19 @@ import {
 } from "../Kanban/@types/kanban";
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
-import { Lead } from "../types";
+import { Lead, Agente, BackendResponse } from "../types";
 import SearchOverlay from "./components/SearchOverlay";
+import { ChatView } from "../preview/ChatView";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
+
+interface SelectedLeadData {
+    conversacionData: {
+        _id: string;
+    };
+    formattedLead: Lead;
+    formattedAgente: Agente;
+}
 
 const mapListIdToTipoGestion = (listId: string): string => {
     const mappings: Record<string, string> = {
@@ -74,6 +83,9 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
     const processedLeadsRef = useRef(new Set<number>());
     const [isInitialized, setIsInitialized] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedLeadData, setSelectedLeadData] = useState<SelectedLeadData | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -87,6 +99,74 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    const handleLeadClick = async (numero: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${enpoinyBasic}/getConversacionNumber/${numero}`);
+            if (!response.ok) {
+                throw new Error('Error al cargar la conversación');
+            }
+            const data: BackendResponse = await response.json();
+
+            const formattedMessages = data.mensajes.map((msg) => ({
+                id: msg.mensaje_id,
+                _id: msg.mensaje_id,
+                Cliente: msg.tipo === 'entrante' ? data.numero_cliente : undefined,
+                Agente: msg.tipo === 'saliente' ? data.correo_agente : undefined,
+                message: msg.archivo || msg.contenido,
+                timestamp: msg.fecha,
+                fileUrl: msg.archivo,
+                fileType: msg.contenido.includes('/') ? msg.contenido : undefined,
+                fileName: msg.mensaje,
+                status: msg.statusHistory?.length ?
+                    msg.statusHistory[msg.statusHistory.length - 1].status :
+                    'pending'
+            }));
+
+            const formattedLead: Lead = {
+                id: parseInt(data._id.slice(-6), 16) || Date.now(),
+                nombre: data.nombre_cliente,
+                numeroWhatsapp: data.numero_cliente,
+                conversacion: data.tipo_gestion,
+                urlPhotoPerfil: data.profilePictureUrl || '',
+                profilePictureUrl: data.profilePictureUrl,
+                TipoGestion: data.tipo_gestion,
+                messages: formattedMessages
+            };
+
+            const formattedAgente: Agente = {
+                id: 1,
+                nombre: data.nombre_agente,
+                correo: data.correo_agente,
+                rol: data.rol_agente,
+                leads: [formattedLead],
+            };
+
+            setSelectedLeadData({
+                conversacionData: data,
+                formattedLead,
+                formattedAgente,
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error desconocido');
+            console.error('Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const handlePhoneClick = async (event: Event) => {
+            const { phoneNumber } = (event as CustomEvent).detail;
+            // console.log('🚀 Iniciando carga de conversación para:', phoneNumber);
+            await handleLeadClick(phoneNumber);
+        };
+
+        window.addEventListener('phoneClick', handlePhoneClick);
+        return () => window.removeEventListener('phoneClick', handlePhoneClick);
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
@@ -190,67 +270,34 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
 
             const activeTaskDetails = findTaskDetails(event.active.id as string);
 
-            console.log('🚀 Detalles Completos del Evento:', {
-                activeId: event.active.id,
-                overId: event.over?.id,
-                activeType: event.active.data.current?.type,
-                overType: event.over?.data.current?.type,
-                taskContent: activeTaskDetails?.fullContent,
-                phoneNumber: activeTaskDetails?.phoneNumber,
-                fromList: activeTaskDetails?.listId
-            });
-
-            await updateTipoGestion(
-                activeTaskDetails?.phoneNumber || '',
-                activeTaskDetails?.listId || ''
-            );
-
-            if (!event.active || !event.over) {
-                console.warn('❌ No hay objetivo de destino válido');
-                return;
+            if (activeTaskDetails?.phoneNumber) {
+                await updateTipoGestion(
+                    activeTaskDetails.phoneNumber,
+                    activeTaskDetails.listId
+                );
             }
+
+            if (!event.active || !event.over) return;
 
             const activeId = event.active.id as string;
             const overId = event.over.id as string;
 
-            if (!activeId || !overId) {
-                console.warn('❌ IDs inválidos en el evento');
-                return;
-            }
+            if (!activeId || !overId) return;
 
             const activeList = findListByTaskId(lists, activeId);
-            if (!activeList) {
-                console.warn(`❌ No se encontró lista para la tarea activa: ${activeId}`);
-                return;
-            }
+            if (!activeList) return;
 
             if (INITIAL_LISTS.includes(overId as ListId)) {
                 const overList = lists[overId as ListId];
-
-                if (!overList || activeList.id === overList.id) {
-                    console.warn('❌ Movimiento inválido entre listas iguales o inexistentes');
-                    return;
-                }
+                if (!overList || activeList.id === overList.id) return;
 
                 const task = activeList.tasks.find(t => t.id === activeId);
                 if (task) {
                     const whatsappMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
-
-                    if (whatsappMatch && whatsappMatch[1]) {
+                    if (whatsappMatch?.[1]) {
                         const numeroWhatsapp = whatsappMatch[1];
                         const newTipoGestion = mapListIdToTipoGestion(overId);
-
-                        console.log(`📞 Moviendo tarea de WhatsApp ${numeroWhatsapp} a columna: ${overId}`);
-                        console.log(`🔄 Nuevo Tipo de Gestión: ${newTipoGestion}`);
-                        console.log(`📋 Contenido completo de la tarea:\n${task.content}`);
-
-                        try {
-                            await updateTipoGestion(numeroWhatsapp, newTipoGestion);
-                        } catch (error) {
-                            console.error('🚨 Error actualizando tipo de gestión:', error);
-                        }
-                    } else {
-                        console.warn(`⚠️ No se encontró número de WhatsApp en la tarea: ${task.content}`);
+                        await updateTipoGestion(numeroWhatsapp, newTipoGestion);
                     }
                 }
 
@@ -259,40 +306,22 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
             }
 
             const overList = findListByTaskId(lists, overId);
-            if (!overList) {
-                console.warn(`❌ No se encontró lista de destino para la tarea: ${overId}`);
-                return;
-            }
+            if (!overList) return;
 
             if (activeList.id === overList.id) {
                 const oldIndex = activeList.tasks.findIndex(t => t.id === activeId);
                 const newIndex = overList.tasks.findIndex(t => t.id === overId);
-
                 if (oldIndex !== newIndex) {
-                    console.log(`🔀 Reordenando tarea dentro de la misma lista: ${activeList.id}`);
                     reorderTask(activeList.id, oldIndex, newIndex);
                 }
-            }
-            else {
+            } else {
                 const task = activeList.tasks.find(t => t.id === activeId);
                 if (task) {
                     const whatsappMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
-
-                    if (whatsappMatch && whatsappMatch[1]) {
+                    if (whatsappMatch?.[1]) {
                         const numeroWhatsapp = whatsappMatch[1];
                         const newTipoGestion = mapListIdToTipoGestion(overList.id);
-
-                        console.log(`📞 Moviendo tarea de WhatsApp ${numeroWhatsapp} a columna: ${overList.id}`);
-                        console.log(`🔄 Nuevo Tipo de Gestión: ${newTipoGestion}`);
-                        console.log(`📋 Contenido completo de la tarea:\n${task.content}`);
-
-                        try {
-                            await updateTipoGestion(numeroWhatsapp, newTipoGestion);
-                        } catch (error) {
-                            console.error('🚨 Error actualizando tipo de gestión:', error);
-                        }
-                    } else {
-                        console.warn(`⚠️ No se encontró número de WhatsApp en la tarea: ${task.content}`);
+                        await updateTipoGestion(numeroWhatsapp, newTipoGestion);
                     }
                 }
 
@@ -305,10 +334,29 @@ export default function KanbanBoard({ leads }: KanbanBoardProps) {
                 );
             }
         } catch (error) {
-            console.error('💥 Error crítico en handleDragEnd:', error);
+            console.error('Error en handleDragEnd:', error);
+        } finally {
             setActiveTask(null);
         }
     }, [lists, findListByTaskId, moveTask, reorderTask]);
+
+    if (loading) {
+        return <div>Cargando conversación...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
+
+    if (selectedLeadData) {
+        return (
+            <ChatView
+                selectedLead={selectedLeadData}
+                onBack={() => setSelectedLeadData(null)}
+                socket={null}
+            />
+        );
+    }
 
     if (!isInitialized) {
         return <div>Cargando tablero...</div>;

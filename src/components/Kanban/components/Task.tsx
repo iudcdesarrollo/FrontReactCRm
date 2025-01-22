@@ -1,7 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState, useCallback, memo } from "react";
-import { useKanbanStore } from "../store/kanbanStore";
+import { useState, useCallback, memo, useEffect } from "react";
 import { type Task as TaskType } from "../../Kanban/@types/kanban";
 import '../css/Task.css';
 
@@ -10,11 +9,18 @@ interface TaskProps {
 }
 
 const Task = memo(({ task }: TaskProps) => {
-    // console.log('esto es lo que trae task:', JSON.stringify(task, null, 2));
-    const [isEditing, setIsEditing] = useState(false);
-    const [editContent, setEditContent] = useState(task.content);
-    const updateTask = useKanbanStore((state) => state.updateTask);
-    const deleteTask = useKanbanStore((state) => state.deleteTask);
+    const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
+
+    const detectPhoneNumber = useCallback((content: string) => {
+        const phoneRegex = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+        const matches = content.match(phoneRegex);
+        return matches ? matches[0] : null;
+    }, []);
+
+    useEffect(() => {
+        const detectedNumber = detectPhoneNumber(task.content);
+        setPhoneNumber(detectedNumber);
+    }, [task.content, detectPhoneNumber]);
 
     const {
         attributes,
@@ -25,10 +31,12 @@ const Task = memo(({ task }: TaskProps) => {
         isDragging,
     } = useSortable({
         id: task.id,
-        disabled: isEditing,
         data: {
             type: 'Task',
-            task,
+            task: {
+                ...task,
+                phoneNumber
+            },
         },
     });
 
@@ -37,35 +45,14 @@ const Task = memo(({ task }: TaskProps) => {
         transition: transition || undefined,
     };
 
-    const handleSave = useCallback(() => {
-        const trimmedContent = editContent.trim();
-        if (trimmedContent !== task.content) {
-            updateTask(task.id, trimmedContent);
+    const handleClick = useCallback(() => {
+        if (phoneNumber) {
+            const event = new CustomEvent('phoneClick', {
+                detail: { phoneNumber, taskContent: task.content }
+            });
+            window.dispatchEvent(event);
         }
-        setIsEditing(false);
-    }, [editContent, task.content, task.id, updateTask]);
-
-    const handleCancel = useCallback(() => {
-        setEditContent(task.content);
-        setIsEditing(false);
-    }, [task.content]);
-
-    const handleDelete = useCallback(() => {
-        deleteTask(task.id);
-    }, [deleteTask, task.id]);
-
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault();
-            handleSave();
-        }
-    }, [handleSave]);
-
-    const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        setIsEditing(true);
-    }, []);
+    }, [phoneNumber, task.content]);
 
     if (isDragging) {
         return (
@@ -77,45 +64,6 @@ const Task = memo(({ task }: TaskProps) => {
         );
     }
 
-    if (isEditing) {
-        return (
-            <div
-                ref={setNodeRef}
-                style={style}
-                className="task-edit-container"
-            >
-                <textarea
-                    autoFocus
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="task-edit-textarea"
-                    rows={2}
-                />
-                <div className="task-edit-buttons">
-                    <button
-                        onClick={handleSave}
-                        className="task-save-button"
-                    >
-                        Save
-                    </button>
-                    <button
-                        onClick={handleCancel}
-                        className="task-cancel-button"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        className="task-delete-button"
-                    >
-                        Delete
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div
             ref={setNodeRef}
@@ -123,7 +71,7 @@ const Task = memo(({ task }: TaskProps) => {
             className="task-container"
             {...attributes}
             {...listeners}
-            onDoubleClick={handleDoubleClick}
+            onClick={handleClick}
         >
             <p className="task-content">{task.content}</p>
         </div>
