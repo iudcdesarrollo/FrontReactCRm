@@ -86,6 +86,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
 
     downloadFile = async (url: string, fileName: string, chatId: number) => {
         try {
+            console.log(`Descargando archivo para chatId: ${chatId}`);
             const response = await fetch(url);
             const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);

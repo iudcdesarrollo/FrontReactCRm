@@ -1,0 +1,48 @@
+.escalor {
+    padding: 8px;
+    font-size: 12px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+}
+
+.metric-card {
+    padding: 8px;
+    font-size: 12px;
+    margin-bottom: 8px;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+.metric-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metric-info h3 {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.metric-info .metric-value {
+    font-size: 12px;
+    color: #bbb;
+}
+
+.btn-cambioLeadsView {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.header-cambio-LeadsView {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.h2-cambio_view {
+    font-size: 18px;
+}
+
+.h3_cambio_view {
+    font-size: 14px;
+}

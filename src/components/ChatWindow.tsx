@@ -29,81 +29,81 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const handleLeadUpdate = useCallback((updatedData: Partial<Lead>) => {
-        if (selectedChat && onLeadUpdate) {
-            onLeadUpdate(selectedChat, updatedData);
-        }
-    }, [selectedChat, onLeadUpdate]);
-
-    if (!selectedChat || !agente) {
-        return (
-            <div className="flex-1 flex items-center justify-center bg-gray-100">
-                <p className="text-xl text-gray-500">Selecciona una conversación</p>
-            </div>
-        );
+const handleLeadUpdate = useCallback((updatedData: Partial<Lead>) => {
+    if (selectedChat && onLeadUpdate) {
+        onLeadUpdate(selectedChat, updatedData);
     }
+}, [selectedChat, onLeadUpdate]);
 
-    const selectedLead = agente.leads.find(lead => lead.id === selectedChat);
-    if (!selectedLead) return null;
-
-    const transformedMessages: Message[] = selectedLead.messages?.map(msg => {
-        const isClient = msg.Cliente !== undefined;
-        return {
-            Cliente: isClient ? msg.Cliente : undefined,
-            Agente: !isClient ? msg.Agente : undefined,
-            message: msg.message,
-            timestamp: msg.timestamp,
-            id: msg.id,
-            _id: msg._id,
-        };
-    }) || [];
-
+if (!selectedChat || !agente) {
     return (
-        <div className="flex flex-row h-full">
-            <div className="flex-1 flex flex-col">
-                <ChatHeader
-                    lead={selectedLead}
-                    onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                />
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-                    <MessageList
-                        messages={transformedMessages}
-                        selectedChat={selectedChat}
-                        downloads={downloads}
-                        downloadFile={downloadFile}
-                        enpointAwsBucked={enpointAwsBucked}
-                        profilePictureUrl={selectedLead.profilePictureUrl}
-                        socket={socket}
-                        numberWhatsApp={selectedLead.numeroWhatsapp}
-                    />
-                </div>
-                <MessageSender
-                    selectedChat={selectedChat}
-                    numberWhatsApp={selectedLead.numeroWhatsapp}
-                    nombreAgente={agente.nombre}
-                    socket={socket}
-                    agentEmail={agente.correo}
-                    agentRole={role}
-                    managementType={selectedLead.TipoGestion}
-                    profilePictureUrl={selectedLead.urlPhotoPerfil}
-                />
-            </div>
-            {isSidebarOpen && (
-                <div className="lead-sidebar-container">
-                    <LeadSidebar
-                        lead={{
-                            nombre: selectedLead.nombre,
-                            numeroWhatsapp: selectedLead.numeroWhatsapp,
-                            urlPhotoPerfil: selectedLead.urlPhotoPerfil,
-                            TipoGestion: selectedLead.TipoGestion,
-                            profilePictureUrl: selectedLead.profilePictureUrl
-                        }}
-                        onUpdate={handleLeadUpdate}
-                    />
-                </div>
-            )}
+        <div className="flex-1 flex items-center justify-center bg-gray-100">
+            <p className="text-xl text-gray-500">Selecciona una conversación</p>
         </div>
     );
+}
+
+const selectedLead = agente.leads.find(lead => lead.id === selectedChat);
+if (!selectedLead) return null;
+
+const transformedMessages: Message[] = selectedLead.messages?.map(msg => {
+    const isClient = msg.Cliente !== undefined;
+    return {
+        Cliente: isClient ? msg.Cliente : undefined,
+        Agente: !isClient ? msg.Agente : undefined,
+        message: msg.message,
+        timestamp: msg.timestamp,
+        id: msg.id,
+        _id: msg._id,
+    };
+}) || [];
+
+return (
+    <div className="flex flex-row h-full">
+        <div className="flex-1 flex flex-col">
+            <ChatHeader
+                lead={selectedLead}
+                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+                <MessageList
+                    messages={transformedMessages}
+                    selectedChat={selectedChat}
+                    downloads={downloads}
+                    downloadFile={downloadFile}
+                    enpointAwsBucked={enpointAwsBucked}
+                    profilePictureUrl={selectedLead.profilePictureUrl}
+                    socket={socket}
+                    numberWhatsApp={selectedLead.numeroWhatsapp}
+                />
+            </div>
+            <MessageSender
+                selectedChat={selectedChat}
+                numberWhatsApp={selectedLead.numeroWhatsapp}
+                nombreAgente={agente.nombre}
+                socket={socket}
+                agentEmail={agente.correo}
+                agentRole={role}
+                managementType={selectedLead.TipoGestion}
+                profilePictureUrl={selectedLead.urlPhotoPerfil}
+            />
+        </div>
+        {isSidebarOpen && (
+            <div className="lead-sidebar-container">
+                <LeadSidebar
+                    lead={{
+                        nombre: selectedLead.nombre,
+                        numeroWhatsapp: selectedLead.numeroWhatsapp,
+                        urlPhotoPerfil: selectedLead.urlPhotoPerfil,
+                        TipoGestion: selectedLead.TipoGestion,
+                        profilePictureUrl: selectedLead.profilePictureUrl
+                    }}
+                    onUpdate={handleLeadUpdate}
+                />
+            </div>
+        )}
+    </div>
+);
 };
 
 export default ChatWindow;

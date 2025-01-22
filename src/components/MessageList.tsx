@@ -18,6 +18,13 @@ const statusTranslations: { [key: string]: string } = {
     'error': 'error'
 };
 
+const validFileExtensions = {
+    audio: ['mp3', 'wav', 'ogg'],
+    image: ['jpg', 'jpeg', 'png', 'gif'],
+    video: ['mp4', 'mov'],
+    document: ['pdf', 'doc', 'docx', 'xlsx', 'xls', 'txt']
+};
+
 const MessageList: React.FC<MessageListProps> = ({
     messages,
     selectedChat,
@@ -98,7 +105,6 @@ const MessageList: React.FC<MessageListProps> = ({
 
             if (data.success && data.data) {
                 const latestStatuses: { [key: string]: string } = {};
-
                 data.data.forEach((message: {
                     mensaje_id: string,
                     statusHistory: Array<{ status: string, timestamp: string }>
@@ -108,7 +114,6 @@ const MessageList: React.FC<MessageListProps> = ({
                         latestStatuses[message.mensaje_id] = lastStatus;
                     }
                 });
-
                 setMessageStatuses(latestStatuses);
             }
         } catch (error) {
@@ -123,28 +128,35 @@ const MessageList: React.FC<MessageListProps> = ({
     }, [numberWhatsApp]);
 
     const isAudioFile = (extension?: string): boolean =>
-        ['mp3', 'wav', 'ogg'].includes(extension || '');
+        validFileExtensions.audio.includes(extension?.toLowerCase() || '');
 
     const isImageFile = (extension?: string): boolean =>
-        ['jpg', 'jpeg', 'png', 'gif'].includes(extension || '');
+        validFileExtensions.image.includes(extension?.toLowerCase() || '');
 
     const isVideoFile = (extension?: string): boolean =>
-        ['mp4', 'mov'].includes(extension || '');
+        validFileExtensions.video.includes(extension?.toLowerCase() || '');
+
+    const isValidFileType = (extension?: string): boolean => {
+        if (!extension) return false;
+        const lowerExt = extension.toLowerCase();
+        return [...validFileExtensions.audio,
+        ...validFileExtensions.image,
+        ...validFileExtensions.video,
+        ...validFileExtensions.document
+        ].includes(lowerExt);
+    };
 
     const getMessageStatus = (msg: Message) => {
         const messageId = msg.id;
-
         let status = messageId && messageStatuses[messageId]
             ? messageStatuses[messageId]
             : msg.status || 'pending';
-
         status = status.toLowerCase();
         return statusTranslations[status] || status;
     };
 
     const formatDateTime = (timestamp: string | undefined) => {
         if (!timestamp) return '';
-
         const date = new Date(timestamp);
         return date.toLocaleString('es-ES', {
             hour: 'numeric',
@@ -157,12 +169,6 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     const renderMessage = (msg: Message, index: number) => {
-        // console.log('Mensaje timestamp:', {
-        //     msgId: msg.id,
-        //     timestamp: msg.timestamp,
-        //     timestampType: typeof msg.timestamp
-        // });
-
         if (!msg.message.trim()) {
             return null;
         }
@@ -187,6 +193,10 @@ const MessageList: React.FC<MessageListProps> = ({
             }
 
             if (isFileUrl) {
+                if (!isValidFileType(extension)) {
+                    return <span className="message-text">{msg.message}</span>;
+                }
+
                 if (isAudioFile(extension)) {
                     if (isDownloaded || audioPlaying[fileName]) {
                         return (
