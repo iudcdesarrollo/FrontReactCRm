@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { User, ArrowLeft } from 'lucide-react';
 import { MetricData } from './types/types';
-import ChatWindow from '../ChatWindow';
 import { Socket } from 'socket.io-client';
 import { Agente, Lead } from '../types';
 import '../../css/Agentes/LeadsView.css';
-import { useFileDownload } from '../../utils/dowloadArchivo';
+import { ChatView } from '../preview/ChatView';
 
 interface Message {
     id: string;
@@ -18,13 +17,6 @@ interface Message {
     fileType?: string;
     fileName?: string;
     status?: string;
-}
-
-interface Download {
-    chatId: number;
-    url: string;
-    fileName: string;
-    downloaded: boolean;
 }
 
 interface Mensaje {
@@ -70,8 +62,6 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
     const [selectedLead, setSelectedLead] = useState<SelectedLeadState | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [downloads, setDownloads] = useState<Download[]>([]);
-    const { downloadFile } = useFileDownload();
 
     const handleLeadClick = async (numero: string) => {
         setLoading(true);
@@ -84,7 +74,6 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
             const data: ConversacionData = await response.json();
 
             const formattedMessages: Message[] = data.mensajes.map((msg) => {
-
                 return {
                     id: msg.mensaje_id,
                     _id: msg.mensaje_id,
@@ -133,27 +122,6 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
         }
     };
 
-    const handleDownload = async (url: string, fileName: string) => {
-        if (selectedLead) {
-            const chatId = parseInt(selectedLead.conversacionData._id, 16) || Date.now();
-            try {
-                await downloadFile(url, fileName, chatId);
-
-                setDownloads(prev => [
-                    ...prev,
-                    {
-                        chatId,
-                        url,
-                        fileName,
-                        downloaded: true
-                    }
-                ]);
-            } catch (error) {
-                console.error('Error al descargar el archivo:', error);
-            }
-        }
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -172,29 +140,11 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
 
     if (selectedLead) {
         return (
-            <div className="relative w-full h-screen">
-                <header className="fixed top-0 left-0 right-0 flex items-center gap-4 p-4 bg-[#1a1a1a] border-b border-gray-800 z-50 header-cambio-LeadsView">
-                    <button
-                        onClick={() => setSelectedLead(null)}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white btn-cambioLeadsView"
-                    >
-                        <ArrowLeft size={20} />
-                        <span className="h3_cambio_view">Volver</span>
-                    </button>
-                </header>
-                <main className="escalor">
-                    <ChatWindow
-                        selectedChat={selectedLead.formattedLead.id}
-                        agente={selectedLead.formattedAgente}
-                        downloads={downloads}
-                        downloadFile={handleDownload}
-                        enpointAwsBucked={import.meta.env.VITE_AWS_BUCKET_ENDPOINT || ''}
-                        role="agent"
-                        socket={socket}
-                        onLeadUpdate={(leadId, updatedData) => console.log('Lead actualizado:', { leadId, updatedData })}
-                    />
-                </main>
-            </div>
+            <ChatView
+                selectedLead={selectedLead}
+                onBack={() => setSelectedLead(null)}
+                socket={socket}
+            />
         );
     }
 

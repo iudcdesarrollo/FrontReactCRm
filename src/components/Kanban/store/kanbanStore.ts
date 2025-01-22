@@ -169,13 +169,10 @@ export const useKanbanStore = create<KanbanState>()(
             updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string) => {
                 set((state) => {
                     const updatedLists: Lists = JSON.parse(JSON.stringify(state.lists));
-
                     let taskToMove: Task | null = null;
                     let originalListId: ListId | null = null;
 
-                    // Buscar la tarea existente
-                    const listKeys = Object.keys(updatedLists) as Array<keyof typeof updatedLists>;
-                    for (const listId of listKeys) {
+                    for (const listId of Object.keys(updatedLists) as Array<keyof typeof updatedLists>) {
                         const list = updatedLists[listId];
                         if (!list) continue;
 
@@ -186,6 +183,10 @@ export const useKanbanStore = create<KanbanState>()(
                         if (taskIndex !== -1) {
                             taskToMove = list.tasks[taskIndex];
                             originalListId = listId;
+                            const nameMatch = taskToMove.content.match(/Nombre: ([^\n]+)/);
+                            if (nameMatch && !nameLead) {
+                                nameLead = nameMatch[1].trim();
+                            }
                             break;
                         }
                     }
@@ -193,26 +194,19 @@ export const useKanbanStore = create<KanbanState>()(
                     const newListId = mapTipoGestionToListId(newTipoGestion);
                     const targetList = updatedLists[newListId];
 
-                    if (!targetList) {
-                        return state;
-                    }
+                    if (!targetList) return state;
 
-                    // Si existe la tarea, actualizarla y moverla
                     if (taskToMove && originalListId) {
                         const originalList = updatedLists[originalListId];
-
                         if (originalList) {
-                            // Remover la tarea de la lista original
                             originalList.tasks = originalList.tasks.filter(
                                 (task: Task) => task.id !== taskToMove!.id
                             );
 
-                            // Actualizar el contenido de la tarea con nuevo tipo de gestión y nombre
-                            const updatedTaskContent = taskToMove.content
-                                .replace(/Tipo de Gestión: [^\n]+/, `Tipo de Gestión: ${newTipoGestion}`)
-                                .replace(/Nombre: [^\n]+/, `Nombre: ${nameLead}`);
+                            const updatedTaskContent = `Nombre: ${nameLead || 'Sin nombre'}
+            WhatsApp: ${numeroWhatsapp}
+            Tipo de Gestión: ${newTipoGestion}`.trim();
 
-                            // Crear la tarea actualizada
                             const updatedTask: Task = {
                                 ...taskToMove,
                                 listId: newListId,
@@ -224,14 +218,11 @@ export const useKanbanStore = create<KanbanState>()(
                             targetList.tasks.push(updatedTask);
                         }
                     } else {
-                        // Crear nueva tarea con nombre del lead
                         const newTask: Task = {
                             id: crypto.randomUUID(),
-                            content: `
-            Nombre: ${nameLead}
+                            content: `Nombre: ${nameLead || 'Sin nombre'}
             WhatsApp: ${numeroWhatsapp}
-            Tipo de Gestión: ${newTipoGestion}
-                            `.trim(),
+            Tipo de Gestión: ${newTipoGestion}`.trim(),
                             listId: newListId,
                             order: targetList.tasks.length,
                             createdAt: new Date().toISOString(),
