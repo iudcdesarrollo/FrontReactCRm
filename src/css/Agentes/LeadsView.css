@@ -46,3 +46,78 @@
 .h3_cambio_view {
     font-size: 14px;
 }
+
+.notes-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    /* Reducir el espacio superior */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(31, 41, 55, 0.9);
+    border: 1px solid #4B5563;
+    border-radius: 6px;
+    /* Reducir el radio del borde */
+    padding: 8px;
+    /* Reducir el padding */
+    width: 220px;
+    /* Reducir el ancho */
+    max-height: 200px;
+    /* Reducir la altura máxima */
+    overflow-y: auto;
+    box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.3), 0 3px 4px -2px rgba(0, 0, 0, 0.2);
+    z-index: 50;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.notes-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    /* Reducir la distancia */
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    /* Reducir el tamaño de la flecha */
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid rgba(31, 41, 55, 0.9);
+}
+
+.notes-tooltip-item {
+    margin-bottom: 8px;
+    /* Reducir margen */
+    padding-bottom: 8px;
+    /* Reducir padding */
+    border-bottom: 1px solid #374151;
+}
+
+.notes-tooltip-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.notes-tooltip-timestamp {
+    font-size: 8px;
+    /* Reducir tamaño de fuente */
+    color: #9CA3AF;
+    margin-bottom: 3px;
+    /* Reducir el margen */
+}
+
+.notes-tooltip-content {
+    font-size: 10px;
+    /* Reducir tamaño de fuente */
+    color: #E5E7EB;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 8px);
+        /* Reducir la distancia */
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}

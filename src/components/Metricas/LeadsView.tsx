@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { User, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { MetricData } from './types/types';
 import { Socket } from 'socket.io-client';
 import { Agente, Lead } from '../types';
@@ -58,74 +58,111 @@ interface LeadsViewProps {
     socket: Socket | null;
 }
 
+interface Note {
+    content: string;
+    timestamp: string;
+    _id: string;
+}
+
 export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) => {
     const [selectedLead, setSelectedLead] = useState<SelectedLeadState | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [expandedLead, setExpandedLead] = useState<string | null>(null);
+    const [leadNotes, setLeadNotes] = useState<{ [key: string]: Note[] }>({});
+    const [conversations, setConversations] = useState<{ [key: string]: ConversacionData }>({});
 
-    const handleLeadClick = async (numero: string) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL_GENERAL}/getConversacionNumber/${numero}`);
-            if (!response.ok) {
-                throw new Error('Error al cargar la conversación');
+    useEffect(() => {
+        const fetchAllLeadsData = async () => {
+            setLoading(true);
+            setError(null);
+
+            const leadsData: { [key: string]: ConversacionData } = {};
+
+            try {
+                for (const lead of metric.clients) {
+                    const response = await fetch(
+                        `${import.meta.env.VITE_API_URL_GENERAL}/getConversacionNumber/${lead.numero}`
+                    );
+                    if (!response.ok) {
+                        throw new Error(`Error al cargar la conversación del número ${lead.numero}`);
+                    }
+                    const data = await response.json();
+                    leadsData[lead.numero] = data.conversation;
+
+                    if (data.leadNotes) {
+                        setLeadNotes((prev) => ({ ...prev, [lead.numero]: data.leadNotes }));
+                    }
+                }
+
+                setConversations(leadsData);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Error desconocido');
+                console.error('Error:', err);
+            } finally {
+                setLoading(false);
             }
-            const data: ConversacionData = await response.json();
+        };
 
-            const formattedMessages: Message[] = data.mensajes.map((msg) => {
-                return {
-                    id: msg.mensaje_id,
-                    _id: msg.mensaje_id,
-                    Cliente: msg.tipo === 'entrante' ? data.numero_cliente : undefined,
-                    Agente: msg.tipo === 'saliente' ? data.correo_agente : undefined,
-                    message: msg.archivo || msg.contenido,
-                    timestamp: msg.fecha,
-                    fileUrl: msg.archivo,
-                    fileType: msg.contenido.includes('/') ? msg.contenido : undefined,
-                    fileName: msg.mensaje,
-                    status: msg.statusHistory?.length > 0
-                        ? msg.statusHistory[msg.statusHistory.length - 1].status
-                        : 'pending'
-                };
-            });
+        fetchAllLeadsData();
+    }, [metric.clients]);
 
-            const formattedLead: Lead = {
-                id: parseInt(data._id, 16) || Date.now(),
-                nombre: data.nombre_cliente,
-                numeroWhatsapp: data.numero_cliente,
-                conversacion: data.tipo_gestion,
-                urlPhotoPerfil: data.profilePictureUrl || '',
-                profilePictureUrl: data.profilePictureUrl || '',
-                TipoGestion: data.tipo_gestion,
-                messages: formattedMessages
+    const handleLeadClick = (numero: string) => {
+        const conversationData = conversations[numero];
+        if (!conversationData) return;
+
+        const formattedMessages: Message[] = conversationData.mensajes.map((msg: Mensaje) => {
+            return {
+                id: msg.mensaje_id,
+                _id: msg.mensaje_id,
+                Cliente: msg.tipo === 'entrante' ? conversationData.numero_cliente : undefined,
+                Agente: msg.tipo === 'saliente' ? conversationData.correo_agente : undefined,
+                message: msg.archivo || msg.contenido,
+                timestamp: msg.fecha,
+                fileUrl: msg.archivo,
+                fileType: msg.contenido.includes('/') ? msg.contenido : undefined,
+                fileName: msg.mensaje,
+                status: msg.statusHistory?.length > 0
+                    ? msg.statusHistory[msg.statusHistory.length - 1].status
+                    : 'pending',
             };
+        });
 
-            const formattedAgente: Agente = {
-                id: 1,
-                nombre: data.nombre_agente,
-                correo: data.correo_agente,
-                rol: data.rol_agente,
-                leads: [formattedLead],
-            };
+        const formattedLead: Lead = {
+            id: parseInt(conversationData._id, 16) || Date.now(),
+            nombre: conversationData.nombre_cliente,
+            numeroWhatsapp: conversationData.numero_cliente,
+            conversacion: conversationData.tipo_gestion,
+            urlPhotoPerfil: conversationData.profilePictureUrl || '',
+            profilePictureUrl: conversationData.profilePictureUrl || '',
+            TipoGestion: conversationData.tipo_gestion,
+            messages: formattedMessages,
+        };
 
-            setSelectedLead({
-                conversacionData: data,
-                formattedLead,
-                formattedAgente,
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-            console.error('Error:', err);
-        } finally {
-            setLoading(false);
-        }
+        const formattedAgente: Agente = {
+            id: 1,
+            nombre: conversationData.nombre_agente,
+            correo: conversationData.correo_agente,
+            rol: conversationData.rol_agente,
+            leads: [formattedLead],
+        };
+
+        setSelectedLead({
+            conversacionData: conversationData,
+            formattedLead,
+            formattedAgente,
+        });
+    };
+
+    const toggleNotes = (e: React.MouseEvent, numero: string) => {
+        e.stopPropagation();
+        setExpandedLead(expandedLead === numero ? null : numero);
     };
 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full">
-                <div className="text-white">Cargando conversación...</div>
+                <div className="text-white">Cargando datos...</div>
             </div>
         );
     }
@@ -158,14 +195,16 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
                     <ArrowLeft size={20} />
                     <span className="h3_cambio_view">Volver</span>
                 </button>
-                <h2 className="text-xl font-semibold text-white h2-cambio_view">Sin Gestionar - Lista de Leads</h2>
+                <h2 className="text-xl font-semibold text-white h2-cambio_view">
+                    Sin Gestionar - Lista de Leads
+                </h2>
             </div>
             <div className="metrics-grid">
                 {metric.clients?.length > 0 ? (
                     metric.clients.map((lead, index) => (
                         <div
                             key={index}
-                            className="metric-card cursor-pointer hover:shadow-md"
+                            className="metric-card cursor-pointer hover:shadow-md relative"
                             onClick={() => handleLeadClick(lead.numero)}
                             role="button"
                             aria-label={`Lead con número ${lead.numero}`}
@@ -176,15 +215,51 @@ export const LeadsView: React.FC<LeadsViewProps> = ({ metric, onBack, socket }) 
                                 </div>
                                 <div className="metric-info">
                                     <h3 className="h3_cambio_view">Número de Contacto</h3>
-                                    <div className="metric-value">{lead.numero}</div>
+                                    <div className="metric-value flex items-center gap-2 relative">
+                                        {lead.numero}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleNotes(e, lead.numero);
+                                            }}
+                                            className="p-1 text-gray-400 hover:text-white focus:outline-none"
+                                        >
+                                            {expandedLead === lead.numero ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                        </button>
+                                        <div className="notes-tooltip">
+                                            {leadNotes[lead.numero]?.length > 0 && (
+                                                <>
+                                                    {expandedLead === lead.numero ? (
+                                                        // Mostrar todas las notas
+                                                        leadNotes[lead.numero].map((note: Note, i: number) => (
+                                                            <div key={i} className="notes-tooltip-item">
+                                                                <div className="notes-tooltip-timestamp">
+                                                                    {new Date(note.timestamp).toLocaleString()}
+                                                                </div>
+                                                                <div className="notes-tooltip-content">{note.content}</div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        // Mostrar solo la última nota
+                                                        <div className="notes-tooltip-item">
+                                                            <div className="notes-tooltip-timestamp">
+                                                                {new Date(leadNotes[lead.numero][leadNotes[lead.numero].length - 1].timestamp).toLocaleString()}
+                                                            </div>
+                                                            <div className="notes-tooltip-content">
+                                                                {leadNotes[lead.numero][leadNotes[lead.numero].length - 1].content}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div className="col-span-full text-center text-gray-400">
-                        No hay leads disponibles
-                    </div>
+                    <div className="col-span-full text-center text-gray-400">No hay leads disponibles.</div>
                 )}
             </div>
         </>
