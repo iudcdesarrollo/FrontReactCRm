@@ -5,11 +5,12 @@ import { useKanbanStore } from "../Kanban/store/kanbanStore";
 import { INITIAL_LISTS, KanbanBoardProps, SelectedLeadData, type ListId, type Lists, type Task as TaskType, } from "../Kanban/@types/kanban";
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
-import { Lead, Agente, BackendResponse } from "../types";
 import SearchOverlay from "./components/SearchOverlay";
 import { ChatView } from "../preview/ChatView";
 import { mapListIdToTipoGestion } from "./utils/mapListIdToTipoGestion";
 import { updateTipoGestion } from "./utils/updateTipoGestion";
+import { Agente, Lead } from "../types";
+import { BackendResponse } from "./typesKanbanPrincipal";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
