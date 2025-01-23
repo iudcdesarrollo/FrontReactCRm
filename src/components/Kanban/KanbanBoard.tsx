@@ -1,8 +1,8 @@
-import {closestCenter,DndContext,DragEndEvent,DragOverEvent,DragOverlay,DragStartEvent,KeyboardSensor,PointerSensor,useSensor,useSensors} from "@dnd-kit/core";
-import {SortableContext,sortableKeyboardCoordinates,verticalListSortingStrategy} from "@dnd-kit/sortable";
+import { closestCenter, DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useKanbanStore } from "../Kanban/store/kanbanStore";
-import {INITIAL_LISTS,KanbanBoardProps,SelectedLeadData,type ListId,type Lists,type Task as TaskType,} from "../Kanban/@types/kanban";
+import { INITIAL_LISTS, KanbanBoardProps, SelectedLeadData, type ListId, type Lists, type Task as TaskType, } from "../Kanban/@types/kanban";
 import List from "./components/List";
 import './css/KanbanBoardPrincipal.css';
 import { Lead, Agente, BackendResponse } from "../types";
@@ -46,11 +46,15 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
             }
             const data: BackendResponse = await response.json();
 
-            const formattedMessages = data.mensajes.map((msg) => ({
+            if (!data?.conversation?.mensajes) {
+                throw new Error('No se encontraron mensajes para esta conversación');
+            }
+
+            const formattedMessages = data.conversation.mensajes.map((msg) => ({
                 id: msg.mensaje_id,
                 _id: msg.mensaje_id,
-                Cliente: msg.tipo === 'entrante' ? data.numero_cliente : undefined,
-                Agente: msg.tipo === 'saliente' ? data.correo_agente : undefined,
+                Cliente: msg.tipo === 'entrante' ? data.conversation.numero_cliente : undefined,
+                Agente: msg.tipo === 'saliente' ? data.conversation.correo_agente : undefined,
                 message: msg.archivo || msg.contenido,
                 timestamp: msg.fecha,
                 fileUrl: msg.archivo,
@@ -62,26 +66,26 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
             }));
 
             const formattedLead: Lead = {
-                id: parseInt(data._id.slice(-6), 16) || Date.now(),
-                nombre: data.nombre_cliente,
-                numeroWhatsapp: data.numero_cliente,
-                conversacion: data.tipo_gestion,
-                urlPhotoPerfil: data.profilePictureUrl || '',
-                profilePictureUrl: data.profilePictureUrl,
-                TipoGestion: data.tipo_gestion,
+                id: parseInt(data.conversation._id.slice(-6), 16) || Date.now(),
+                nombre: data.conversation.nombre_cliente,
+                numeroWhatsapp: data.conversation.numero_cliente,
+                conversacion: data.conversation.tipo_gestion,
+                urlPhotoPerfil: data.conversation.profilePictureUrl || '',
+                profilePictureUrl: data.conversation.profilePictureUrl,
+                TipoGestion: data.conversation.tipo_gestion,
                 messages: formattedMessages
             };
 
             const formattedAgente: Agente = {
                 id: 1,
-                nombre: data.nombre_agente,
-                correo: data.correo_agente,
-                rol: data.rol_agente,
+                nombre: data.conversation.nombre_agente || 'Agente',
+                correo: data.conversation.correo_agente || '',
+                rol: data.conversation.rol_agente || 'agente',
                 leads: [formattedLead],
             };
 
             setSelectedLeadData({
-                conversacionData: data,
+                conversacionData: data.conversation,
                 formattedLead,
                 formattedAgente,
             });

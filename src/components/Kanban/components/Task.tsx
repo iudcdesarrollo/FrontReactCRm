@@ -45,7 +45,8 @@ const Task = memo(({ task }: TaskProps) => {
         transition: transition || undefined,
     };
 
-    const handleClick = useCallback(() => {
+    const handleClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
         if (phoneNumber) {
             const event = new CustomEvent('phoneClick', {
                 detail: { phoneNumber, taskContent: task.content }
