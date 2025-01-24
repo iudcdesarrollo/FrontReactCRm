@@ -39,6 +39,7 @@ const MessageList: React.FC<MessageListProps> = ({
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [messageStatuses, setMessageStatuses] = useState<{ [key: string]: string }>({});
+    const [timeoutMessage, setTimeoutMessage] = useState<{ number: string, message: string } | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -56,12 +57,19 @@ const MessageList: React.FC<MessageListProps> = ({
                     [status.messageId]: status.status
                 }));
             });
+
+            socket.on('24hTimeout', (data) => {
+                if (data.number === numberWhatsApp) {
+                    setTimeoutMessage(data);
+                }
+            });
         }
 
         return () => {
             socket?.off('messageStatus');
+            socket?.off('24hTimeout');
         };
-    }, [socket, messages]);
+    }, [socket, messages, numberWhatsApp]);
 
     const handleFileDownload = async (url: string, fileName: string) => {
         try {
@@ -166,6 +174,17 @@ const MessageList: React.FC<MessageListProps> = ({
             month: '2-digit',
             year: 'numeric'
         });
+    };
+
+    const renderTimeoutMessage = () => {
+        if (!timeoutMessage) return null;
+        return (
+            <div className="flex justify-center my-2">
+                <div className="timeout-message">
+                    {timeoutMessage.message}
+                </div>
+            </div>
+        );
     };
 
     const renderMessage = (msg: Message, index: number) => {
@@ -294,6 +313,7 @@ const MessageList: React.FC<MessageListProps> = ({
         <div className="message-list">
             <div className="messages-container">
                 {messages.map(renderMessage)}
+                {timeoutMessage && renderTimeoutMessage()}
                 <div ref={messagesEndRef} />
             </div>
             {selectedImage && (

@@ -285,14 +285,8 @@ function App() {
   useEffect(() => {
     if (!formattedEmail) return;
 
-    const newSocket = io(socketEndpoint, {
-      transports: ['websocket'],
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 3000
-    });
-    
+    const newSocket = io(socketEndpoint);
+
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
@@ -663,6 +657,14 @@ function App() {
         console.error('Error actualizando localStorage con el nuevo lead:', err);
         handleLogout();
       }
+    });
+
+    newSocket.on('24hTimeout', (responseData) => {
+      console.log('Timeout detected:', {
+        number: responseData.number,
+        message: responseData.message,
+        phoneNumber: responseData.phoneNumberStatus
+      });
     });
 
     newSocket.on('error', (error) => {
