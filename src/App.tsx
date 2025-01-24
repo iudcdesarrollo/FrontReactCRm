@@ -285,7 +285,14 @@ function App() {
   useEffect(() => {
     if (!formattedEmail) return;
 
-    const newSocket = io(socketEndpoint);
+    const newSocket = io(socketEndpoint, {
+      transports: ['websocket'],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 3000
+    });
+    
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
