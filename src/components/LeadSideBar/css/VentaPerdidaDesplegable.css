@@ -1,0 +1,113 @@
+.venta-perdida-container {
+    font-family: Arial, sans-serif;
+    padding: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.venta-perdida-container p {
+    color: #000000;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.control-container {
+    position: relative;
+    width: 100%;
+    height: 38px;
+    margin-bottom: 10px;
+}
+
+.activate-button {
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #0088ff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.2s ease;
+}
+
+.activate-button:hover {
+    background-color: #f8f9fa;
+}
+
+.select-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.select-wrapper select {
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #0088ff;
+    border-radius: 4px;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    color: #000000;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+.select-wrapper.disabled select {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.select-wrapper select:focus {
+    outline: none;
+    border-color: #0088ff;
+    box-shadow: 0 0 0 2px rgba(0, 136, 255, 0.15);
+}
+
+.custom-reason-container {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.custom-reason-input {
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: #212529;
+    color: #ffffff;
+}
+
+.custom-reason-input::placeholder {
+    color: #adb5bd;
+}
+
+.custom-reason-input:focus {
+    outline: none;
+    border-color: #0088ff;
+    box-shadow: 0 0 0 2px rgba(0, 136, 255, 0.15);
+}
+
+.selected-option {
+    margin-top: 10px;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 400;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}

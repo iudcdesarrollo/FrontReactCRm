@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../css/Agentes/LeadSidebar.css';
 import { Lead, LeadSidebarData } from '../types';
 import LeadNotes from './Notas';
+import VentaPerdidaDesplegable from './VentaPerdidaDesplegable';
 
 interface LeadSidebarProps {
     lead: LeadSidebarData;
@@ -163,6 +164,7 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                 </div>
             </div>
             <LeadNotes numeroWhatsapp={lead.numeroWhatsapp} />
+            <VentaPerdidaDesplegable telefono={lead.numeroWhatsapp} />
         </div>
     );
 };
