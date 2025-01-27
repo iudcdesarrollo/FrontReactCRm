@@ -1,20 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
+import axios from 'axios';
 import '../css/SearchBarKanBan.css';
-import { Lists, Task } from '../@types/kanban';
+import { Lists } from '../@types/kanban';
+
+interface Note {
+    content: string;
+    timestamp: string;
+    _id: string;
+}
 
 interface SearchResult {
     listName: string;
     content: string;
     phone: string;
+    notes: Note[] | null;
+    agentName: string | null;
+    ventaPerdidaRazon: string | null;
 }
 
 interface SearchOverlayProps {
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     lists: Lists;
-    onLeadSelect?: (phoneNumber: string) => void; // Nueva prop para manejar la selección
+    onLeadSelect?: (phoneNumber: string) => void;
 }
+
+const enpointPeticiones = import.meta.env.VITE_API_URL_GENERAL;
 
 const SearchOverlay: React.FC<SearchOverlayProps> = ({
     searchTerm,
@@ -23,6 +35,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
     onLeadSelect
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const overlayRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -39,35 +52,80 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
         };
     }, []);
 
-    const getSearchResults = () => {
-        if (!searchTerm.trim()) return [];
+    const extractPhoneNumber = (content: string): string => {
+        const phoneMatch = content.match(/(?:WhatsApp:?\s*)(\d+)/i);
+        return phoneMatch ? phoneMatch[1] : 'No encontrado';
+    };
+
+    const getSearchResults = async () => {
+        if (!searchTerm.trim()) {
+            setSearchResults([]);
+            return;
+        }
 
         const results: SearchResult[] = [];
         const searchLower = searchTerm.toLowerCase();
+        const processedPhones = new Set<string>();
 
-        Object.entries(lists).forEach(([listId, list]) => {
-            list?.tasks.forEach((task: Task) => {
+        for (const [listId, list] of Object.entries(lists)) {
+            if (!list?.tasks) continue;
+
+            for (const task of list.tasks) {
                 if (task.content.toLowerCase().includes(searchLower)) {
-                    const phoneMatch = task.content.match(/(?:WhatsApp:?\s*)(\d+)/i);
-                    results.push({
-                        listName: listId,
-                        content: task.content,
-                        phone: phoneMatch ? phoneMatch[1] : 'No encontrado'
-                    });
-                }
-            });
-        });
+                    const phone = extractPhoneNumber(task.content);
+                    
+                    if (processedPhones.has(phone)) continue;
+                    processedPhones.add(phone);
 
-        return results;
+                    try {
+                        const response = await axios.get(`${enpointPeticiones}/lead-info/${phone}`);
+                        const leadInfo = response.data.data;
+
+                        results.push({
+                            listName: listId,
+                            content: task.content,
+                            phone,
+                            notes: leadInfo.notas,
+                            agentName: leadInfo.nombreAgente,
+                            ventaPerdidaRazon: leadInfo.ventaPerdidaRazon
+                        });
+                    } catch (error) {
+                        console.error('Error fetching lead info:', error);
+                        results.push({
+                            listName: listId,
+                            content: task.content,
+                            phone,
+                            notes: null,
+                            agentName: null,
+                            ventaPerdidaRazon: null
+                        });
+                    }
+                }
+            }
+        }
+
+        setSearchResults(results);
     };
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (isOpen) {
+                getSearchResults();
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, isOpen, lists]);
 
     const handleFocus = () => {
         setIsOpen(true);
+        getSearchResults();
     };
 
     const handleClear = () => {
         setSearchTerm('');
         setIsOpen(false);
+        setSearchResults([]);
     };
 
     const handleResultClick = (phone: string) => {
@@ -75,10 +133,13 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
             onLeadSelect(phone);
             setIsOpen(false);
             setSearchTerm('');
+            setSearchResults([]);
         }
     };
 
-    const results = getSearchResults();
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleString();
+    };
 
     return (
         <div className="search-overlay-container" ref={overlayRef}>
@@ -104,17 +165,16 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 <div className="search-results-overlay">
                     <div className="search-results-content">
                         <h3 className="results-title">
-                            {results.length
-                                ? `Resultados encontrados: ${results.length}`
+                            {searchResults.length
+                                ? `Resultados encontrados: ${searchResults.length}`
                                 : 'No se encontraron resultados'}
                         </h3>
                         <div className="results-list">
-                            {results.map((result, index) => (
+                            {searchResults.map((result, index) => (
                                 <div
                                     key={index}
                                     className="result-item"
                                     onClick={() => handleResultClick(result.phone)}
-                                    style={{ cursor: 'pointer' }}
                                     role="button"
                                     tabIndex={0}
                                     onKeyPress={(e) => {
@@ -127,7 +187,27 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                         <span className="result-phone">{result.phone}</span>
                                         <span className="result-list-name">{result.listName}</span>
                                     </div>
-                                    <p className="result-content">{result.content}</p>
+                                    
+                                    {result.agentName && (
+                                        <p className="result-agent">
+                                            <strong>Agente a Cargo:</strong> {result.agentName}
+                                        </p>
+                                    )}
+                                    
+                                    {result.notes && result.notes.length > 0 && (
+                                        <p className="result-note">
+                                            <strong>Última Nota:</strong> {result.notes[0].content}
+                                            <span className="result-timestamp">
+                                                ({formatDate(result.notes[0].timestamp)})
+                                            </span>
+                                        </p>
+                                    )}
+                                    
+                                    {result.ventaPerdidaRazon && (
+                                        <p className="result-razon">
+                                            <strong>Razón de Venta Perdida:</strong> {result.ventaPerdidaRazon}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                         </div>

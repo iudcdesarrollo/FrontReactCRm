@@ -55,6 +55,14 @@ const mapTipoGestionToListId = (tipoGestion: string): ListId => {
     return mappings[tipoGestionLower] || 'sinGestionar';
 };
 
+interface TaskPayload {
+    notas?: Array<{
+        content: string;
+        timestamp: Date;
+    }>;
+    ventaPerdidaRazon?: string | null;
+}
+
 export const useKanbanStore = create<KanbanState>()(
     persist(
         (set) => ({
@@ -166,7 +174,12 @@ export const useKanbanStore = create<KanbanState>()(
                 });
             },
 
-            updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string) => {
+            updateTaskListByTipoGestion: (
+                numeroWhatsapp: string,
+                newTipoGestion: string,
+                nameLead: string,
+                payload?: TaskPayload
+            ) => {
                 set((state) => {
                     const updatedLists: Lists = JSON.parse(JSON.stringify(state.lists));
                     let taskToMove: Task | null = null;
@@ -196,6 +209,25 @@ export const useKanbanStore = create<KanbanState>()(
 
                     if (!targetList) return state;
 
+                    const createTaskContent = () => {
+                        let content = `Nombre: ${nameLead || 'Sin nombre'}
+            WhatsApp: ${numeroWhatsapp}
+            Tipo de Gestión: ${newTipoGestion}`;
+
+                        if (payload?.ventaPerdidaRazon) {
+                            content += `\nRazón de Venta Perdida: ${payload.ventaPerdidaRazon}`;
+                        }
+
+                        if (payload?.notas && payload.notas.length > 0) {
+                            content += '\nNotas:';
+                            payload.notas.forEach(nota => {
+                                content += `\n- ${nota.content} (${new Date(nota.timestamp).toLocaleString()})`;
+                            });
+                        }
+
+                        return content.trim();
+                    };
+
                     if (taskToMove && originalListId) {
                         const originalList = updatedLists[originalListId];
                         if (originalList) {
@@ -203,14 +235,10 @@ export const useKanbanStore = create<KanbanState>()(
                                 (task: Task) => task.id !== taskToMove!.id
                             );
 
-                            const updatedTaskContent = `Nombre: ${nameLead || 'Sin nombre'}
-            WhatsApp: ${numeroWhatsapp}
-            Tipo de Gestión: ${newTipoGestion}`.trim();
-
                             const updatedTask: Task = {
                                 ...taskToMove,
                                 listId: newListId,
-                                content: updatedTaskContent,
+                                content: createTaskContent(),
                                 updatedAt: new Date().toISOString(),
                                 order: targetList.tasks.length
                             };
@@ -220,9 +248,7 @@ export const useKanbanStore = create<KanbanState>()(
                     } else {
                         const newTask: Task = {
                             id: crypto.randomUUID(),
-                            content: `Nombre: ${nameLead || 'Sin nombre'}
-            WhatsApp: ${numeroWhatsapp}
-            Tipo de Gestión: ${newTipoGestion}`.trim(),
+                            content: createTaskContent(),
                             listId: newListId,
                             order: targetList.tasks.length,
                             createdAt: new Date().toISOString(),

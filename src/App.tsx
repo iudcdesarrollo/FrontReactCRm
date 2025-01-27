@@ -73,8 +73,7 @@ function App() {
 
       setLoading(true);
       setError(null);
-
-      // Verificar caché
+      
       const cachedTimestamp = localStorage.getItem('dataTimestamp');
       const cachedData = localStorage.getItem('agenteData');
       const isValidCache = cachedTimestamp && cachedData &&
@@ -170,12 +169,11 @@ function App() {
               contenido: msg.contenido,
               fecha: msg.fecha,
               usuario_destino: msg.usuario_destino,
-              mensaje_id: msg.mensaje_id || msg.id_message || msg._id, // Aseguramos que siempre haya un mensaje_id
+              mensaje_id: msg.mensaje_id || msg.id_message || msg._id,
               id_message: msg.id_message,
               messageType: msg.messageType || 'text'
             };
 
-            // Process message status from statusHistory first
             if (msg.statusHistory && msg.statusHistory.length > 0) {
               const sortedHistory = [...msg.statusHistory].sort((a, b) =>
                 new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -184,10 +182,10 @@ function App() {
               const currentStatus = sortedHistory[0];
               if (currentStatus) {
                 processedMsg.status = currentStatus.status;
-                processedMsg.statusTimestamp = new Date(currentStatus.timestamp); // Convertir a Date
+                processedMsg.statusTimestamp = new Date(currentStatus.timestamp);
                 processedMsg.statusHistory = msg.statusHistory.map(history => ({
                   ...history,
-                  timestamp: new Date(history.timestamp) // Convertir cada timestamp a Date
+                  timestamp: new Date(history.timestamp)
                 }));
               }
             } else {
@@ -195,7 +193,6 @@ function App() {
               processedMsg.statusTimestamp = new Date(msg.fecha);
             }
 
-            // Process file types
             if (msg.contenido.startsWith('image/') || msg.archivo === 'image/jpeg') {
               processedMsg = {
                 ...processedMsg,
