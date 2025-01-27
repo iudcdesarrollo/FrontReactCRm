@@ -164,7 +164,9 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                 </div>
             </div>
             <LeadNotes numeroWhatsapp={lead.numeroWhatsapp} />
-            <VentaPerdidaDesplegable telefono={lead.numeroWhatsapp} />
+            {selectedGestion === 'venta perdida' && (
+                <VentaPerdidaDesplegable telefono={lead.numeroWhatsapp} />
+            )}
         </div>
     );
 };

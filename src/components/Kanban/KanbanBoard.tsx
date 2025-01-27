@@ -24,6 +24,11 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const boardRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -98,6 +103,31 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
         }
     };
 
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!boardRef.current || e.button !== 0) return; // Solo botón izquierdo
+
+        setIsDragging(true);
+        setStartX(e.pageX - boardRef.current.offsetLeft);
+        setScrollLeft(boardRef.current.scrollLeft);
+        document.body.style.cursor = 'grabbing';
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        if (boardRef.current) {
+            document.body.style.cursor = 'default';
+        }
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isDragging || !boardRef.current) return;
+
+        e.preventDefault();
+        const x = e.pageX - boardRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        boardRef.current.scrollLeft = scrollLeft - walk;
+    };
+
     useEffect(() => {
         const handlePhoneClick = async (event: Event) => {
             const { phoneNumber } = (event as CustomEvent).detail;
@@ -125,6 +155,17 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
             isMounted = false;
         };
     }, [isInitialized, initializeLists]);
+
+    useEffect(() => {
+        // Limpiar los eventos del mouse cuando el componente se desmonta
+        const cleanup = () => {
+            document.body.style.cursor = 'default';
+            setIsDragging(false);
+        };
+
+        document.addEventListener('mouseup', cleanup);
+        return () => document.removeEventListener('mouseup', cleanup);
+    }, []);
 
     useEffect(() => {
         if (!isInitialized || !leads?.length) return;
@@ -323,7 +364,14 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
                     />
                 </div>
                 <div className="kanban-content">
-                    <div className="kanban-board">
+                    <div
+                        ref={boardRef}
+                        className={`kanban-board ${isDragging ? 'dragging' : ''}`}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUp}
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseUp}
+                    >
                         <div className="kanban-lists">
                             {INITIAL_LISTS.map((listId: ListId) => {
                                 const taskIds = lists[listId]?.tasks.map((t: TaskType) => t.id) || [];
