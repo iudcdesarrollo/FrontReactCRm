@@ -30,7 +30,8 @@ interface KanbanState {
         newIndex: number
     ) => void;
     reorderTask: (listId: ListId, oldIndex: number, newIndex: number) => void;
-    updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string) => void;
+    updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string, payload?: TaskPayload) => void;
+    clearStore: () => void;
     syncWithRemote?: () => Promise<void>;
 }
 
@@ -185,6 +186,8 @@ export const useKanbanStore = create<KanbanState>()(
                     let taskToMove: Task | null = null;
                     let originalListId: ListId | null = null;
 
+                    // console.log('Estado inicial de las listas:', updatedLists);
+
                     for (const listId of Object.keys(updatedLists) as Array<keyof typeof updatedLists>) {
                         const list = updatedLists[listId];
                         if (!list) continue;
@@ -204,15 +207,21 @@ export const useKanbanStore = create<KanbanState>()(
                         }
                     }
 
+                    // console.log('Tarea encontrada:', taskToMove);
+                    // console.log('ID original de la lista:', originalListId);
+
                     const newListId = mapTipoGestionToListId(newTipoGestion);
                     const targetList = updatedLists[newListId];
 
-                    if (!targetList) return state;
+                    if (!targetList) {
+                        console.log('No se encontró la lista de destino:', newListId);
+                        return state;
+                    }
 
                     const createTaskContent = () => {
                         let content = `Nombre: ${nameLead || 'Sin nombre'}
-            WhatsApp: ${numeroWhatsapp}
-            Tipo de Gestión: ${newTipoGestion}`;
+                        WhatsApp: ${numeroWhatsapp}
+                        Tipo de Gestión: ${newTipoGestion}`;
 
                         if (payload?.ventaPerdidaRazon) {
                             content += `\nRazón de Venta Perdida: ${payload.ventaPerdidaRazon}`;
@@ -244,6 +253,7 @@ export const useKanbanStore = create<KanbanState>()(
                             };
 
                             targetList.tasks.push(updatedTask);
+                            // console.log('Tarea actualizada y movida:', updatedTask);
                         }
                     } else {
                         const newTask: Task = {
@@ -256,6 +266,7 @@ export const useKanbanStore = create<KanbanState>()(
                         };
 
                         targetList.tasks.push(newTask);
+                        // console.log('Nueva tarea creada:', newTask);
                     }
 
                     return {
@@ -265,6 +276,7 @@ export const useKanbanStore = create<KanbanState>()(
                     };
                 });
             },
+
 
             moveTask: (taskId, fromListId, toListId, newIndex) => {
                 set((state) => {
@@ -337,6 +349,26 @@ export const useKanbanStore = create<KanbanState>()(
                     };
                 });
             },
+
+            clearStore: () => {
+                set((state) => {
+                    const clearedLists = Object.keys(state.lists).reduce((acc, listId) => {
+                        acc[listId] = {
+                            ...state.lists[listId],
+                            tasks: [],
+                        };
+                        return acc;
+                    }, {} as Lists);
+
+                    return {
+                        version: STORE_VERSION,
+                        lastSynced: null,
+                        lists: clearedLists, // Mantén las listas, pero con tareas vacías
+                    };
+                });
+                localStorage.removeItem(STORE_NAME); // Borra los datos persistidos en localStorage
+            },
+
         }),
         {
             name: STORE_NAME,

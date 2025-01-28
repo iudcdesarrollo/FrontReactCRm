@@ -9,7 +9,8 @@ import {
     getDownloadsFromMessages
 } from './types';
 import Metrics from './Metricas/Metrics';
-import KanbanBoard from './Kanban/KanbanBoard';
+// import KanbanBoard from './Kanban/KanbanBoard';
+import { KanbanPage } from './Kanban/KanbanPage';
 
 class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     constructor(props: WhatsAppCloneProps) {
@@ -125,7 +126,11 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
         if (showKanban) {
-            return <KanbanBoard
+            // return <KanbanBoard
+            //     leads={agente?.leads}
+            //     soket={this.props.socket}
+            // />;
+            return <KanbanPage
                 leads={agente?.leads}
                 soket={this.props.socket}
             />;
