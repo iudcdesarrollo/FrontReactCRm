@@ -353,20 +353,23 @@ export const useKanbanStore = create<KanbanState>()(
             clearStore: () => {
                 set((state) => {
                     const clearedLists = Object.keys(state.lists).reduce((acc, listId) => {
-                        acc[listId] = {
-                            ...state.lists[listId],
-                            tasks: [],
-                        };
+                        const typedListId = listId as ListId;  // Asegura que listId es de tipo ListId
+                        if (state.lists[typedListId]) {
+                            acc[typedListId] = {
+                                ...state.lists[typedListId]!,  // Usa non-null assertion
+                                tasks: [],
+                            };
+                        }
                         return acc;
                     }, {} as Lists);
 
                     return {
                         version: STORE_VERSION,
                         lastSynced: null,
-                        lists: clearedLists, // Mantén las listas, pero con tareas vacías
+                        lists: clearedLists,
                     };
                 });
-                localStorage.removeItem(STORE_NAME); // Borra los datos persistidos en localStorage
+                localStorage.removeItem(STORE_NAME);
             },
 
         }),

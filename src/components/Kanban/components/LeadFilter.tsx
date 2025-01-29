@@ -43,20 +43,20 @@ interface ProcessedLead {
     messages: Message[];
 }
 
-interface OriginalLead {
-    nombre: string;
-    apellido: string;
-    telefono: string;
-    correo: string;
-    programa: string;
-    tipo_gestion: string;
-    nombre_agente: string;
-    notas: Array<{
-        content: string;
-        timestamp: string;
-    }>;
-    ventaPerdidaRazon: string;
-}
+// interface OriginalLead {
+//     nombre: string;
+//     apellido: string;
+//     telefono: string;
+//     correo: string;
+//     programa: string;
+//     tipo_gestion: string;
+//     nombre_agente: string;
+//     notas: Array<{
+//         content: string;
+//         timestamp: string;
+//     }>;
+//     ventaPerdidaRazon: string;
+// }
 
 interface LeadFilterProps {
     onLeadsFiltered: (leads: ProcessedLead[]) => void;
@@ -118,7 +118,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
     const processLeadData = (leadResponse: any): ProcessedLead => {
         if (!leadResponse) {
             console.error('Lead response is undefined or null');
-            return {} as ProcessedLead;  // Return a safe default
+            return {} as ProcessedLead;
         }
 
         return {
