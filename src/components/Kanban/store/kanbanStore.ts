@@ -353,13 +353,17 @@ export const useKanbanStore = create<KanbanState>()(
             clearStore: () => {
                 set((state) => {
                     const clearedLists = Object.keys(state.lists).reduce((acc, listId) => {
-                        const typedListId = listId as ListId;  // Asegura que listId es de tipo ListId
-                        if (state.lists[typedListId]) {
+                        const typedListId = listId as ListId;
+                        const currentList = state.lists[typedListId];
+
+                        if (currentList) {
                             acc[typedListId] = {
-                                ...state.lists[typedListId]!,  // Usa non-null assertion
-                                tasks: [],
+                                id: currentList.id,
+                                title: currentList.title,
+                                tasks: [] // Vaciamos las tareas pero mantenemos la estructura
                             };
                         }
+
                         return acc;
                     }, {} as Lists);
 
