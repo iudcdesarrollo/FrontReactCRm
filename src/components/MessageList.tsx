@@ -205,7 +205,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 return (
                     <UrlPreview
                         url={msg.message}
-                        extension={extension}
+                        extension={extension || undefined}
                         onDownload={() => handleFileDownload(msg.message, fileName)}
                     />
                 );
@@ -213,7 +213,7 @@ const MessageList: React.FC<MessageListProps> = ({
 
             if (isFileUrl) {
                 if (!isValidFileType(extension)) {
-                    return <span className="message-text">{msg.message}</span>;
+                    return <span className="message-text break-words whitespace-pre-wrap overflow-hidden">{msg.message}</span>;
                 }
 
                 if (isAudioFile(extension)) {
@@ -221,7 +221,7 @@ const MessageList: React.FC<MessageListProps> = ({
                         return (
                             <audio
                                 controls
-                                className="audio-player"
+                                className="audio-player w-full max-w-full"
                                 onEnded={() => setAudioPlaying(prev => ({ ...prev, [fileName]: false }))}
                                 src={downloads.find(d => d.fileName === fileName && d.chatId === selectedChat)?.url || msg.message}
                             >
@@ -230,10 +230,10 @@ const MessageList: React.FC<MessageListProps> = ({
                         );
                     }
                     return (
-                        <div className="audio-preview">
-                            <Music className="audio-icon" />
+                        <div className="audio-preview flex items-center gap-2">
+                            <Music className="audio-icon w-5 h-5" />
                             <button
-                                className="play-button"
+                                className="play-button text-blue-600 hover:underline"
                                 onClick={() => handleFileDownload(msg.message, fileName)}
                             >
                                 Reproducir audio
@@ -248,10 +248,10 @@ const MessageList: React.FC<MessageListProps> = ({
                             <img
                                 src={msg.message}
                                 alt="Imagen"
-                                className="message-image"
+                                className="message-image w-full rounded-lg cursor-pointer max-w-full"
                                 onClick={() => setSelectedImage(msg.message)}
                             />
-                            <p className="file-name">{fileName}</p>
+                            <p className="file-name text-sm text-gray-600 mt-1 break-words">{fileName}</p>
                         </div>
                     );
                 }
@@ -259,20 +259,20 @@ const MessageList: React.FC<MessageListProps> = ({
                 if (isVideoFile(extension)) {
                     return (
                         <div className="video-container">
-                            <video controls className="message-video">
+                            <video controls className="message-video w-full rounded-lg max-w-full">
                                 <source src={msg.message} type="video/mp4" />
                                 Tu navegador no soporta el video.
                             </video>
-                            <p className="file-name">{fileName}</p>
+                            <p className="file-name text-sm text-gray-600 mt-1 break-words">{fileName}</p>
                         </div>
                     );
                 }
 
                 return (
-                    <div className="file-download">
-                        <FileText className="file-icon" />
+                    <div className="file-download flex items-center gap-2">
+                        <FileText className="file-icon w-5 h-5" />
                         <button
-                            className="download-button"
+                            className="download-button text-blue-600 hover:underline break-words"
                             onClick={() => handleFileDownload(msg.message, fileName)}
                         >
                             Descargar {fileName}
@@ -281,27 +281,28 @@ const MessageList: React.FC<MessageListProps> = ({
                 );
             }
 
-            return <span className="message-text">{msg.message}</span>;
+            return <span className="message-text break-words whitespace-pre-wrap overflow-hidden">{msg.message}</span>;
         };
 
         return (
-            <div key={index} className={`message-row ${msg.Cliente ? 'message-client' : 'message-agent'}`}>
+            <div key={index} className={`message-row flex ${msg.Cliente ? 'justify-start' : 'justify-end'} mb-2`}>
                 {msg.Cliente && (
-                    <div className="profile-container">
+                    <div className="profile-container mr-2">
                         {profilePictureUrl ? (
                             <img
                                 src={profilePictureUrl}
                                 alt="Profile"
-                                className="profile-image"
+                                className="profile-image w-8 h-8 rounded-full"
                             />
                         ) : (
-                            <div className="profile-placeholder" />
+                            <div className="profile-placeholder w-8 h-8 rounded-full bg-gray-200" />
                         )}
                     </div>
                 )}
-                <div className="message-bubble">
+                <div className={`message-bubble max-w-[70%] p-3 rounded-xl ${msg.Cliente ? 'bg-white' : 'bg-[#e7ffdb]'
+                    }`}>
                     {renderContent()}
-                    <div className="message-status">
+                    <div className="message-status text-xs text-gray-500 mt-1">
                         {`Estado: ${getMessageStatus(msg)} - ${formatDateTime(msg.timestamp)}`}
                     </div>
                 </div>
@@ -310,8 +311,8 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     return (
-        <div className="message-list">
-            <div className="messages-container">
+        <div className="message-list h-full bg-gray-100">
+            <div className="messages-container h-full overflow-y-auto p-4">
                 {messages.map(renderMessage)}
                 {timeoutMessage && renderTimeoutMessage()}
                 <div ref={messagesEndRef} />

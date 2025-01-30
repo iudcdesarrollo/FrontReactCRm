@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, FileText, Video, Music, Image as ImageIcon, X } from 'lucide-react';
 import '../../css/Agentes/MessageList.css';
-import { ImageModalProps, PreviewData, UrlPreviewProps } from '../@types/mensajeList.ts';
+import { ImageModalProps, PreviewData, UrlPreviewProps } from '../@types/mensajeList';
 
 export const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
     return (
@@ -16,7 +16,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => 
     );
 };
 
-export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownload }) => {
+export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownload, timestamp }) => {
     const [previewData, setPreviewData] = useState<PreviewData>({});
     const [loading, setLoading] = useState(true);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -29,7 +29,8 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
                     setPreviewData({
                         title: 'Link Preview',
                         description: url,
-                        icon: <Link className="preview-icon" />
+                        icon: <Link className="preview-icon" />,
+                        timestamp
                     });
                     return;
                 }
@@ -40,19 +41,24 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
                     setPreviewData({
                         title: 'Image Preview',
                         image: url,
-                        icon: <ImageIcon className="preview-icon" />
+                        icon: <ImageIcon className="preview-icon" />,
+                        timestamp
                     });
                 } else if (['mp4', 'mov'].includes(ext)) {
                     setPreviewData({
-                        title: 'Video File',
-                        description: 'Click to play video',
-                        icon: <Video className="preview-icon" />
+                        title: 'Video Preview',
+                        description: 'Click para reproducir video',
+                        icon: <Video className="preview-icon" />,
+                        isAudio: false,
+                        timestamp
                     });
                 } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
                     setPreviewData({
-                        title: 'Audio File',
-                        description: 'Click to play audio',
-                        icon: <Music className="preview-icon" />
+                        title: 'Audio',
+                        icon: <Music className="preview-icon" />,
+                        isAudio: true,
+                        audioUrl: url,
+                        timestamp
                     });
                 } else if (['doc', 'docx', 'pdf', 'xlsx', 'xls'].includes(ext)) {
                     const fileTypeNames = {
@@ -65,13 +71,15 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
                     setPreviewData({
                         title: `${fileTypeNames[ext as keyof typeof fileTypeNames]} Document`,
                         description: 'Click para descargar',
-                        icon: <FileText className="preview-icon" />
+                        icon: <FileText className="preview-icon" />,
+                        timestamp
                     });
                 } else {
                     setPreviewData({
                         title: 'Link Preview',
                         description: url,
-                        icon: <Link className="preview-icon" />
+                        icon: <Link className="preview-icon" />,
+                        timestamp
                     });
                 }
             } catch (error) {
@@ -79,7 +87,8 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
                 setPreviewData({
                     title: 'Link Preview',
                     description: url,
-                    icon: <Link className="preview-icon" />
+                    icon: <Link className="preview-icon" />,
+                    timestamp
                 });
             } finally {
                 setLoading(false);
@@ -87,7 +96,7 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
         };
 
         fetchPreview();
-    }, [url, extension]);
+    }, [url, extension, timestamp]);
 
     const handleDownload = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -115,6 +124,28 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
                             <div className="file-details">{previewData.title}</div>
                         </div>
                     </div>
+                ) : previewData.isAudio ? (
+                    <div className="audio-preview-card">
+                        <div className="audio-preview-header">
+                            <div className="audio-icon-wrapper">
+                                <Music className="audio-preview-icon" />
+                            </div>
+                            <div className="audio-preview-info">
+                                <span className="audio-preview-title">{previewData.title}</span>
+                                {previewData.timestamp && (
+                                    <span className="audio-preview-timestamp">
+                                        {previewData.timestamp}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="audio-preview-player">
+                            <audio controls className="custom-audio-player">
+                                <source src={previewData.audioUrl} type={`audio/${extension?.toLowerCase()}`} />
+                                Tu navegador no soporta la reproducción de audio.
+                            </audio>
+                        </div>
+                    </div>
                 ) : (
                     <div className="file-icon-container">
                         {previewData.icon}
@@ -139,3 +170,5 @@ export const UrlPreview: React.FC<UrlPreviewProps> = ({ url, extension, onDownlo
         </>
     );
 };
+
+export default UrlPreview;

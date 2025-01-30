@@ -22,8 +22,9 @@ export interface MessageStatus {
 
 export interface UrlPreviewProps {
     url: string;
-    extension: string | null;
+    extension?: string;
     onDownload: () => void;
+    timestamp?: string;
 }
 
 export interface PreviewData {
@@ -31,6 +32,9 @@ export interface PreviewData {
     description?: string;
     image?: string;
     icon?: React.ReactNode;
+    isAudio?: boolean;
+    audioUrl?: string;
+    timestamp?: string;
 }
 
 export interface ImageModalProps {
