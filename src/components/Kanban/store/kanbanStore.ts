@@ -13,12 +13,23 @@ interface PersistedState {
     version: number;
     lastSynced: string | null;
     lists: Lists;
+    taskCounts: TaskCounts;
 }
 
-interface KanbanState {
-    version: number;
-    lastSynced: string | null;
-    lists: Lists;
+interface TaskCounts {
+    sinGestionar: number;
+    conversacion: number;
+    depurar: number;
+    llamada: number;
+    segundaLlamada: number;
+    duplicado: number;
+    inscrito: number;
+    estudiante: number;
+    ventaPerdida: number;
+    revision: number;
+}
+
+interface KanbanState extends PersistedState {
     initializeLists: () => void;
     addTask: (listId: ListId, content: string) => void;
     updateTask: (taskId: TaskId, content: string) => void;
@@ -32,11 +43,25 @@ interface KanbanState {
     reorderTask: (listId: ListId, oldIndex: number, newIndex: number) => void;
     updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string, payload?: TaskPayload) => void;
     clearStore: () => void;
+    updateTaskCounts: () => void;
     syncWithRemote?: () => Promise<void>;
 }
 
 const STORE_VERSION = 1;
 const STORE_NAME = "kanban-store";
+
+const initialTaskCounts: TaskCounts = {
+    sinGestionar: 0,
+    conversacion: 0,
+    depurar: 0,
+    llamada: 0,
+    segundaLlamada: 0,
+    duplicado: 0,
+    inscrito: 0,
+    estudiante: 0,
+    ventaPerdida: 0,
+    revision: 0,
+};
 
 const mapTipoGestionToListId = (tipoGestion: string): ListId => {
     const tipoGestionLower = tipoGestion.toLowerCase().trim();
@@ -66,10 +91,22 @@ interface TaskPayload {
 
 export const useKanbanStore = create<KanbanState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             version: STORE_VERSION,
             lastSynced: null,
             lists: {},
+            taskCounts: initialTaskCounts,
+
+            updateTaskCounts: () => {
+                set(state => {
+                    const newCounts = { ...initialTaskCounts };
+                    Object.entries(state.lists).forEach(([listId, list]) => {
+                        const typedListId = listId as keyof TaskCounts;
+                        newCounts[typedListId] = list.tasks.length;
+                    });
+                    return { taskCounts: newCounts };
+                });
+            },
 
             initializeLists: () => {
                 set((state) => {
@@ -85,11 +122,13 @@ export const useKanbanStore = create<KanbanState>()(
                             tasks: [],
                         };
                     });
+
                     return {
                         lists: initialLists,
                         lastSynced: new Date().toISOString(),
                     };
                 });
+                get().updateTaskCounts();
             },
 
             addTask: (listId, content) => {
@@ -103,7 +142,7 @@ export const useKanbanStore = create<KanbanState>()(
                         updatedAt: new Date().toISOString(),
                     };
 
-                    return {
+                    const newState = {
                         lists: {
                             ...state.lists,
                             [listId]: {
@@ -116,7 +155,10 @@ export const useKanbanStore = create<KanbanState>()(
                         },
                         lastSynced: new Date().toISOString(),
                     };
+
+                    return newState;
                 });
+                get().updateTaskCounts();
             },
 
             updateTask: (taskId, content) => {
@@ -160,7 +202,7 @@ export const useKanbanStore = create<KanbanState>()(
 
                     if (!listId || !state.lists[listId]) return state;
 
-                    return {
+                    const newState = {
                         lists: {
                             ...state.lists,
                             [listId]: {
@@ -172,7 +214,10 @@ export const useKanbanStore = create<KanbanState>()(
                         },
                         lastSynced: new Date().toISOString(),
                     };
+
+                    return newState;
                 });
+                get().updateTaskCounts();
             },
 
             updateTaskListByTipoGestion: (
@@ -185,8 +230,6 @@ export const useKanbanStore = create<KanbanState>()(
                     const updatedLists: Lists = JSON.parse(JSON.stringify(state.lists));
                     let taskToMove: Task | null = null;
                     let originalListId: ListId | null = null;
-
-                    // console.log('Estado inicial de las listas:', updatedLists);
 
                     for (const listId of Object.keys(updatedLists) as Array<keyof typeof updatedLists>) {
                         const list = updatedLists[listId];
@@ -206,9 +249,6 @@ export const useKanbanStore = create<KanbanState>()(
                             break;
                         }
                     }
-
-                    // console.log('Tarea encontrada:', taskToMove);
-                    // console.log('ID original de la lista:', originalListId);
 
                     const newListId = mapTipoGestionToListId(newTipoGestion);
                     const targetList = updatedLists[newListId];
@@ -253,7 +293,6 @@ export const useKanbanStore = create<KanbanState>()(
                             };
 
                             targetList.tasks.push(updatedTask);
-                            // console.log('Tarea actualizada y movida:', updatedTask);
                         }
                     } else {
                         const newTask: Task = {
@@ -266,17 +305,18 @@ export const useKanbanStore = create<KanbanState>()(
                         };
 
                         targetList.tasks.push(newTask);
-                        // console.log('Nueva tarea creada:', newTask);
                     }
 
-                    return {
+                    const newState = {
                         ...state,
                         lists: updatedLists,
                         lastSynced: new Date().toISOString()
                     };
-                });
-            },
 
+                    return newState;
+                });
+                get().updateTaskCounts();
+            },
 
             moveTask: (taskId, fromListId, toListId, newIndex) => {
                 set((state) => {
@@ -297,7 +337,7 @@ export const useKanbanStore = create<KanbanState>()(
                     };
                     toList.tasks.splice(newIndex, 0, updatedTask);
 
-                    return {
+                    const newState = {
                         lists: {
                             ...state.lists,
                             [fromListId]: {
@@ -317,7 +357,10 @@ export const useKanbanStore = create<KanbanState>()(
                         },
                         lastSynced: new Date().toISOString(),
                     };
+
+                    return newState;
                 });
+                get().updateTaskCounts();
             },
 
             reorderTask: (listId, oldIndex, newIndex) => {
@@ -351,19 +394,13 @@ export const useKanbanStore = create<KanbanState>()(
             },
 
             clearStore: () => {
-                set((state) => {
-                    const clearedLists = Object.keys(state.lists).reduce((acc, listId) => {
-                        const typedListId = listId as ListId;
-                        const currentList = state.lists[typedListId];
-
-                        if (currentList) {
-                            acc[typedListId] = {
-                                id: currentList.id,
-                                title: currentList.title,
-                                tasks: [] // Vaciamos las tareas pero mantenemos la estructura
-                            };
-                        }
-
+                set(() => {
+                    const clearedLists = INITIAL_LISTS.reduce((acc, listId) => {
+                        acc[listId] = {
+                            id: listId,
+                            title: LIST_TITLES[listId],
+                            tasks: []
+                        };
                         return acc;
                     }, {} as Lists);
 
@@ -371,17 +408,20 @@ export const useKanbanStore = create<KanbanState>()(
                         version: STORE_VERSION,
                         lastSynced: null,
                         lists: clearedLists,
+                        taskCounts: initialTaskCounts,
                     };
                 });
                 localStorage.removeItem(STORE_NAME);
             },
-
         }),
         {
             name: STORE_NAME,
             storage: createJSONStorage(() => localStorage),
             version: STORE_VERSION,
-            onRehydrateStorage: () => () => {
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.updateTaskCounts();
+                }
             },
             migrate: (persistedState: unknown, version: number) => {
                 if (version < STORE_VERSION) {
@@ -389,6 +429,7 @@ export const useKanbanStore = create<KanbanState>()(
                     return {
                         ...typedState,
                         version: STORE_VERSION,
+                        taskCounts: initialTaskCounts,
                     };
                 }
                 return persistedState as PersistedState;

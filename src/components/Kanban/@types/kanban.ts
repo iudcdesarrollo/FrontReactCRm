@@ -1,5 +1,5 @@
 import { Socket } from "socket.io-client";
-import { Agente, Lead } from "../../types";
+import { Agente, Lead, ManagementCount } from "../../types";
 
 export type ListId =
     | "sinGestionar"
@@ -80,4 +80,6 @@ export interface SelectedLeadData {
 export interface KanbanBoardProps {
     leads: Lead[] | undefined;
     soket: Socket | null;
+    managementCounts?: ManagementCount[];
+    totalCount?: number;
 }

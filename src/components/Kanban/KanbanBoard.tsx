@@ -14,7 +14,13 @@ import { BackendResponse } from "./typesKanbanPrincipal";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
-export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
+export default function KanbanBoard({
+    leads, 
+    soket,
+    managementCounts
+}: KanbanBoardProps) {
+    // console.log(`esto es lo que trae el conteso: ${JSON.stringify(managementCounts, null, 2)}, ${JSON.stringify(totalCount, null, 2)}`);
+    // console.log(`informacion de leads: ${JSON.stringify(leads, null, 2)}`);
     const { lists, initializeLists, moveTask, reorderTask, updateTaskListByTipoGestion } = useKanbanStore();
     const [activeTask, setActiveTask] = useState<TaskType | null>(null);
     const processedLeadsRef = useRef(new Set<number>());
@@ -381,7 +387,7 @@ export default function KanbanBoard({ leads, soket }: KanbanBoardProps) {
                                             items={taskIds}
                                             strategy={verticalListSortingStrategy}
                                         >
-                                            <List listId={listId} />
+                                            <List listId={listId} managementCounts={managementCounts} />
                                         </SortableContext>
                                     </div>
                                 );

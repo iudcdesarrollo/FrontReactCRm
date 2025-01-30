@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { memo, useEffect, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { useKanbanStore } from "../store/kanbanStore";
 import { type ListId, type Task as TaskType } from "../../Kanban/@types/kanban";
 import CreateTask from "./CreateTask";
@@ -8,13 +8,14 @@ import '../css/List.css';
 
 interface ListProps {
     listId: ListId;
+    managementCounts?: { _id: string; count: number }[];
 }
 
 interface TaskWithPhone extends TaskType {
     phoneNumber?: string;
 }
 
-const List = memo(({ listId }: ListProps) => {
+const List = memo(({ listId, managementCounts }: ListProps) => {
     const list = useKanbanStore((state) => state.lists[listId]);
     const { setNodeRef, isOver } = useDroppable({
         id: listId,
@@ -24,21 +25,30 @@ const List = memo(({ listId }: ListProps) => {
         }
     });
 
+    // Calcula el conteo solo si managementCounts está presente
+    const count = managementCounts ? (() => {
+        const countKey = {
+            sinGestionar: 'sin gestionar',
+            conversacion: 'conversacion',
+            depurar: 'depuracion',
+            llamada: 'llamada',
+            segundaLlamada: 'segunda llamada',
+            duplicado: 'duplicado',
+            inscrito: 'inscrito',
+            estudiante: 'estudiante',
+            ventaPerdida: 'venta perdida',
+            revision: 'revision'
+        }[listId];
+
+        const managementCount = managementCounts.find(mc => mc._id === countKey);
+        return managementCount?.count || 0;
+    })() : null;
+
     const handleTaskMove = useCallback((task: TaskWithPhone) => {
         if (task.phoneNumber) {
-            // console.log(`Teléfono en lista ${listId}:`, task.phoneNumber);
+            // Lógica de manejo de movimiento de tarea
         }
     }, [listId]);
-
-    useEffect(() => {
-        list?.tasks.forEach(task => {
-            const phoneRegex = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
-            const phoneNumber = task.content.match(phoneRegex)?.[0];
-            if (phoneNumber) {
-                // console.log(`Teléfono encontrado en lista ${listId}:`, phoneNumber);
-            }
-        });
-    }, [list?.tasks, listId]);
 
     if (!list) return null;
 
@@ -61,9 +71,14 @@ const List = memo(({ listId }: ListProps) => {
             }}
         >
             <div className="list-header">
-                <h3 className="list-title">
-                    {list.title || listId.toUpperCase()}
-                </h3>
+                <div className="list-title-container">
+                    <h3 className="list-title">
+                        {list.title || listId.toUpperCase()}
+                    </h3>
+                    {count !== null && (
+                        <span className="list-count">Total: {count}</span>
+                    )}
+                </div>
             </div>
 
             <div className="list-add-task">

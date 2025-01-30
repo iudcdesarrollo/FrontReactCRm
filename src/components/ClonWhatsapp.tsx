@@ -15,6 +15,9 @@ import { KanbanPage } from './Kanban/KanbanPage';
 class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     constructor(props: WhatsAppCloneProps) {
         super(props);
+        // console.log('Initial Management Counts:', props.initialData?.[0]?.managementCounts);
+        // console.log('Initial Total Count:', props.initialData?.[0]?.totalCount);
+
         this.state = {
             searchTerm: '',
             selectedCategory: 'Todos',
@@ -23,7 +26,9 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
             downloads: [],
             showMetrics: false,
             showSettings: false,
-            showKanban: false
+            showKanban: false,
+            managementCounts: props.initialData?.[0]?.managementCounts,
+            totalCount: props.initialData?.[0]?.totalCount
         };
     }
 
@@ -133,6 +138,8 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
             return <KanbanPage
                 leads={agente?.leads}
                 soket={this.props.socket}
+                managementCounts={this.props.initialData?.[0]?.managementCounts}
+                totalCount={this.props.initialData?.[0]?.totalCount}
             />;
         }
 

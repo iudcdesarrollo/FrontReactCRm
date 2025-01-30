@@ -21,10 +21,32 @@
     border-bottom: 2px solid #f3f4f6;
 }
 
+.list-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .list-title {
     font-size: 1.25rem;
     font-weight: bold;
     color: #374151;
+}
+
+.list-count {
+    background-color: #e5e7eb;
+    color: #374151;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 24px;
+    text-align: center;
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .list-content {
@@ -37,4 +59,8 @@
     margin-top: 1rem;
     padding-top: 0.75rem;
     border-top: 1px solid #E5E7EB;
+}
+
+.list-add-task {
+    margin-bottom: 1rem;
 }

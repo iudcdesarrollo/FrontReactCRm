@@ -102,7 +102,9 @@ function App() {
         }
       );
 
-      console.log(`email en uso: ${emailToUse}`);
+      console.log(`esto es lo que llega del response: ${JSON.stringify(response, null, 2)}`);
+
+      // console.log(`email en uso: ${emailToUse}`);
 
       if (!response.data || response.data.length === 0) {
         throw new Error('No se encontraron conversaciones para este usuario.');
@@ -436,7 +438,6 @@ function App() {
         handleLogout();
       }
     });
-
 
     newSocket.on('fileSent', (data) => {
       try {

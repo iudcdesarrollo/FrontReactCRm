@@ -1,62 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../css/LeadFilter.css';
-
-interface FilterOptions {
-    programas: string[];
-    tiposGestion: string[];
-    agentes: {
-        _id: string;
-        nombre: string;
-        correo: string;
-    }[];
-}
-
-interface FilterState {
-    startDate: string;
-    endDate: string;
-    agentId: string;
-    tipoGestion: string;
-    programa: string;
-    searchTerm: string;
-    page: number;
-    limit: number;
-}
-
-interface Message {
-    Agente?: string;
-    Cliente?: string;
-    message: string;
-    timestamp: string;
-    id: string;
-    _id: string;
-    status: string;
-    messageType: string;
-}
-
-interface ProcessedLead {
-    id: number;
-    nombre: string;
-    numeroWhatsapp: string;
-    conversacion: string;
-    urlPhotoPerfil: string;
-    TipoGestion: string;
-    messages: Message[];
-}
-
-// interface OriginalLead {
-//     nombre: string;
-//     apellido: string;
-//     telefono: string;
-//     correo: string;
-//     programa: string;
-//     tipo_gestion: string;
-//     nombre_agente: string;
-//     notas: Array<{
-//         content: string;
-//         timestamp: string;
-//     }>;
-//     ventaPerdidaRazon: string;
-// }
+import { FilterOptions, FilterState, ProcessedLead } from '../@types/LeadFilter';
+import { Search } from 'lucide-react';
 
 interface LeadFilterProps {
     onLeadsFiltered: (leads: ProcessedLead[]) => void;
@@ -80,7 +25,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         programa: '',
         searchTerm: '',
         page: 1,
-        limit: 10
+        limit: 20
     });
 
     const [loading, setLoading] = useState(false);
@@ -122,7 +67,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         }
 
         return {
-            id: leadResponse.id || 0,  // Safe default
+            id: leadResponse.id || 0,
             nombre: leadResponse.nombre || 'Unknown',
             numeroWhatsapp: leadResponse.numeroWhatsapp || '',
             conversacion: leadResponse.conversacion || '',
@@ -131,7 +76,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
             messages: leadResponse.messages || []
         };
     };
-    
+
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -165,7 +110,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
 
                 // Log first lead to see its structure
                 if (data.data.length > 0) {
-                    console.log('First Lead Structure:', JSON.stringify(data.data));
+                    // console.log('First Lead Structure:', JSON.stringify(data.data));
                 }
 
                 const processedLeads = data.data.map(processLeadData);
@@ -200,16 +145,14 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
     return (
         <div className="filter-wrapper">
             {!isOpen ? (
-                <button
-                    type="button"
+                <Search
+                    size={20}
                     onClick={() => setIsOpen(true)}
-                    className="filter-toggle-button"
-                    title="Abrir filtros"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="search-icon">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="search-icon"
+                    aria-hidden="true"
+                />
             ) : (
                 <>
                     <div className="filter-overlay" onClick={() => setIsOpen(false)} />
