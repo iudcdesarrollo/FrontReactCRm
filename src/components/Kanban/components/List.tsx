@@ -33,11 +33,9 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             depurar: 'depuracion',
             llamada: 'llamada',
             segundaLlamada: 'segunda llamada',
-            duplicado: 'duplicado',
             inscrito: 'inscrito',
             estudiante: 'estudiante',
-            ventaPerdida: 'venta perdida',
-            revision: 'revision'
+            ventaPerdida: 'venta perdida'
         }[listId];
 
         const managementCount = managementCounts.find(mc => mc._id === countKey);
@@ -55,6 +53,7 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
     return (
         <div
             ref={setNodeRef}
+            data-list-id={listId}
             className={`list-container ${isOver ? "list-container-over" : ""}`}
             onDragOver={(e) => {
                 if (isOver) {
@@ -70,7 +69,16 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
                 }
             }}
         >
-            <div className="list-header">
+            <div className={`list-header ${listId === 'sinGestionar' ? 'gradient-border-lila' :
+                    listId === 'conversacion' ? 'gradient-border-aqua' :
+                        listId === 'depurar' ? 'gradient-border-turquesa' :
+                            listId === 'llamada' ? 'gradient-border-rosa' :
+                                listId === 'segundaLlamada' ? 'gradient-border-amarillo' :
+                                    listId === 'inscrito' ? 'gradient-border-morado' :
+                                        listId === 'estudiante' ? 'gradient-border-verde' :
+                                            listId === 'matriculado' ? 'gradient-border-azul' :
+                                                listId === 'ventaPerdida' ? 'gradient-border-negro' : ''
+                }`}>
                 <div className="list-title-container">
                     <h3 className="list-title">
                         {list.title || listId.toUpperCase()}

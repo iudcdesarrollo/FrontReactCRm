@@ -40,7 +40,7 @@ const Task = memo(({ task }: TaskProps) => {
 
     const extractNameFromContent = useCallback((content: string) => {
         const nameMatch = content.match(/Nombre: ([^\n]+)/);
-        return nameMatch ? nameMatch[1].trim() : '';
+        return nameMatch ? nameMatch[1].trim() : 'Sin nombre';
     }, []);
 
     const extractAgenteFromContent = useCallback((content: string) => {
@@ -157,6 +157,8 @@ const Task = memo(({ task }: TaskProps) => {
         );
     }
 
+    const name = extractNameFromContent(task.content);
+
     return (
         <div
             ref={setNodeRef}
@@ -166,20 +168,30 @@ const Task = memo(({ task }: TaskProps) => {
             {...listeners}
             onClick={handleClick}
         >
-            <p className="task-content">{task.content}</p>
-            <hr />
-            <p className="task-content">
-                Nota: {primeraNota ? `${primeraNota.content} (${formatDate(primeraNota.timestamp)})` : 'Sin notas'}
-            </p>
-            <hr />
-            <p className="task-content">
-                Agente a Cargo: {agente || 'Sin asignar'}
-            </p>
-            <hr />
-            <p className="task-content">
-                Razón de Venta Perdida: {ventaPerdidaRazon || 'No especificada'}
-            </p>
-            <hr />
+            <div className="task-header">
+                <p className="task-content">
+                    {name} - {phoneNumber || 'Sin teléfono'}
+                </p>
+            </div>
+
+            <div className="task-details">
+                <hr />
+                <p className="task-content">
+                    {task.content}
+                </p>
+                <hr />
+                <p className="task-content">
+                    Nota: {primeraNota ? `${primeraNota.content} (${formatDate(primeraNota.timestamp)})` : 'Sin notas'}
+                </p>
+                <hr />
+                <p className="task-content">
+                    Agente a Cargo: {agente || 'Sin asignar'}
+                </p>
+                <hr />
+                <p className="task-content">
+                    Razón de Venta Perdida: {ventaPerdidaRazon || 'No especificada'}
+                </p>
+            </div>
         </div>
     );
 });

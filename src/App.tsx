@@ -102,7 +102,7 @@ function App() {
         }
       );
 
-      console.log(`esto es lo que llega del response: ${JSON.stringify(response, null, 2)}`);
+      // console.log(`esto es lo que llega del response: ${JSON.stringify(response, null, 2)}`);
 
       // console.log(`email en uso: ${emailToUse}`);
 

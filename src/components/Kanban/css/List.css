@@ -19,6 +19,161 @@
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 2px solid #f3f4f6;
+    position: relative;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Base para todos los gradientes */
+[class*="gradient-border"]::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Sin Gestionar - Lila */
+[data-list-id="sinGestionar"] .list-header::after,
+.gradient-border-lila::after {
+    background: linear-gradient(to right,
+            #9333EA,
+            #C4B5FD,
+            #DDD6FE,
+            #C4B5FD,
+            #9333EA);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Conversación - Azul agua marina */
+[data-list-id="conversacion"] .list-header::after,
+.gradient-border-aqua::after {
+    background: linear-gradient(to right,
+            #06B6D4,
+            #67E8F9,
+            #A5F3FC,
+            #67E8F9,
+            #06B6D4);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Depurar - Verde turquesa */
+[data-list-id="depurar"] .list-header::after,
+.gradient-border-turquesa::after {
+    background: linear-gradient(to right,
+            #14B8A6,
+            #5EEAD4,
+            #99F6E4,
+            #5EEAD4,
+            #14B8A6);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Llamada - Palo de rosa */
+[data-list-id="llamada"] .list-header::after,
+.gradient-border-rosa::after {
+    background: linear-gradient(to right,
+            #EC4899,
+            #F472B6,
+            #FBCFE8,
+            #F472B6,
+            #EC4899);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Segunda llamada - Amarillo */
+[data-list-id="segundaLlamada"] .list-header::after,
+.gradient-border-amarillo::after {
+    background: linear-gradient(to right,
+            #FBBF24,
+            #FCD34D,
+            #FDE68A,
+            #FCD34D,
+            #FBBF24);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Inscrito - Morado */
+[data-list-id="inscrito"] .list-header::after,
+.gradient-border-morado::after {
+    background: linear-gradient(to right,
+            #7C3AED,
+            #A78BFA,
+            #DDD6FE,
+            #A78BFA,
+            #7C3AED);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Matriculado - Azul */
+[data-list-id="matriculado"] .list-header::after,
+.gradient-border-azul::after {
+    background: linear-gradient(to right,
+            #2563EB,
+            #60A5FA,
+            #93C5FD,
+            #60A5FA,
+            #2563EB);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Venta perdida - Negro */
+[data-list-id="ventaPerdida"] .list-header::after,
+.gradient-border-negro::after {
+    background: linear-gradient(to right,
+            #111827,
+            #374151,
+            #4B5563,
+            #374151,
+            #111827);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
+/* Estudiante - Verde */
+[data-list-id="estudiante"] .list-header::after,
+.gradient-border-verde::after {
+    background: linear-gradient(to right,
+            #059669,
+            #34D399,
+            #6EE7B7,
+            #34D399,
+            #059669);
+}
+
+.gradient-border {
+    position: relative;
 }
 
 .list-title-container {
