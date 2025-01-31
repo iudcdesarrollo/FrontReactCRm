@@ -71,11 +71,9 @@ const mapTipoGestionToListId = (tipoGestion: string): ListId => {
         'depuracion': 'depurar',
         'llamada': 'llamada',
         'segunda llamada': 'segundaLlamada',
-        'duplicado': 'duplicado',
         'inscrito': 'inscrito',
         'estudiante': 'estudiante',
         'venta perdida': 'ventaPerdida',
-        'revision': 'revision',
         'todos': 'sinGestionar'
     };
     return mappings[tipoGestionLower] || 'sinGestionar';

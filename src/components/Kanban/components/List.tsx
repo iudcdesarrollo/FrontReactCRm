@@ -76,7 +76,6 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
                                 listId === 'segundaLlamada' ? 'gradient-border-amarillo' :
                                     listId === 'inscrito' ? 'gradient-border-morado' :
                                         listId === 'estudiante' ? 'gradient-border-verde' :
-                                            listId === 'matriculado' ? 'gradient-border-azul' :
                                                 listId === 'ventaPerdida' ? 'gradient-border-negro' : ''
                 }`}>
                 <div className="list-title-container">
