@@ -25,7 +25,7 @@ const Pagination = () => {
         return pages;
     };
 
-    const handleDateChange = (e) => {
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(e.target.value);
     };
 
