@@ -36,8 +36,11 @@ const MessageSender: React.FC<ExtendedMessageSenderProps> = ({
 
     const [showTemplateForm, setShowTemplateForm] = useState(false);
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === 'Enter') {
+            if (event.shiftKey) {
+                return; // Allow new line when Shift+Enter is pressed
+            }
             event.preventDefault();
             sendMessage();
         } else if (event.key === '/') {
@@ -198,13 +201,13 @@ const MessageSender: React.FC<ExtendedMessageSenderProps> = ({
             )}
             <div className="message-sender-container">
                 <div className="input-wrapper">
-                    <input
-                        type="text"
+                    <textarea
                         placeholder="Escribe tu mensaje o utiliza / para enviar templates."
                         value={messageText}
                         onChange={(e) => setMessageText(e.target.value)}
                         onKeyPress={handleKeyPress}
                         className="message-input"
+                        rows={1}
                     />
                 </div>
                 <button
