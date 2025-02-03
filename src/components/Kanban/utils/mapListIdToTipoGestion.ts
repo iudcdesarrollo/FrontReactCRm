@@ -6,7 +6,8 @@ export const mapListIdToTipoGestion = (listId: string): string => {
         'llamada': 'llamada',
         'segundaLlamada': 'segunda llamada',
         'estudiante': 'inscrito',
-        'revision': 'venta perdida'
+        'revision': 'venta perdida',
+        'inscritoOtraAgente': 'inscrito otra agente'
     };
     return mappings[listId] || 'sin gestionar';
 };

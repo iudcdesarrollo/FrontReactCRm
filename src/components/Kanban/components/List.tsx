@@ -5,6 +5,7 @@ import { type ListId, type Task as TaskType } from "../../Kanban/@types/kanban";
 import CreateTask from "./CreateTask";
 import Task from "./Task";
 import '../css/List.css';
+import Pagination from "./PaginationKanban";
 
 interface ListProps {
     listId: ListId;
@@ -25,7 +26,6 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
         }
     });
 
-    // Calcula el conteo solo si managementCounts está presente
     const count = managementCounts ? (() => {
         const countKey = {
             sinGestionar: 'sin gestionar',
@@ -35,7 +35,8 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             segundaLlamada: 'segunda llamada',
             inscrito: 'inscrito',
             estudiante: 'estudiante',
-            ventaPerdida: 'venta perdida'
+            ventaPerdida: 'venta perdida',
+            inscritoOtraAgente: 'inscrito otra agente',
         }[listId];
 
         const managementCount = managementCounts.find(mc => mc._id === countKey);
@@ -70,13 +71,14 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             }}
         >
             <div className={`list-header ${listId === 'sinGestionar' ? 'gradient-border-lila' :
-                    listId === 'conversacion' ? 'gradient-border-aqua' :
-                        listId === 'depurar' ? 'gradient-border-turquesa' :
-                            listId === 'llamada' ? 'gradient-border-rosa' :
-                                listId === 'segundaLlamada' ? 'gradient-border-amarillo' :
-                                    listId === 'inscrito' ? 'gradient-border-morado' :
-                                        listId === 'estudiante' ? 'gradient-border-verde' :
-                                                listId === 'ventaPerdida' ? 'gradient-border-negro' : ''
+                listId === 'conversacion' ? 'gradient-border-aqua' :
+                    listId === 'depurar' ? 'gradient-border-turquesa' :
+                        listId === 'llamada' ? 'gradient-border-rosa' :
+                            listId === 'segundaLlamada' ? 'gradient-border-amarillo' :
+                                listId === 'inscrito' ? 'gradient-border-morado' :
+                                    listId === 'estudiante' ? 'gradient-border-verde' :
+                                        listId === 'ventaPerdida' ? 'gradient-border-negro' :
+                                            listId === 'inscritoOtraAgente' ? 'gradient-border-naranja' : ''
                 }`}>
                 <div className="list-title-container">
                     <h3 className="list-title">
@@ -87,6 +89,8 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
                     )}
                 </div>
             </div>
+
+            <Pagination />
 
             <div className="list-add-task">
                 <CreateTask listId={listId} />

@@ -27,6 +27,7 @@ interface TaskCounts {
     estudiante: number;
     ventaPerdida: number;
     revision: number;
+    inscritoOtraAgente: number;
 }
 
 interface KanbanState extends PersistedState {
@@ -61,6 +62,7 @@ const initialTaskCounts: TaskCounts = {
     estudiante: 0,
     ventaPerdida: 0,
     revision: 0,
+    inscritoOtraAgente: 0,
 };
 
 const mapTipoGestionToListId = (tipoGestion: string): ListId => {
@@ -74,6 +76,7 @@ const mapTipoGestionToListId = (tipoGestion: string): ListId => {
         'inscrito': 'inscrito',
         'estudiante': 'estudiante',
         'venta perdida': 'ventaPerdida',
+        'inscrito otra agente': 'inscritoOtraAgente',
         'todos': 'sinGestionar'
     };
     return mappings[tipoGestionLower] || 'sinGestionar';

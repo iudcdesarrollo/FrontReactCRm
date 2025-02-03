@@ -9,7 +9,8 @@ export type ListId =
     | "segundaLlamada"
     | "inscrito"
     | "estudiante"
-    | "ventaPerdida";
+    | "ventaPerdida"
+    | "inscritoOtraAgente";
 
 export type TaskId = string;
 
@@ -41,7 +42,8 @@ export const INITIAL_LISTS: ListId[] = [
     "segundaLlamada",
     "inscrito",
     "estudiante",
-    "ventaPerdida"
+    "ventaPerdida",
+    "inscritoOtraAgente"
 ];
 
 export const LIST_TITLES: Record<ListId, string> = {
@@ -52,7 +54,8 @@ export const LIST_TITLES: Record<ListId, string> = {
     segundaLlamada: "Segunda Llamada",
     inscrito: "Inscripción",
     estudiante: "Estudiante",
-    ventaPerdida: "Venta Perdida"
+    ventaPerdida: "Venta Perdida",
+    inscritoOtraAgente: "Inscrito/matriculado de otra agente"
 };
 
 export interface LeadFormData {

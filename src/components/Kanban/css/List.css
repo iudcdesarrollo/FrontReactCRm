@@ -172,6 +172,19 @@
             #059669);
 }
 
+[data-list-id="inscritoOtraAgente"] .list-header::after,
+.gradient-border-naranja::after {
+    background: linear-gradient(to right,
+            #EA580C,
+            #FB923C,
+            #FDBA74,
+            #FB923C,
+            #EA580C);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
 .gradient-border {
     position: relative;
 }
