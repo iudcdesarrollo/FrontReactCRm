@@ -64,11 +64,44 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
         } else {
             const searchedLeads = (agente?.leads || []).filter((lead: Lead) => {
                 const lowerCaseSearchTerm = term.toLowerCase();
-                return lead.nombre?.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    lead.numeroWhatsapp.includes(lowerCaseSearchTerm);
+                return (
+                    lead.nombre?.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    lead.numeroWhatsapp.includes(lowerCaseSearchTerm)
+                );
             });
-            setFilteredLeads(searchedLeads);
-            localStorage.setItem('filteredLeads', JSON.stringify(searchedLeads));
+
+            if (currentCategory === 'Todos') {
+                const leadsWithUnreadCount = searchedLeads.map(lead => {
+                    let unreadCount = 0;
+                    let lastAgentMessage = -1;
+
+                    const messages = lead.messages || [];
+                    for (let i = messages.length - 1; i >= 0; i--) {
+                        if (messages[i].Agente !== undefined) {
+                            lastAgentMessage = i;
+                            break;
+                        }
+                    }
+
+                    for (let i = messages.length - 1; i > lastAgentMessage; i--) {
+                        if (messages[i].Agente === undefined) {
+                            unreadCount++;
+                        }
+                    }
+
+                    return {
+                        ...lead,
+                        unreadMessages: unreadCount
+                    };
+                });
+
+                const filteredUnreadLeads = leadsWithUnreadCount.filter(lead => lead.unreadMessages > 0);
+                setFilteredLeads(filteredUnreadLeads);
+                localStorage.setItem('filteredLeads', JSON.stringify(filteredUnreadLeads));
+            } else {
+                setFilteredLeads(searchedLeads);
+                localStorage.setItem('filteredLeads', JSON.stringify(searchedLeads));
+            }
         }
     };
 
@@ -109,6 +142,7 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
                     leads={filteredLeads}
                     selectedChat={selectedChat}
                     setSelectedChat={setSelectedChat}
+                    currentCategory={currentCategory}
                 />
             </div>
             <div className="flex-1">

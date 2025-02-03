@@ -6,12 +6,14 @@ interface LeadListProps {
     leads: Lead[];
     selectedChat: number | null;
     setSelectedChat: (chatId: number | null) => void;
+    currentCategory: string;
 }
 
 const LeadList: React.FC<LeadListProps> = ({
     leads,
     selectedChat,
     setSelectedChat,
+    currentCategory
 }) => {
     const countUnreadMessages = (messages: Message[]) => {
         let unreadCount = 0;
@@ -38,7 +40,12 @@ const LeadList: React.FC<LeadListProps> = ({
         unreadMessages: countUnreadMessages(lead.messages || [])
     }));
 
-    const sortedLeads = leadsWithUnreadCount.sort((a, b) => b.unreadMessages - a.unreadMessages);
+    // Filter leads in 'Todos' category to show only unread
+    const filteredLeads = currentCategory === 'Todos'
+        ? leadsWithUnreadCount.filter(lead => lead.unreadMessages > 0)
+        : leadsWithUnreadCount;
+
+    const sortedLeads = filteredLeads.sort((a, b) => b.unreadMessages - a.unreadMessages);
 
     const truncateText = (text: string | undefined, maxLength: number = 20): string => {
         if (!text) return 'No hay mensajes';
