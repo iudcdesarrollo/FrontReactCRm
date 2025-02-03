@@ -90,7 +90,7 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
                 </div>
             </div>
 
-            <Pagination />
+            <Pagination listId={listId} />
 
             <div className="list-add-task">
                 <CreateTask listId={listId} />

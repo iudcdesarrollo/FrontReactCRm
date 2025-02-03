@@ -1,15 +1,34 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import { ListId } from '../../Kanban/@types/kanban';
+import { usePaginatedSales } from './usePaginatedSales';
+import "react-datepicker/dist/react-datepicker.css";
 import '../css/PaginationKanban.css';
 
-const Pagination = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedDate, setSelectedDate] = useState('');
-    const totalPages = 10;
+interface PaginationProps {
+    listId: ListId;
+}
+
+const Pagination = ({ listId }: PaginationProps) => {
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
+    const {
+        currentPage,
+        totalPages,
+        isLoading,
+        selectedDate,
+        handlePageChange,
+        handleDateChange
+    } = usePaginatedSales({
+        listId,
+        initialPage: 1,
+        itemsPerPage: 10
+    });
 
     const getPageNumbers = () => {
         const pages = [];
-        const showPages = 5;
+        const showPages = 3;
 
         let start = Math.max(1, currentPage - Math.floor(showPages / 2));
         const end = Math.min(totalPages, start + showPages - 1);
@@ -25,48 +44,67 @@ const Pagination = () => {
         return pages;
     };
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedDate(e.target.value);
+    const onDateChange = (date: Date | null) => {
+        handleDateChange(date);
+        setShowDatePicker(false);
     };
 
+    if (isLoading) {
+        return <div className="paginate-loading">Cargando...</div>;
+    }
+
     return (
-        <div className="pagination-wrapper">
-            <div className="pagination-container">
+        <div className="paginate-container">
+            <div className="paginate-content">
                 <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="pagination-arrow"
+                    className="paginate-nav-btn"
                 >
-                    <ChevronLeft size={20} />
+                    <ChevronLeft size={16} />
                 </button>
 
                 {getPageNumbers().map((pageNum) => (
                     <button
                         key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`pagination-button ${pageNum === currentPage ? 'active' : ''}`}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`paginate-number ${pageNum === currentPage ? 'active' : ''}`}
                     >
                         {pageNum}
                     </button>
                 ))}
 
                 <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="pagination-arrow"
+                    className="paginate-nav-btn"
                 >
-                    <ChevronRight size={20} />
+                    <ChevronRight size={16} />
                 </button>
-            </div>
 
-            <div className="date-picker-container">
-                <Calendar size={18} className="date-picker-icon" />
-                <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={handleDateChange}
-                    className="date-picker-input"
-                />
+                <div className="paginate-calendar-wrapper">
+                    <button
+                        className="paginate-calendar-btn"
+                        onClick={() => setShowDatePicker(!showDatePicker)}
+                    >
+                        <Calendar size={16} />
+                    </button>
+                    {showDatePicker && (
+                        <div className="paginate-calendar-dropdown">
+                            <DatePicker
+                                selected={selectedDate}
+                                onChange={onDateChange}
+                                inline
+                                dateFormat="dd/MM/yyyy"
+                                locale="es"
+                                calendarClassName="paginate-calendar"
+                                monthsShown={1}
+                                showPopperArrow={false}
+                                fixedHeight
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
