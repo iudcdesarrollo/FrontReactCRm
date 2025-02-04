@@ -27,6 +27,7 @@ const categories: ChatCategory[] = [
   { icon: <Clock size={15} />, label: 'segunda llamada' },
   { icon: <CheckCircle size={15} />, label: 'inscrito' },
   { icon: <UserPlus size={15} />, label: 'venta perdida' },
+  { icon: <UserPlus size={15} />, label: 'gestionado' }
 ];
 
 const STORAGE_KEY = 'navActiveCategory';

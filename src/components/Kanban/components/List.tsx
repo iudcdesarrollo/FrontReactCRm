@@ -36,6 +36,7 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             inscrito: 'inscrito',
             estudiante: 'estudiante',
             ventaPerdida: 'venta perdida',
+            gestionado: 'gestionado',
             inscritoOtraAgente: 'inscrito otra agente',
         }[listId];
 

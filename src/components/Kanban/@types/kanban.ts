@@ -10,6 +10,7 @@ export type ListId =
     | "inscrito"
     | "estudiante"
     | "ventaPerdida"
+    | "gestionado"
     | "inscritoOtraAgente";
 
 export type TaskId = string;
@@ -43,6 +44,7 @@ export const INITIAL_LISTS: ListId[] = [
     "inscrito",
     "estudiante",
     "ventaPerdida",
+    "gestionado",
     "inscritoOtraAgente"
 ];
 
@@ -55,6 +57,7 @@ export const LIST_TITLES: Record<ListId, string> = {
     inscrito: "Inscripción",
     estudiante: "Estudiante",
     ventaPerdida: "Venta Perdida",
+    gestionado: "Gestionado",
     inscritoOtraAgente: "Inscrito/matriculado de otra agente"
 };
 

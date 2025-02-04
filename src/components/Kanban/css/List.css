@@ -161,6 +161,19 @@
     animation: gradientMove 2s ease-in-out infinite;
 }
 
+[data-list-id="gestionado"] .list-header::after,
+.gradient-border-morado-claro::after {
+    background: linear-gradient(to right,
+            #8B5CF6,
+            #A78BFA,
+            #C4B5FD,
+            #A78BFA,
+            #8B5CF6);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
 /* Estudiante - Verde */
 [data-list-id="estudiante"] .list-header::after,
 .gradient-border-verde::after {
