@@ -29,11 +29,18 @@ interface AccountManagerData {
     Personal: number;
 }
 
+interface MetricCardProps {
+    title: string;
+    value: string;
+    subtitle: string;
+    className: string;
+    isLoading?: boolean;
+}
+
 const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        // Simulate data loading
         const loadingTimer = setTimeout(() => {
             setIsLoading(false);
         }, 2000);
@@ -77,12 +84,13 @@ const Dashboard: React.FC = () => {
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
     // Metric Card Component
-    const MetricCard: React.FC<{
-        title: string;
-        value: string;
-        subtitle: string;
-        className: string;
-    }> = ({ title, value, subtitle, className }) => (
+    const MetricCard: React.FC<MetricCardProps> = ({
+        title,
+        value,
+        subtitle,
+        className,
+        isLoading = false
+    }) => (
         <div className={`dashboard__metric ${className}`}>
             <h3 className={`dashboard__metric-title ${isLoading ? 'skeleton-text' : ''}`}>
                 {title}
@@ -101,44 +109,49 @@ const Dashboard: React.FC = () => {
             {/* Metrics Grid */}
             <div className="dashboard__metrics-grid">
                 <MetricCard
-                    title="texto"
+                    title="VENTAS TOTALES"
                     value="$67.7M"
-                    subtitle="texto"
+                    subtitle="+20% respecto al año anterior"
                     className="dashboard__metric--revenue"
+                    isLoading={isLoading}
                 />
                 <MetricCard
-                    title="Texto"
+                    title="GANANCIA BRUTA"
                     value="$34.0M"
-                    subtitle="texto"
+                    subtitle="+15% respecto al año anterior"
                     className="dashboard__metric--profit"
+                    isLoading={isLoading}
                 />
                 <MetricCard
-                    title="texto"
+                    title="COSTO TOTAL"
                     value="$33.7M"
-                    subtitle="texto"
+                    subtitle="+5% respecto al año anterior"
                     className="dashboard__metric--cost"
+                    isLoading={isLoading}
                 />
                 <MetricCard
-                    title="texto"
+                    title="VENTAS DEL AÑO"
                     value="85%"
-                    subtitle="texto"
+                    subtitle="del objetivo anual"
                     className="dashboard__metric--sales"
+                    isLoading={isLoading}
                 />
             </div>
 
+            {/* Charts Grid */}
             <div className="dashboard__charts-grid">
                 <div className="dashboard__chart-container">
                     <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        SALES MAP
+                        MAPA DE VENTAS
                     </h3>
                     <div className={`dashboard__map ${isLoading ? 'skeleton-box' : ''}`}>
-                        <p className="dashboard__map-placeholder">Mapa de las ciudades.</p>
+                        <p className="dashboard__map-placeholder">Mapa de las ciudades</p>
                     </div>
                 </div>
 
                 <div className="dashboard__chart-container">
                     <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        PRODUCT DAILY SALES
+                        VENTAS DIARIAS DE PRODUCTOS
                     </h3>
                     {!isLoading ? (
                         <ResponsiveContainer className="dashboard__sales-chart">
@@ -146,7 +159,7 @@ const Dashboard: React.FC = () => {
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="date" />
                                 <YAxis />
-                                <Tooltip />
+                                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                                 <Line
                                     type="monotone"
                                     dataKey="value"
@@ -162,10 +175,11 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* Bottom Grid */}
             <div className="dashboard__bottom-grid">
                 <div className="dashboard__chart-container">
                     <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        SALES BY ACCOUNT MANAGER
+                        VENTAS POR GESTOR DE CUENTA
                     </h3>
                     {!isLoading ? (
                         <ResponsiveContainer className="dashboard__manager-chart">
@@ -173,7 +187,7 @@ const Dashboard: React.FC = () => {
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
-                                <Tooltip />
+                                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                                 <Legend />
                                 <Bar dataKey="Sarah" stackId="a" fill="#8884d8" />
                                 <Bar dataKey="Mike" stackId="a" fill="#82ca9d" />
@@ -188,15 +202,15 @@ const Dashboard: React.FC = () => {
 
                 <div className="dashboard__chart-container">
                     <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        TOP 10 CUSTOMERS
+                        TOP 10 CLIENTES
                     </h3>
                     {!isLoading ? (
                         <ResponsiveContainer className="dashboard__customers-chart">
                             <BarChart layout="vertical" data={topCustomers}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis type="number" />
-                                <YAxis dataKey="name" type="category" />
-                                <Tooltip />
+                                <YAxis dataKey="name" type="category" width={150} />
+                                <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
                                 <Bar
                                     dataKey="value"
                                     fill="#82ca9d"
@@ -211,7 +225,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="dashboard__chart-container">
                     <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        SALES BY CATEGORY
+                        VENTAS POR CATEGORÍA
                     </h3>
                     {!isLoading ? (
                         <ResponsiveContainer className="dashboard__category-chart">
@@ -225,15 +239,16 @@ const Dashboard: React.FC = () => {
                                     fill="#8884d8"
                                     paddingAngle={5}
                                     dataKey="value"
+                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                                 >
-                                    {salesByCategory.map((entry, index) => (
+                                    {salesByCategory.map((_entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
                                             fill={COLORS[index % COLORS.length]}
                                         />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip formatter={(value) => `${value}%`} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
