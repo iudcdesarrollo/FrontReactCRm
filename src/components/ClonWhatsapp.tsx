@@ -8,9 +8,10 @@ import {
     WhatsAppCloneState,
     getDownloadsFromMessages
 } from './types';
-import Metrics from './Metricas/Metrics';
+// import Metrics from './Metricas/Metrics';
 // import KanbanBoard from './Kanban/KanbanBoard';
 import { KanbanPage } from './Kanban/KanbanPage';
+import Dashboard from './Metricas/metricas-avanzadas-Ingrid/Dashboard';
 
 class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     constructor(props: WhatsAppCloneProps) {
@@ -144,7 +145,8 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         }
 
         if (showMetrics) {
-            return <Metrics socket={this.props.socket} />;
+            return <Dashboard/>
+            // <Metrics socket={this.props.socket} />;
         }
 
         if (showSettings) {
