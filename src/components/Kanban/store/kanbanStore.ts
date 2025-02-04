@@ -320,6 +320,18 @@ export const useKanbanStore = create<KanbanState>()(
                 get().updateTaskCounts();
             },
 
+            clearList: (listId: ListId) => {
+                set(state => ({
+                    lists: {
+                        ...state.lists,
+                        [listId]: {
+                            ...state.lists[listId],
+                            tasks: []
+                        }
+                    }
+                }))
+            },
+
             moveTask: (taskId, fromListId, toListId, newIndex) => {
                 set((state) => {
                     const fromList = state.lists[fromListId];

@@ -15,7 +15,7 @@ import { BackendResponse } from "./typesKanbanPrincipal";
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
 export default function KanbanBoard({
-    leads, 
+    leads,
     soket,
     managementCounts
 }: KanbanBoardProps) {
@@ -162,8 +162,8 @@ export default function KanbanBoard({
         };
     }, [isInitialized, initializeLists]);
 
+
     useEffect(() => {
-        // Limpiar los eventos del mouse cuando el componente se desmonta
         const cleanup = () => {
             document.body.style.cursor = 'default';
             setIsDragging(false);

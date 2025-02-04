@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useKanbanStore } from '../store/kanbanStore';
-import { ListId, Task } from '../../Kanban/@types/kanban';
+import { ListId } from '../../Kanban/@types/kanban';
 
 interface UsePaginatedSalesProps {
     listId: ListId;
@@ -9,13 +9,27 @@ interface UsePaginatedSalesProps {
     itemsPerPage?: number;
 }
 
-// Interfaz para las tareas que vienen del servidor
-interface ServerTask extends Omit<Task, 'listId'> {
-    notas?: Array<{
-        content: string;
-        timestamp: string;
+interface ServerResponse {
+    success: boolean;
+    data: Array<{
+        numeroCliente: string;
+        nombreCliente: string;
+        nombreAgente: string;
+        ultimaNota: string;
+        razonVentaPerdida: string | null;
+        tipoGestion: string;
+        agente: {
+            nombre: string;
+            correo: string;
+            rol: string;
+        };
     }>;
-    ventaPerdidaRazon?: string | null;
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        itemsPerPage: number;
+    };
 }
 
 const mapListIdToTipoGestion = (listId: ListId): string => {
@@ -28,7 +42,8 @@ const mapListIdToTipoGestion = (listId: ListId): string => {
         inscrito: 'inscrito',
         estudiante: 'estudiante',
         ventaPerdida: 'venta perdida',
-        inscritoOtraAgente: 'inscrito otra agente'
+        inscritoOtraAgente: 'inscrito otra agente',
+        gestionado: 'gestionado'
     };
     return mappings[listId as keyof typeof mappings] || 'sin gestionar';
 };
@@ -36,7 +51,7 @@ const mapListIdToTipoGestion = (listId: ListId): string => {
 export const usePaginatedSales = ({
     listId,
     initialPage = 1,
-    itemsPerPage = 10
+    itemsPerPage = 5
 }: UsePaginatedSalesProps) => {
     const [currentPage, setCurrentPage] = useState(initialPage);
     const [totalPages, setTotalPages] = useState(1);
@@ -63,44 +78,40 @@ export const usePaginatedSales = ({
                 params.append('date', date.toISOString());
             }
 
-            const response = await axios.get(
+            const response = await axios.get<ServerResponse>(
                 `${import.meta.env.VITE_API_URL_GENERAL}/sales?${params}`
             );
 
-            const { tasks, pagination } = response.data.data;
+            console.log(`esto es lo que trae response de sales: ${JSON.stringify(response, null, 2)}`);
 
-            // Limpiar las tareas existentes antes de agregar las nuevas
+            if (!response.data?.success || !response.data?.data) {
+                throw new Error('Respuesta inválida del servidor');
+            }
+
             clearStore();
 
-            // Agregar cada tarea usando updateTaskListByTipoGestion
-            tasks.forEach((task: ServerTask) => {
-                const whatsappMatch = task.content.match(/WhatsApp: (\d+)/);
-                const nameMatch = task.content.match(/Nombre: ([^\n]+)/);
-
-                if (whatsappMatch && nameMatch) {
-                    const payload = {
-                        notas: task.notas ? task.notas.map(nota => ({
-                            content: nota.content,
-                            timestamp: new Date(nota.timestamp)
-                        })) : [],
-                        ventaPerdidaRazon: task.ventaPerdidaRazon || null
-                    };
-
-                    updateTaskListByTipoGestion(
-                        whatsappMatch[1],
-                        tipoGestion,
-                        nameMatch[1].trim(),
-                        payload
-                    );
-                }
+            response.data.data.forEach(item => {
+                updateTaskListByTipoGestion(
+                    item.numeroCliente,
+                    item.tipoGestion,
+                    item.nombreCliente,
+                    {
+                        notas: item.ultimaNota ? [{
+                            content: item.ultimaNota,
+                            timestamp: new Date()
+                        }] : [],
+                        ventaPerdidaRazon: item.razonVentaPerdida
+                    }
+                );
             });
 
-            setTotalPages(pagination.totalPages);
-            return pagination;
+            setTotalPages(response.data.pagination.totalPages);
+            return response.data.pagination;
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al cargar los datos');
             console.error('Error fetching sales:', err);
+            setTotalPages(1);
         } finally {
             setIsLoading(false);
         }
@@ -119,7 +130,7 @@ export const usePaginatedSales = ({
 
     useEffect(() => {
         fetchSales(currentPage, selectedDate);
-    }, [listId]);
+    }, [listId, currentPage, selectedDate]);
 
     return {
         currentPage,

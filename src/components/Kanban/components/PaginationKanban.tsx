@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { ListId } from '../../Kanban/@types/kanban';
-import { usePaginatedSales } from './usePaginatedSales';
 import "react-datepicker/dist/react-datepicker.css";
 import '../css/PaginationKanban.css';
+import { usePaginatedSales } from './usePaginatedSales';
 
 interface PaginationProps {
     listId: ListId;
@@ -23,7 +23,7 @@ const Pagination = ({ listId }: PaginationProps) => {
     } = usePaginatedSales({
         listId,
         initialPage: 1,
-        itemsPerPage: 10
+        itemsPerPage: 5
     });
 
     const getPageNumbers = () => {

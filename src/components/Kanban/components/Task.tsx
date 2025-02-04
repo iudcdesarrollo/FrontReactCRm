@@ -26,6 +26,7 @@ interface LeadInfoResponse {
 const enpointPeticiones = import.meta.env.VITE_API_URL_GENERAL;
 
 const Task = memo(({ task }: TaskProps) => {
+    // console.log(`esto es lo que se ve y que se ve que llega en task: ${JSON.stringify(task, null, 2)}`);
     const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
     const [agente, setAgente] = useState<string | null>(null);
     const [primeraNota, setPrimeraNota] = useState<Note | null>(null);
