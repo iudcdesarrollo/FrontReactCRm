@@ -110,30 +110,30 @@ const Dashboard: React.FC = () => {
             {/* Metrics Grid */}
             <div className="dashboard__metrics-grid">
                 <MetricCard
-                    title="VENTAS TOTALES"
-                    value="$67.7M"
-                    subtitle="+20% respecto al año anterior"
+                    title="Texto"
+                    value="$64.7M"
+                    subtitle="Texto"
                     className="dashboard__metric--revenue"
                     isLoading={isLoading}
                 />
                 <MetricCard
-                    title="GANANCIA BRUTA"
+                    title="Texto"
                     value="$34.0M"
-                    subtitle="+15% respecto al año anterior"
+                    subtitle="Texto"
                     className="dashboard__metric--profit"
                     isLoading={isLoading}
                 />
                 <MetricCard
-                    title="COSTO TOTAL"
+                    title="Texto"
                     value="$33.7M"
-                    subtitle="+5% respecto al año anterior"
+                    subtitle="Texto"
                     className="dashboard__metric--cost"
                     isLoading={isLoading}
                 />
                 <MetricCard
-                    title="VENTAS DEL AÑO"
+                    title="Texto"
                     value="85%"
-                    subtitle="del objetivo anual"
+                    subtitle="Texto"
                     className="dashboard__metric--sales"
                     isLoading={isLoading}
                 />

@@ -19,20 +19,20 @@ interface City {
 }
 
 const cities: City[] = [
-    { name: 'Bogotá', lat: 4.7110, lng: -74.0721, sales: 1250000 },
-    { name: 'Medellín', lat: 6.2442, lng: -75.5812, sales: 980000 },
-    { name: 'Cali', lat: 3.4516, lng: -76.5320, sales: 850000 },
-    { name: 'Barranquilla', lat: 10.9685, lng: -74.7813, sales: 620000 },
-    { name: 'Cartagena', lat: 10.3932, lng: -75.4832, sales: 580000 },
-    { name: 'Bucaramanga', lat: 7.1254, lng: -73.1198, sales: 450000 },
-    { name: 'Pereira', lat: 4.8133, lng: -75.6961, sales: 320000 },
-    { name: 'Santa Marta', lat: 11.2404, lng: -74.1990, sales: 290000 },
-    { name: 'Manizales', lat: 5.0687, lng: -75.5173, sales: 280000 },
-    { name: 'Ibagué', lat: 4.4389, lng: -75.2322, sales: 260000 }
+    { name: 'Bogotá', lat: 4.7110, lng: -74.0721, sales: 3 },
+    { name: 'Medellín', lat: 6.2442, lng: -75.5812, sales: 9 },
+    { name: 'Cali', lat: 3.4516, lng: -76.5320, sales: 85 },
+    { name: 'Barranquilla', lat: 10.9685, lng: -74.7813, sales: 6 },
+    { name: 'Cartagena', lat: 10.3932, lng: -75.4832, sales: 5 },
+    { name: 'Bucaramanga', lat: 7.1254, lng: -73.1198, sales: 4 },
+    { name: 'Pereira', lat: 4.8133, lng: -75.6961, sales: 32 },
+    { name: 'Santa Marta', lat: 11.2404, lng: -74.1990, sales: 29 },
+    { name: 'Manizales', lat: 5.0687, lng: -75.5173, sales: 28 },
+    { name: 'Ibagué', lat: 4.4389, lng: -75.2322, sales: 26 }
 ];
 
 const customIcon = (sales: number) => {
-    const size = Math.min(30, Math.max(20, sales / 50000));
+    const size = Math.min(30, Math.max(20, sales / 50));
     return L.divIcon({
         html: `<div style="
             background-color: #3B82F6;
@@ -69,7 +69,7 @@ const ColombiaMap: React.FC = () => {
                     <Popup>
                         <div className="p-2 text-center">
                             <h3 className="font-semibold text-gray-800">{city.name}</h3>
-                            <p className="text-gray-600">Ventas: ${city.sales.toLocaleString()}</p>
+                            <p className="text-gray-600">Lista de Personas: {city.sales.toLocaleString()}</p>
                         </div>
                     </Popup>
                 </Marker>
