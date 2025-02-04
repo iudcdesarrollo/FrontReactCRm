@@ -4,6 +4,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ResponsiveContainer
 } from 'recharts';
 import '../../../css/metricas/Dashboart.css';
+import ColombiaMap from './colombiaMap';
 
 // Types
 interface DailySale {
@@ -141,12 +142,13 @@ const Dashboard: React.FC = () => {
             {/* Charts Grid */}
             <div className="dashboard__charts-grid">
                 <div className="dashboard__chart-container">
-                    <h3 className={`dashboard__chart-title ${isLoading ? 'skeleton-text' : ''}`}>
-                        MAPA DE VENTAS
-                    </h3>
-                    <div className={`dashboard__map ${isLoading ? 'skeleton-box' : ''}`}>
-                        <p className="dashboard__map-placeholder">Mapa de las ciudades</p>
-                    </div>
+                    {!isLoading ? (
+                        <div style={{ height: '300px', width: '100%' }}>
+                            <ColombiaMap />
+                        </div>
+                    ) : (
+                        <div className="skeleton-box chart-skeleton" />
+                    )}
                 </div>
 
                 <div className="dashboard__chart-container">
