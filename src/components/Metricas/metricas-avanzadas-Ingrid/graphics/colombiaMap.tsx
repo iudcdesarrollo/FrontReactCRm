@@ -84,7 +84,10 @@ const ColombiaMap: React.FC = () => {
                 if (!response.ok) throw new Error('Error al cargar los datos');
                 const data = await response.json();
                 if (data.success) {
-                    setCitiesData(data.data);
+                    const filteredData = data.data.filter((city: CityData) =>
+                        city.ciudad !== 'Bogotá' && city.ciudad !== 'No especificada'
+                    );
+                    setCitiesData(filteredData);
                 } else {
                     throw new Error(data.message || 'Error desconocido');
                 }
@@ -98,17 +101,13 @@ const ColombiaMap: React.FC = () => {
         fetchData();
     }, []);
 
-    if (loading) {
-        return <div className="h-full w-full flex items-center justify-center">
-            <span className="text-gray-600">Cargando mapa...</span>
-        </div>;
-    }
+    if (loading) return <div className="h-full w-full flex items-center justify-center">
+        <span className="text-gray-600">Cargando mapa...</span>
+    </div>;
 
-    if (error) {
-        return <div className="h-full w-full flex items-center justify-center">
-            <span className="text-red-600">{error}</span>
-        </div>;
-    }
+    if (error) return <div className="h-full w-full flex items-center justify-center">
+        <span className="text-red-600">{error}</span>
+    </div>;
 
     return (
         <MapContainer
