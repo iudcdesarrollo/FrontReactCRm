@@ -25,10 +25,20 @@ interface ServerResponse {
 
 const enpointGeneral = import.meta.env.VITE_API_URL_GENERAL;
 
+const colombianCities = [
+    'Medellín', 'Cali', 'Barranquilla', 'Cartagena', 'Cúcuta',
+    'Bucaramanga', 'Pereira', 'Santa Marta', 'Ibagué', 'Pasto',
+    'Manizales', 'Neiva', 'Villavicencio', 'Armenia', 'Valledupar',
+    'Montería', 'Sincelejo', 'Popayán', 'Tunja', 'Riohacha',
+    'Quibdó', 'Florencia', 'Yopal', 'Mocoa', 'San José del Guaviare',
+    'Mitú', 'Puerto Carreño', 'Inírida', 'Leticia'
+].sort();
+
 const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telefono }) => {
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [customReason, setCustomReason] = useState('');
+    const [selectedCity, setSelectedCity] = useState<string>('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -54,16 +64,21 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
         { value: 'razon-no-definida', label: 'Razón no definida' },
     ];
 
-    const sendToServer = async (reason: string) => {
+    const sendToServer = async (reason: string, city?: string) => {
         try {
+            const finalReason = city
+                ? `No vive en Bogotá - Ciudad: ${city}`
+                : reason;
+
             const response = await axios.post<ServerResponse>(`${enpointGeneral}/addRazonVentaPerdida`, {
                 telefono,
-                ventaPerdidaRazon: reason
+                ventaPerdidaRazon: finalReason
             });
 
             if (response.status === 200) {
                 console.log('Razón de venta perdida actualizada exitosamente');
                 setError(null);
+                setIsSubmitted(true);
             }
         } catch (error) {
             const axiosError = error as AxiosError<ServerError>;
@@ -84,10 +99,19 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
         const value = e.target.value;
         setSelectedOption(value);
         setIsSubmitted(false);
+        setSelectedCity('');
 
-        if (value !== 'razon-no-definida') {
+        if (value !== 'razon-no-definida' && value !== 'no-vive-en-bogota') {
             setIsButtonEnabled(false);
             await sendToServer(value);
+        }
+    };
+
+    const handleCityChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const city = e.target.value;
+        setSelectedCity(city);
+        if (city) {
+            await sendToServer('no-vive-en-bogota', city);
         }
     };
 
@@ -105,7 +129,8 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
     };
 
     const shouldShowServerMessage = selectedOption && (
-        selectedOption !== 'razon-no-definida' ||
+        (selectedOption !== 'razon-no-definida' && selectedOption !== 'no-vive-en-bogota') ||
+        (selectedOption === 'no-vive-en-bogota' && selectedCity && isSubmitted) ||
         (selectedOption === 'razon-no-definida' && isSubmitted)
     );
 
@@ -124,12 +149,12 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
                 )}
 
                 {(isButtonEnabled || selectedOption) && (
-                    <div className={`select-wrapper ${selectedOption && selectedOption !== 'razon-no-definida' ? 'disabled' : ''}`}>
+                    <div className={`select-wrapper ${selectedOption && selectedOption !== 'razon-no-definida' && selectedOption !== 'no-vive-en-bogota' ? 'disabled' : ''}`}>
                         <select
                             id="ventaPerdida"
                             value={selectedOption || ''}
                             onChange={handleSelectChange}
-                            disabled={selectedOption !== null && selectedOption !== 'razon-no-definida'}
+                            disabled={selectedOption !== null && selectedOption !== 'razon-no-definida' && selectedOption !== 'no-vive-en-bogota'}
                         >
                             <option value="" disabled>
                                 Seleccione una opción
@@ -137,6 +162,25 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
                             {options.map((option) => (
                                 <option key={option.value} value={option.value}>
                                     {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {selectedOption === 'no-vive-en-bogota' && !isSubmitted && (
+                    <div className="select-wrapper city-select">
+                        <select
+                            value={selectedCity}
+                            onChange={handleCityChange}
+                            className="city-dropdown"
+                        >
+                            <option value="" disabled>
+                                Seleccione una ciudad
+                            </option>
+                            {colombianCities.map((city) => (
+                                <option key={city} value={city}>
+                                    {city}
                                 </option>
                             ))}
                         </select>
@@ -160,7 +204,13 @@ const VentaPerdidaDesplegable: React.FC<VentaPerdidaDesplegableProps> = ({ telef
 
             {shouldShowServerMessage && !error && (
                 <p className="selected-option">
-                    Se informa al server: <strong>{selectedOption === 'razon-no-definida' ? customReason : selectedOption}</strong>
+                    Se informa al server: <strong>
+                        {selectedOption === 'razon-no-definida'
+                            ? customReason
+                            : selectedOption === 'no-vive-en-bogota'
+                                ? `No vive en Bogotá - Ciudad: ${selectedCity}`
+                                : selectedOption}
+                    </strong>
                 </p>
             )}
 
