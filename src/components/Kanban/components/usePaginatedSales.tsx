@@ -82,7 +82,7 @@ export const usePaginatedSales = ({
                 `${import.meta.env.VITE_API_URL_GENERAL}/sales?${params}`
             );
 
-            console.log(`esto es lo que trae response de sales: ${JSON.stringify(response, null, 2)}`);
+            // console.log(`esto es lo que trae response de sales: ${JSON.stringify(response, null, 2)}`);
 
             if (!response.data?.success || !response.data?.data) {
                 throw new Error('Respuesta inválida del servidor');

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import '../../../css/metricas/Dashboart.css';
-import ColombiaMap from './graphics/colombiaMap';
 import { HorizontalBarChart } from './graphics/horizontalBarChart';
 import { GraphicDonut } from './graphics/donutGraphic';
 import { StackedBarChart } from './graphics/stackedBarChart';
 import { LineChat } from './graphics/lineChart';
 import { MetricsCards } from './graphics/metricsCards';
+import MapToggle from './MapToggle';
 
 const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -20,15 +20,12 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="dashboard">
-
             <MetricsCards isLoading={isLoading} />
 
             <div className="dashboard__charts-grid">
                 <div className="dashboard__chart-container">
                     {!isLoading ? (
-                        <div style={{ height: '300px', width: '100%' }}>
-                            <ColombiaMap />
-                        </div>
+                        <MapToggle />
                     ) : (
                         <div className="skeleton-box chart-skeleton" />
                     )}
