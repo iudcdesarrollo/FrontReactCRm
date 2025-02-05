@@ -337,11 +337,13 @@ export default function KanbanBoard({
 
     if (selectedLeadData) {
         return (
-            <ChatView
-                selectedLead={selectedLeadData}
-                onBack={() => setSelectedLeadData(null)}
-                socket={soket}
-            />
+            <div className="fixed inset-0 z-50 flex flex-col bg-white">
+                <ChatView
+                    selectedLead={selectedLeadData}
+                    onBack={() => setSelectedLeadData(null)}
+                    socket={soket}
+                />
+            </div>
         );
     }
 

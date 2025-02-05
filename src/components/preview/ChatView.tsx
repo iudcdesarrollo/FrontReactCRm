@@ -4,6 +4,7 @@ import ChatWindow from '../ChatWindow';
 import { Socket } from 'socket.io-client';
 import { Agente, Lead } from '../types';
 import { downloadFile } from '../../utils/MensajeList/handleFileDownload';
+import '../../css/Admins/ChatView.css'
 
 interface Download {
     chatId: number;
