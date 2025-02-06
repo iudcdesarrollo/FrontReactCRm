@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Map, Table, Search } from 'lucide-react';
+import { Map, Table } from 'lucide-react';
 import ColombiaMap from './graphics/colombiaMap';
 import LostSalesTable from './LostSalesTable';
 import 'leaflet/dist/leaflet.css';
+import { SearchBarTableMetricas } from '../searchMetricasTable';
 
 const MapToggle = () => {
     const [vista, setVista] = useState('mapa');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        // Implementa aquí la lógica de búsqueda
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
     };
 
     return (
@@ -34,20 +34,14 @@ const MapToggle = () => {
                                 <Table className="w-3 h-3" />
                             </button>
                         </div>
-                        
+
                         {vista === 'tabla' && (
                             <div className="relative flex items-center max-w-xs">
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={handleSearch}
-                                    placeholder="Buscar..."
-                                    className="pl-8 pr-4 py-1 text-xs rounded-md border border-gray-200 
-                                             focus:outline-none focus:ring-1 focus:ring-indigo-500 
-                                             focus:border-indigo-500 transition-all w-48
-                                             bg-white shadow-sm hover:shadow"
+                                <SearchBarTableMetricas
+                                    onSearch={handleSearch}
+                                    placeholder="Buscar por ciudad, cliente..."
+                                    className="w-full"
                                 />
-                                <Search className="w-3 h-3 text-gray-400 absolute left-2.5" />
                             </div>
                         )}
                     </div>
