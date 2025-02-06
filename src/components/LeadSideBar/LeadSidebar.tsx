@@ -26,8 +26,10 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
         'inscrito otra agente',
         'venta perdida',
         'Gestionado',
-        'estudiante'
+        'estudiante',
+        'matriculado'
     ];
+
 
     useEffect(() => {
         const obtenerProgramaMeta = async () => {

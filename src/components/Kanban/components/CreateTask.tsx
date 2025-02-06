@@ -83,7 +83,8 @@ const tipoGestionMap: Record<string, string> = {
     'sinGestionar': 'sin gestionar',
     'segundaLlamada': 'segunda llamada',
     'depurar': 'depuracion',
-    'ventaPerdida': 'venta perdida'
+    'ventaPerdida': 'venta perdida',
+    'matriculados': 'matriculados'
 };
 
 const CreateTask = ({ listId }: CreateTaskProps) => {

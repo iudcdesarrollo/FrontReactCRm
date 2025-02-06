@@ -198,6 +198,19 @@
     animation: gradientMove 2s ease-in-out infinite;
 }
 
+[data-list-id="matriculados"] .list-header::after,
+.gradient-border-rojo::after {
+    background: linear-gradient(to right,
+            #DC2626,
+            #7a0c0c,
+            #F87171,
+            #EF4444,
+            #DC2626);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradientMove 2s ease-in-out infinite;
+}
+
 .gradient-border {
     position: relative;
 }

@@ -43,7 +43,8 @@ const mapListIdToTipoGestion = (listId: ListId): string => {
         estudiante: 'estudiante',
         ventaPerdida: 'venta perdida',
         inscritoOtraAgente: 'inscrito otra agente',
-        gestionado: 'gestionado'
+        gestionado: 'gestionado',
+        matriculados: 'matriculados'
     };
     return mappings[listId as keyof typeof mappings] || 'sin gestionar';
 };

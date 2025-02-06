@@ -38,7 +38,10 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             ventaPerdida: 'venta perdida',
             gestionado: 'gestionado',
             inscritoOtraAgente: 'inscrito otra agente',
+            matriculados: 'matriculados'
         }[listId];
+
+        console.log(JSON.stringify(listId));
 
         const managementCount = managementCounts.find(mc => mc._id === countKey);
         return managementCount?.count || 0;
