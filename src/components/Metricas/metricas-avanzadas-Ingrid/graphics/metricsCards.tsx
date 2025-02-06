@@ -37,7 +37,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
 
                 if (response.data.success) {
                     setTotalLeads(response.data.dates.totalConversations);
-                    console.log('Total de Conversaciones:', response.data.dates.totalConversations);
+                    console.log('Total de leads:', response.data.dates.totalConversations);
                 }
             } catch (error) {
                 console.error('Error fetching total leads:', error);
@@ -61,9 +61,8 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     return (
         <div className="dashboard__metrics-grid">
             <DashboardMetricCard
-                title="Total de conversaciones"
+                title="Total de Leads"
                 value={totalLeads !== null ? totalLeads.toString() : 'N/A'}
-                subtitle={`Conversaciones desde ${format(startDate, 'dd/MM/yyyy')} hasta ${format(endDate, 'dd/MM/yyyy')}`}
                 className="dashboard__metric--revenue"
                 isLoading={isLoading || leadsLoading}
                 onStartDateSelect={handleStartDateSelect}
