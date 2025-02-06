@@ -37,7 +37,12 @@ interface ApiResponse {
     data: CityGroup[];
 }
 
-const LostSalesTable = () => {
+interface LostSalesTableProps {
+    searchQuery: string;
+}
+
+
+const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
     const [data, setData] = useState<Client[]>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [currentPage, setCurrentPage] = useState(1);
