@@ -16,22 +16,37 @@ interface LeadCountResponse {
     };
 }
 
+interface InscritoCountResponse {
+    totalConversations: number;
+    startDate: string;
+    endDate: string;
+    tipoGestion: string;
+}
+
 export const MetricsCards: React.FC<MetricsCardsProps> = ({
     isLoading
 }) => {
+    // Estados para Total Leads
     const [totalLeads, setTotalLeads] = useState<number | null>(null);
     const [leadsLoading, setLeadsLoading] = useState(true);
-    const [startDate, setStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
-    const [endDate, setEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+    const [leadsStartDate, setLeadsStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
+    const [leadsEndDate, setLeadsEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
 
+    // Estados para Inscritos
+    const [inscritoLeads, setInscritoLeads] = useState<number | null>(null);
+    const [inscritoLoading, setInscritoLoading] = useState(true);
+    const [inscritoStartDate, setInscritoStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
+    const [inscritoEndDate, setInscritoEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+
+    // Efecto para Total Leads
     useEffect(() => {
         const fetchTotalLeads = async () => {
             try {
                 setLeadsLoading(true);
                 const response = await axios.get<LeadCountResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/count`, {
                     params: {
-                        startDate: format(startDate, 'yyyy-MM-dd'),
-                        endDate: format(endDate, 'yyyy-MM-dd')
+                        startDate: format(leadsStartDate, 'yyyy-MM-dd'),
+                        endDate: format(leadsEndDate, 'yyyy-MM-dd')
                     }
                 });
 
@@ -48,14 +63,53 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         };
 
         fetchTotalLeads();
-    }, [startDate, endDate]);
+    }, [leadsStartDate, leadsEndDate]);
 
-    const handleStartDateSelect = (date: Date) => {
-        setStartDate(date);
+    // Efecto para Inscritos
+    useEffect(() => {
+        const fetchInscritoLeads = async () => {
+            try {
+                setInscritoLoading(true);
+                const response = await axios.get<InscritoCountResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/inscrito-count`, {
+                    params: {
+                        startDate: format(inscritoStartDate, 'yyyy-MM-dd'),
+                        endDate: format(inscritoEndDate, 'yyyy-MM-dd')
+                    }
+                });
+
+                if (response.data && typeof response.data.totalConversations === 'number') {
+                    setInscritoLeads(response.data.totalConversations);
+                    console.log('Total de inscritos:', response.data.totalConversations);
+                } else {
+                    setInscritoLeads(0);
+                }
+            } catch (error) {
+                console.error('Error fetching inscrito leads:', error);
+                setInscritoLeads(null);
+            } finally {
+                setInscritoLoading(false);
+            }
+        };
+
+        fetchInscritoLeads();
+    }, [inscritoStartDate, inscritoEndDate]);
+
+    // Manejadores para Total Leads
+    const handleLeadsStartDateSelect = (date: Date) => {
+        setLeadsStartDate(date);
     };
 
-    const handleEndDateSelect = (date: Date) => {
-        setEndDate(date);
+    const handleLeadsEndDateSelect = (date: Date) => {
+        setLeadsEndDate(date);
+    };
+
+    // Manejadores para Inscritos
+    const handleInscritoStartDateSelect = (date: Date) => {
+        setInscritoStartDate(date);
+    };
+
+    const handleInscritoEndDateSelect = (date: Date) => {
+        setInscritoEndDate(date);
     };
 
     return (
@@ -65,15 +119,17 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
                 value={totalLeads !== null ? totalLeads.toString() : 'N/A'}
                 className="dashboard__metric--revenue"
                 isLoading={isLoading || leadsLoading}
-                onStartDateSelect={handleStartDateSelect}
-                onEndDateSelect={handleEndDateSelect}
+                onStartDateSelect={handleLeadsStartDateSelect}
+                onEndDateSelect={handleLeadsEndDateSelect}
             />
             <DashboardMetricCard
-                title="Ingresos"
-                value="$34.0M"
-                subtitle="Ingresos totales"
+                title="Inscritos"
+                value={inscritoLeads !== null ? inscritoLeads.toString() : 'N/A'}
+                subtitle="Total de inscritos"
                 className="dashboard__metric--profit"
-                isLoading={isLoading}
+                isLoading={isLoading || inscritoLoading}
+                onStartDateSelect={handleInscritoStartDateSelect}
+                onEndDateSelect={handleInscritoEndDateSelect}
             />
             <DashboardMetricCard
                 title="Proyectos"
