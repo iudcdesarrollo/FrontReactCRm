@@ -8,7 +8,7 @@ import {
     SortingState,
     ColumnDef,
 } from '@tanstack/react-table';
-import '../../../css/metricas/table.css'
+import '../../../css/metricas/table.css';
 
 interface Agent {
     nombre: string;
@@ -41,9 +41,9 @@ interface LostSalesTableProps {
     searchQuery: string;
 }
 
-
 const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
     const [data, setData] = useState<Client[]>([]);
+    const [filteredData, setFilteredData] = useState<Client[]>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -51,26 +51,11 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
     const ITEMS_PER_PAGE = 4;
 
     const columns: ColumnDef<Client, unknown>[] = [
-        {
-            header: 'Ciudad',
-            accessorKey: 'ciudad',
-        },
-        {
-            header: 'Cliente',
-            accessorKey: 'nombreCompleto',
-        },
-        {
-            header: 'Teléfono',
-            accessorKey: 'telefono',
-        },
-        {
-            header: 'Programa',
-            accessorKey: 'programa',
-        },
-        {
-            header: 'Agente',
-            accessorKey: 'agente.nombre',
-        },
+        { header: 'Ciudad', accessorKey: 'ciudad' },
+        { header: 'Cliente', accessorKey: 'nombreCompleto' },
+        { header: 'Teléfono', accessorKey: 'telefono' },
+        { header: 'Programa', accessorKey: 'programa' },
+        { header: 'Agente', accessorKey: 'agente.nombre' },
     ];
 
     useEffect(() => {
@@ -90,7 +75,7 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                     return [...acc, ...clients];
                 }, []);
 
-                setData(flattenedData.slice(0, ITEMS_PER_PAGE));
+                setData(flattenedData);
                 setTotalPages(Math.ceil(result.total / ITEMS_PER_PAGE));
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -102,12 +87,25 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
         fetchData();
     }, [currentPage]);
 
+    useEffect(() => {
+        if (!searchQuery) {
+            setFilteredData(data.slice(0, ITEMS_PER_PAGE));
+        } else {
+            const filtered = data.filter(client =>
+                client.ciudad?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                client.nombreCompleto.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                client.telefono.includes(searchQuery) ||
+                client.programa.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                client.agente.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredData(filtered.slice(0, ITEMS_PER_PAGE));
+        }
+    }, [searchQuery, data]);
+
     const table = useReactTable({
-        data,
+        data: filteredData,
         columns,
-        state: {
-            sorting,
-        },
+        state: { sorting },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -133,10 +131,7 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                                             key={header.id}
                                             onClick={header.column.getToggleSortingHandler()}
                                         >
-                                            {flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
+                                            {flexRender(header.column.columnDef.header, header.getContext())}
                                             {header.column.getIsSorted() && (
                                                 <span className="ml-2">
                                                     {header.column.getIsSorted() === "asc" ? "↑" : "↓"}
