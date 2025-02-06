@@ -6,9 +6,12 @@ import { StackedBarChart } from './graphics/stackedBarChart';
 import { LineChat } from './graphics/lineChart';
 import { MetricsCards } from './graphics/metricsCards';
 import MapToggle from './MapToggle';
+import { startOfMonth, endOfMonth, subMonths, format, parse } from 'date-fns';
 
 const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [startDate, setStartDate] = useState<Date>(startOfMonth(subMonths(new Date(), 1)));
+    const [endDate, setEndDate] = useState<Date>(endOfMonth(new Date()));
 
     useEffect(() => {
         const loadingTimer = setTimeout(() => {
@@ -18,9 +21,50 @@ const Dashboard: React.FC = () => {
         return () => clearTimeout(loadingTimer);
     }, []);
 
+    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newStartDate = parse(e.target.value, 'yyyy-MM-dd', new Date());
+        setStartDate(newStartDate);
+    };
+
+    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newEndDate = parse(e.target.value, 'yyyy-MM-dd', new Date());
+        setEndDate(newEndDate);
+    };
+
     return (
         <div className="dashboard">
-            <MetricsCards isLoading={isLoading} />
+            <div className="date-range-selector mb-4">
+                <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                        <label htmlFor="startDate" className="text-sm font-medium">
+                            Fecha Inicial:
+                        </label>
+                        <input
+                            type="date"
+                            id="startDate"
+                            value={format(startDate, 'yyyy-MM-dd')}
+                            onChange={handleStartDateChange}
+                            className="border rounded px-2 py-1"
+                        />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <label htmlFor="endDate" className="text-sm font-medium">
+                            Fecha Final:
+                        </label>
+                        <input
+                            type="date"
+                            id="endDate"
+                            value={format(endDate, 'yyyy-MM-dd')}
+                            onChange={handleEndDateChange}
+                            className="border rounded px-2 py-1"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <MetricsCards
+                isLoading={isLoading}
+            />
 
             <div className="dashboard__charts-grid">
                 <div className="dashboard__chart-container">

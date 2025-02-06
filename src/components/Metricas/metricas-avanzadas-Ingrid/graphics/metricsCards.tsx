@@ -1,37 +1,85 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { DashboardMetricCard } from "../DashboardMetricCard"
+import { parse, format } from 'date-fns';
 
 interface MetricsCardsProps {
     isLoading: boolean;
 }
 
-export const MetricsCards: React.FC<MetricsCardsProps> = ({ isLoading }) => {
+interface LeadCountResponse {
+    success: boolean;
+    dates: {
+        totalConversations: number;
+        startDate: string;
+        endDate: string;
+    };
+}
+
+export const MetricsCards: React.FC<MetricsCardsProps> = ({
+    isLoading
+}) => {
+    const [totalLeads, setTotalLeads] = useState<number | null>(null);
+    const [leadsLoading, setLeadsLoading] = useState(true);
+    const [startDate, setStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
+    const [endDate, setEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+
+    useEffect(() => {
+        const fetchTotalLeads = async () => {
+            try {
+                setLeadsLoading(true);
+                const response = await axios.get<LeadCountResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/count`, {
+                    params: {
+                        startDate: format(startDate, 'yyyy-MM-dd'),
+                        endDate: format(endDate, 'yyyy-MM-dd')
+                    }
+                });
+
+                if (response.data.success) {
+                    setTotalLeads(response.data.dates.totalConversations);
+                    console.log('Total de Conversaciones:', response.data.dates.totalConversations);
+                }
+            } catch (error) {
+                console.error('Error fetching total leads:', error);
+                setTotalLeads(null);
+            } finally {
+                setLeadsLoading(false);
+            }
+        };
+
+        fetchTotalLeads();
+    }, [startDate, endDate]);
+
+    const handleStartDateSelect = (date: Date) => {
+        setStartDate(date);
+    };
+
+    const handleEndDateSelect = (date: Date) => {
+        setEndDate(date);
+    };
+
     return (
         <div className="dashboard__metrics-grid">
             <DashboardMetricCard
-                title="Texto"
-                value="$64.7M"
-                subtitle="Texto"
+                title="Total de conversaciones"
+                value={totalLeads !== null ? totalLeads.toString() : 'N/A'}
+                subtitle={`Conversaciones desde ${format(startDate, 'dd/MM/yyyy')} hasta ${format(endDate, 'dd/MM/yyyy')}`}
                 className="dashboard__metric--revenue"
-                isLoading={isLoading}
+                isLoading={isLoading || leadsLoading}
+                onStartDateSelect={handleStartDateSelect}
+                onEndDateSelect={handleEndDateSelect}
             />
             <DashboardMetricCard
-                title="Texto"
+                title="Ingresos"
                 value="$34.0M"
-                subtitle="Texto"
+                subtitle="Ingresos totales"
                 className="dashboard__metric--profit"
                 isLoading={isLoading}
             />
             <DashboardMetricCard
-                title="Texto"
-                value="$33.7M"
-                subtitle="Texto"
-                className="dashboard__metric--cost"
-                isLoading={isLoading}
-            />
-            <DashboardMetricCard
-                title="Texto"
+                title="Proyectos"
                 value="85%"
-                subtitle="Texto"
+                subtitle="Proyectos completados"
                 className="dashboard__metric--sales"
                 isLoading={isLoading}
             />
