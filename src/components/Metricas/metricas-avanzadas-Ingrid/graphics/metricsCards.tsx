@@ -38,6 +38,18 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     const [inscritoStartDate, setInscritoStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
     const [inscritoEndDate, setInscritoEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
 
+    // Estados para Matriculados
+    const [matriculadosCount, setMatriculadosCount] = useState<number | null>(null);
+    const [matriculadosLoading, setMatriculadosLoading] = useState(true);
+    const [matriculadosStartDate, setMatriculadosStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
+    const [matriculadosEndDate, setMatriculadosEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+
+    // Estados para Venta Perdida
+    const [ventaPerdidaCount, setVentaPerdidaCount] = useState<number | null>(null);
+    const [ventaPerdidaLoading, setVentaPerdidaLoading] = useState(true);
+    const [ventaPerdidaStartDate, setVentaPerdidaStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
+    const [ventaPerdidaEndDate, setVentaPerdidaEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+
     // Efecto para Total Leads
     useEffect(() => {
         const fetchTotalLeads = async () => {
@@ -94,6 +106,64 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         fetchInscritoLeads();
     }, [inscritoStartDate, inscritoEndDate]);
 
+    // Efecto para Matriculados
+    useEffect(() => {
+        const fetchMatriculadosCount = async () => {
+            try {
+                setMatriculadosLoading(true);
+                const response = await axios.get<InscritoCountResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/matriculados-count`, {
+                    params: {
+                        startDate: format(matriculadosStartDate, 'yyyy-MM-dd'),
+                        endDate: format(matriculadosEndDate, 'yyyy-MM-dd')
+                    }
+                });
+
+                if (response.data && typeof response.data.totalConversations === 'number') {
+                    setMatriculadosCount(response.data.totalConversations);
+                    console.log('Total de matriculados:', response.data.totalConversations);
+                } else {
+                    setMatriculadosCount(0);
+                }
+            } catch (error) {
+                console.error('Error fetching matriculados count:', error);
+                setMatriculadosCount(null);
+            } finally {
+                setMatriculadosLoading(false);
+            }
+        };
+
+        fetchMatriculadosCount();
+    }, [matriculadosStartDate, matriculadosEndDate]);
+
+    // Efecto para Venta Perdida
+    useEffect(() => {
+        const fetchVentaPerdidaCount = async () => {
+            try {
+                setVentaPerdidaLoading(true);
+                const response = await axios.get<InscritoCountResponse>(`${import.meta.env.VITE_API_URL_GENERAL}/ventaperdida-count`, {
+                    params: {
+                        startDate: format(ventaPerdidaStartDate, 'yyyy-MM-dd'),
+                        endDate: format(ventaPerdidaEndDate, 'yyyy-MM-dd')
+                    }
+                });
+
+                if (response.data && typeof response.data.totalConversations === 'number') {
+                    setVentaPerdidaCount(response.data.totalConversations);
+                    console.log('Total de ventas perdidas:', response.data.totalConversations);
+                } else {
+                    setVentaPerdidaCount(0);
+                }
+            } catch (error) {
+                console.error('Error fetching venta perdida count:', error);
+                setVentaPerdidaCount(null);
+            } finally {
+                setVentaPerdidaLoading(false);
+            }
+        };
+
+        fetchVentaPerdidaCount();
+    }, [ventaPerdidaStartDate, ventaPerdidaEndDate]);
+
     // Manejadores para Total Leads
     const handleLeadsStartDateSelect = (date: Date) => {
         setLeadsStartDate(date);
@@ -112,11 +182,30 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         setInscritoEndDate(date);
     };
 
+    // Manejadores para Matriculados
+    const handleMatriculadosStartDateSelect = (date: Date) => {
+        setMatriculadosStartDate(date);
+    };
+
+    const handleMatriculadosEndDateSelect = (date: Date) => {
+        setMatriculadosEndDate(date);
+    };
+
+    // Manejadores para Venta Perdida
+    const handleVentaPerdidaStartDateSelect = (date: Date) => {
+        setVentaPerdidaStartDate(date);
+    };
+
+    const handleVentaPerdidaEndDateSelect = (date: Date) => {
+        setVentaPerdidaEndDate(date);
+    };
+
     return (
         <div className="dashboard__metrics-grid">
             <DashboardMetricCard
-                title="Total de Leads"
+                title="Leads"
                 value={totalLeads !== null ? totalLeads.toString() : 'N/A'}
+                subtitle="Total de Leads"
                 className="dashboard__metric--revenue"
                 isLoading={isLoading || leadsLoading}
                 onStartDateSelect={handleLeadsStartDateSelect}
@@ -125,19 +214,30 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
             <DashboardMetricCard
                 title="Inscritos"
                 value={inscritoLeads !== null ? inscritoLeads.toString() : 'N/A'}
-                subtitle="Total de inscritos"
+                subtitle="Total de Inscritos"
                 className="dashboard__metric--profit"
                 isLoading={isLoading || inscritoLoading}
                 onStartDateSelect={handleInscritoStartDateSelect}
                 onEndDateSelect={handleInscritoEndDateSelect}
             />
             <DashboardMetricCard
-                title="Proyectos"
-                value="85%"
-                subtitle="Proyectos completados"
+                title="Matriculados"
+                value={matriculadosCount !== null ? matriculadosCount.toString() : 'N/A'}
+                subtitle="Total de Matriculados"
                 className="dashboard__metric--sales"
-                isLoading={isLoading}
+                isLoading={isLoading || matriculadosLoading}
+                onStartDateSelect={handleMatriculadosStartDateSelect}
+                onEndDateSelect={handleMatriculadosEndDateSelect}
+            />
+            <DashboardMetricCard
+                title="Venta Perdida"
+                value={ventaPerdidaCount !== null ? ventaPerdidaCount.toString() : 'N/A'}
+                subtitle="Total de Ventas Perdidas"
+                className="dashboard__metric--lost"
+                isLoading={isLoading || ventaPerdidaLoading}
+                onStartDateSelect={handleVentaPerdidaStartDateSelect}
+                onEndDateSelect={handleVentaPerdidaEndDateSelect}
             />
         </div>
-    )
+    );
 }

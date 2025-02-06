@@ -389,7 +389,7 @@
     display: none;
 }
 
-/* esto es el css de los calendarios. */
+/* Estilos de los calendarios */
 .dashboard__calendar {
     padding: 1rem;
     border-radius: 0.375rem;
@@ -445,4 +445,85 @@
     border-width: 1px;
     color: white;
     background: none;
+}
+
+/* Estilos base para todas las tarjetas métricas */
+.dashboard__metric {
+    transition: all 0.3s ease;
+}
+
+/* Tarjeta de Revenue (Leads) */
+.dashboard__metric--revenue {
+    background: linear-gradient(to right, #0ea5e9, #38bdf8);
+    color: white;
+    border: 1px solid #0284c7;
+    transition: all 0.3s ease;
+}
+
+.dashboard__metric--revenue:hover {
+    background: linear-gradient(to right, #38bdf8, #7dd3fc);
+    transform: translateY(-2px);
+}
+
+/* Tarjeta de Profit (Inscritos) */
+.dashboard__metric--profit {
+    background: linear-gradient(to right, #22c55e, #4ade80);
+    color: white;
+    border: 1px solid #16a34a;
+    transition: all 0.3s ease;
+}
+
+.dashboard__metric--profit:hover {
+    background: linear-gradient(to right, #4ade80, #86efac);
+    transform: translateY(-2px);
+}
+
+/* Tarjeta de Sales (Matriculados) */
+.dashboard__metric--sales {
+    background: linear-gradient(to right, #6366f1, #818cf8);
+    color: white;
+    border: 1px solid #4f46e5;
+    transition: all 0.3s ease;
+}
+
+.dashboard__metric--sales:hover {
+    background: linear-gradient(to right, #818cf8, #a5b4fc);
+    transform: translateY(-2px);
+}
+
+/* Tarjeta de Lost (Venta Perdida) */
+.dashboard__metric--lost {
+    background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+    color: white;
+    border: 1px solid #333333;
+    transition: all 0.3s ease;
+}
+
+.dashboard__metric--lost:hover {
+    background: linear-gradient(to right, #2d2d2d, #404040);
+    transform: translateY(-2px);
+}
+
+/* Estilos del texto para todas las tarjetas métricas */
+.dashboard__metric--revenue .metric-title,
+.dashboard__metric--revenue .metric-value,
+.dashboard__metric--revenue .metric-subtitle,
+.dashboard__metric--profit .metric-title,
+.dashboard__metric--profit .metric-value,
+.dashboard__metric--profit .metric-subtitle,
+.dashboard__metric--sales .metric-title,
+.dashboard__metric--sales .metric-value,
+.dashboard__metric--sales .metric-subtitle,
+.dashboard__metric--lost .metric-title,
+.dashboard__metric--lost .metric-value,
+.dashboard__metric--lost .metric-subtitle {
+    color: white;
+}
+
+/* Grid layout para las tarjetas métricas */
+.dashboard__metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 0.2rem;
 }
