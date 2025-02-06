@@ -47,31 +47,30 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const [totalItems, setTotalItems] = useState(0);
     const ITEMS_PER_PAGE = 4;
 
     const columns: ColumnDef<Client, unknown>[] = [
-        { 
+        {
             header: 'Ciudad',
             accessorKey: 'ciudad',
             cell: (info) => info.getValue() || 'N/A'
         },
-        { 
+        {
             header: 'Cliente',
             accessorKey: 'nombreCompleto',
             cell: (info) => info.getValue() || 'N/A'
         },
-        { 
+        {
             header: 'Teléfono',
             accessorKey: 'telefono',
             cell: (info) => info.getValue() || 'N/A'
         },
-        { 
+        {
             header: 'Programa',
             accessorKey: 'programa',
             cell: (info) => info.getValue() || 'N/A'
         },
-        { 
+        {
             header: 'Agente',
             accessorKey: 'agente.nombre',
             cell: (info) => info.getValue() || 'N/A'
@@ -87,7 +86,6 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                 query: query.trim()
             });
 
-            // Agregamos los parámetros de ordenamiento si existen
             if (sorting.length > 0) {
                 params.append('sortBy', sorting[0].id);
                 params.append('sortOrder', sorting[0].desc ? 'desc' : 'asc');
@@ -96,14 +94,13 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL_GENERAL}/lost-sales?${params}`
             );
-            
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
 
             const result: ApiResponse = await response.json();
 
-            // Aplanar los datos
             const flattenedData = result.data.reduce((acc: Client[], cityGroup: CityGroup) => {
                 const clients = cityGroup.clientes.map((client: Client) => ({
                     ...client,
@@ -114,31 +111,26 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
 
             setData(flattenedData);
             setTotalPages(result.totalPages || 1);
-            setTotalItems(result.total);
-            
-            // Solo actualizar la página actual si viene del servidor
+
             if (result.currentPage) {
                 setCurrentPage(result.currentPage);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            // Aquí podrías agregar un estado para manejar errores y mostrarlos en la UI
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Efecto para manejar cambios en la búsqueda
     useEffect(() => {
         const debounceTimer = setTimeout(() => {
-            setCurrentPage(1); // Reset to first page on new search
+            setCurrentPage(1);
             fetchData(1, searchQuery);
         }, 300);
 
         return () => clearTimeout(debounceTimer);
     }, [searchQuery]);
 
-    // Efecto para manejar cambios en el ordenamiento
     useEffect(() => {
         fetchData(currentPage, searchQuery);
     }, [sorting]);
@@ -146,7 +138,7 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
     const table = useReactTable({
         data,
         columns,
-        state: { 
+        state: {
             sorting,
         },
         onSortingChange: setSorting,
@@ -167,7 +159,13 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
             {isLoading ? (
                 <div className="loading">Cargando...</div>
             ) : (
-                <>  
+                <>
+                    {/* <div className="table-info mb-4">
+                        <span className="text-sm text-gray-600">
+                            Total de registros: {totalItems}
+                        </span>
+                    </div> */}
+
                     <table className="lost-sales-table">
                         <thead>
                             {table.getHeaderGroups().map(headerGroup => (
@@ -176,15 +174,14 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                                         <th
                                             key={header.id}
                                             onClick={header.column.getToggleSortingHandler()}
-                                            className={`cursor-pointer hover:bg-gray-50 ${
-                                                header.column.getIsSorted() ? 'bg-gray-100' : ''
-                                            }`}
+                                            className={`cursor-pointer hover:bg-gray-50 ${header.column.getIsSorted() ? 'bg-gray-100' : ''
+                                                }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 <span className="ml-2">
-                                                    {header.column.getIsSorted() === "asc" ? "↑" : 
-                                                     header.column.getIsSorted() === "desc" ? "↓" : "↕"}
+                                                    {header.column.getIsSorted() === "asc" ? "↑" :
+                                                        header.column.getIsSorted() === "desc" ? "↓" : "↕"}
                                                 </span>
                                             </div>
                                         </th>
@@ -211,7 +208,7 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                             )}
                         </tbody>
                     </table>
-                    
+
                     <div className="pagination mt-4">
                         <button
                             onClick={() => handlePageChange(1)}
@@ -227,7 +224,7 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                         >
                             Anterior
                         </button>
-                        
+
                         <div className="pagination-pages">
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                 let pageNum;
@@ -240,21 +237,20 @@ const LostSalesTable: React.FC<LostSalesTableProps> = ({ searchQuery }) => {
                                 } else {
                                     pageNum = currentPage - 2 + i;
                                 }
-                                
+
                                 return (
                                     <button
                                         key={pageNum}
                                         onClick={() => handlePageChange(pageNum)}
-                                        className={`pagination-number ${
-                                            currentPage === pageNum ? 'active' : ''
-                                        }`}
+                                        className={`pagination-number ${currentPage === pageNum ? 'active' : ''
+                                            }`}
                                     >
                                         {pageNum}
                                     </button>
                                 );
                             })}
                         </div>
-                        
+
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
