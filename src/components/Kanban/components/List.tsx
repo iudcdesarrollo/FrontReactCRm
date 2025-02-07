@@ -29,13 +29,13 @@ const List = memo(({ listId, managementCounts, role }: ListProps) => {
 
     const handleTaskMove = useCallback((task: TaskWithPhone) => {
         if (task.phoneNumber) {
-            // Lógica de manejo de movimiento de tarea
+            // Lógica de movimiento de tarea
         }
     }, [listId]);
 
-    const restrictedLists = role === 'agent' ? ['matriculados', 'inscritoOtraAgente', 'gestionado', 'ventaPerdida'] : [];
+    const isRestricted = role === 'agent' && ['estudiante', 'inscritoOtraAgente', 'gestionado', 'ventaPerdida'].includes(listId);
 
-    if (restrictedLists.includes(listId)) {
+    if (isRestricted || !list?.tasks) {
         return null;
     }
 
@@ -58,9 +58,7 @@ const List = memo(({ listId, managementCounts, role }: ListProps) => {
         return managementCount?.count || 0;
     })() : null;
 
-    if (!list) return null;
-
-    const canEditList = role === 'admin' || !restrictedLists.includes(listId);
+    const canEditList = role === 'admin' || !isRestricted;
 
     return (
         <div
@@ -76,7 +74,7 @@ const List = memo(({ listId, managementCounts, role }: ListProps) => {
                             handleTaskMove(parsedTask);
                         }
                     } catch (error) {
-                        console.error('Error parsing task data:', error);
+                        console.error('Error al analizar datos de la tarea:', error);
                     }
                 }
             }}
@@ -89,7 +87,8 @@ const List = memo(({ listId, managementCounts, role }: ListProps) => {
                                 listId === 'inscrito' ? 'gradient-border-morado' :
                                     listId === 'estudiante' ? 'gradient-border-verde' :
                                         listId === 'ventaPerdida' ? 'gradient-border-negro' :
-                                            listId === 'inscritoOtraAgente' ? 'gradient-border-naranja' : ''
+                                            listId === 'inscritoOtraAgente' ? 'gradient-border-naranja' :
+                                                listId === 'matriculados' ? 'gradient-border-azul' : ''
                 }`}>
                 <div className="list-title-container">
                     <h3 className="list-title">

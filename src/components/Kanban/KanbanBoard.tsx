@@ -352,6 +352,14 @@ export default function KanbanBoard({
         return <div>Cargando tablero...</div>;
     }
 
+    const restrictedLists = role === 'agent' ?
+        ['estudiante', 'inscritoOtraAgente', 'gestionado', 'ventaPerdida'] : [];
+
+    const renderableListIds = INITIAL_LISTS.filter(listId => {
+        const list = lists[listId];
+        return !restrictedLists.includes(listId) || (list && list.tasks.length > 0);
+    });
+
     return (
         <DndContext
             sensors={sensors}
@@ -382,7 +390,7 @@ export default function KanbanBoard({
                         onMouseLeave={handleMouseUp}
                     >
                         <div className="kanban-lists">
-                            {INITIAL_LISTS.map((listId: ListId) => {
+                            {renderableListIds.map((listId: ListId) => {
                                 const taskIds = lists[listId]?.tasks.map((t: TaskType) => t.id) || [];
                                 return (
                                     <div key={listId} className="kanban-list">
