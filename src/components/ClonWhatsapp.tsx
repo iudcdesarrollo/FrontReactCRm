@@ -145,7 +145,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         }
 
         if (showMetrics) {
-            return <Dashboard/>
+            return <Dashboard />
             // <Metrics socket={this.props.socket} />;
         }
 
@@ -184,17 +184,16 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
 
         return (
             <div className="whatsapp-clone-container">
-                {role !== 'agent' && (
-                    <div className="w-1/5">
-                        <LeftSidebar
-                            handleLogout={this.handleLogout}
-                            toggleSettings={this.toggleSettings}
-                            onSelectHome={this.onSelectHome}
-                            onSelectMetrics={this.onSelectMetrics}
-                            onSelectKanban={this.onSelectKanban}
-                        />
-                    </div>
-                )}
+                <div className="w-1/5">
+                    <LeftSidebar
+                        handleLogout={this.handleLogout}
+                        toggleSettings={this.toggleSettings}
+                        onSelectHome={this.onSelectHome}
+                        onSelectMetrics={this.onSelectMetrics}
+                        onSelectKanban={this.onSelectKanban}
+                        role={role}
+                    />
+                </div>
                 <div className={`flex-grow ${role === 'agent' ? 'w-full' : ''}`}>
                     {this.renderMainContent()}
                 </div>
