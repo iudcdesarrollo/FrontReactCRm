@@ -5,7 +5,6 @@ import LeadList from './LeadList';
 import SearchBar from './SearchBar';
 import ChatCategories from './ChatCategories';
 import ChatWindow from './ChatWindow';
-import '../css/Agentes/ChatInterface.css';
 
 interface ExtendedChatInterfaceProps extends ChatInterfaceProps {
     role: 'agent' | 'admin';
@@ -19,7 +18,6 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
     setSelectedCategory,
     selectedChat,
     setSelectedChat,
-    setEmail,
     role,
     downloadFile,
     enpointAwsBucked,
@@ -105,12 +103,6 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('filteredLeads');
-        localStorage.removeItem('currentCategory');
-        setEmail('');
-    };
-
     return (
         <Split
             className="flex h-screen bg-gray-100"
@@ -127,11 +119,6 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
             <div className="bg-white border-r overflow-hidden">
                 <div className="p-4 bg-gray-200 flex justify-between items-center">
                     <h1 className="text-xl font-semibold">CRM Innovacion.</h1>
-                    {role === 'agent' && (
-                        <button className="Btn_Cerrar_Sesion" onClick={handleLogout}>
-                            Cerrar sesión
-                        </button>
-                    )}
                 </div>
                 <SearchBar searchTerm={searchTerm} setSearchTerm={handleSearch} />
                 <ChatCategories
