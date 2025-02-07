@@ -141,6 +141,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
                 soket={this.props.socket}
                 managementCounts={this.props.initialData?.[0]?.managementCounts}
                 totalCount={this.props.initialData?.[0]?.totalCount}
+                role={role}
             />;
         }
 

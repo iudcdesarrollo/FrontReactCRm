@@ -85,4 +85,5 @@ export interface KanbanBoardProps {
     soket: Socket | null;
     managementCounts?: ManagementCount[];
     totalCount?: number;
+    role?: string;
 }

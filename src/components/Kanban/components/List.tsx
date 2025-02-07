@@ -10,13 +10,14 @@ import Pagination from "./PaginationKanban";
 interface ListProps {
     listId: ListId;
     managementCounts?: { _id: string; count: number }[];
+    role: string;
 }
 
 interface TaskWithPhone extends TaskType {
     phoneNumber?: string;
 }
 
-const List = memo(({ listId, managementCounts }: ListProps) => {
+const List = memo(({ listId, managementCounts, role }: ListProps) => {
     const list = useKanbanStore((state) => state.lists[listId]);
     const { setNodeRef, isOver } = useDroppable({
         id: listId,
@@ -25,6 +26,18 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             listId
         }
     });
+
+    const handleTaskMove = useCallback((task: TaskWithPhone) => {
+        if (task.phoneNumber) {
+            // Lógica de manejo de movimiento de tarea
+        }
+    }, [listId]);
+
+    const restrictedLists = role === 'agent' ? ['matriculados', 'inscritoOtraAgente', 'gestionado', 'ventaPerdida'] : [];
+
+    if (restrictedLists.includes(listId)) {
+        return null;
+    }
 
     const count = managementCounts ? (() => {
         const countKey = {
@@ -41,27 +54,21 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
             matriculados: 'matriculados'
         }[listId];
 
-        console.log(JSON.stringify(listId));
-
         const managementCount = managementCounts.find(mc => mc._id === countKey);
         return managementCount?.count || 0;
     })() : null;
 
-    const handleTaskMove = useCallback((task: TaskWithPhone) => {
-        if (task.phoneNumber) {
-            // Lógica de manejo de movimiento de tarea
-        }
-    }, [listId]);
-
     if (!list) return null;
+
+    const canEditList = role === 'admin' || !restrictedLists.includes(listId);
 
     return (
         <div
             ref={setNodeRef}
             data-list-id={listId}
-            className={`list-container ${isOver ? "list-container-over" : ""}`}
+            className={`list-container ${isOver && canEditList ? "list-container-over" : ""}`}
             onDragOver={(e) => {
-                if (isOver) {
+                if (isOver && canEditList) {
                     try {
                         const taskData = e.dataTransfer?.getData('task');
                         if (taskData) {
@@ -96,13 +103,18 @@ const List = memo(({ listId, managementCounts }: ListProps) => {
 
             <Pagination listId={listId} />
 
-            <div className="list-add-task">
-                <CreateTask listId={listId} />
-            </div>
+            {canEditList && (
+                <div className="list-add-task">
+                    <CreateTask listId={listId} />
+                </div>
+            )}
 
             <div className="list-content">
                 {list.tasks.map((task) => (
-                    <Task key={task.id} task={task} />
+                    <Task
+                        key={task.id}
+                        task={task}
+                    />
                 ))}
             </div>
         </div>
