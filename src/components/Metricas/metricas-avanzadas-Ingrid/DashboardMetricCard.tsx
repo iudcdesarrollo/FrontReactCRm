@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface DashboardMetricCardProps {
     title: string;
@@ -8,6 +8,7 @@ interface DashboardMetricCardProps {
     isLoading?: boolean;
     onStartDateSelect?: (date: Date) => void;
     onEndDateSelect?: (date: Date) => void;
+    customHeaderContent?: React.ReactNode;
 }
 
 export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
@@ -17,11 +18,33 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
     className = '',
     isLoading = false,
     onStartDateSelect,
-    onEndDateSelect
+    onEndDateSelect,
+    customHeaderContent
 }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+
+    // Close calendar when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                calendarRef.current && 
+                !calendarRef.current.contains(event.target as Node) &&
+                buttonRef.current && 
+                !buttonRef.current.contains(event.target as Node)
+            ) {
+                setShowCalendar(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const toggleCalendar = () => {
         setShowCalendar(!showCalendar);
@@ -61,15 +84,20 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
                         </p>
                     )}
                 </div>
-                <div className="relative">
+                <div className="flex items-center relative">
+                    {customHeaderContent}
                     <button
+                        ref={buttonRef}
                         onClick={toggleCalendar}
-                        className="dashboard__calendar-button p-2 border rounded hover:bg-gray-100"
+                        className="dashboard__calendar-button"
                     >
                         📅
                     </button>
                     {showCalendar && (
-                        <div className="dashboard__calendar absolute right-0 mt-2 p-4 border rounded shadow-lg z-10">
+                        <div 
+                            ref={calendarRef}
+                            className="dashboard__calendar absolute -right-4 top-full mt-2 p-4 border rounded shadow-lg z-50 w-[calc(100%+8rem)]"
+                        >
                             <div className="mb-2">
                                 <label className="block text-sm mb-1">Dia inicio:</label>
                                 <input
@@ -79,7 +107,7 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm mb-1"> Dia Final:</label>
+                                <label className="block text-sm mb-1">Dia Final:</label>
                                 <input
                                     type="date"
                                     onChange={handleEndDateSelect}
