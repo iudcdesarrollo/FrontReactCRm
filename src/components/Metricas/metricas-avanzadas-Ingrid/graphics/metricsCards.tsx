@@ -6,6 +6,7 @@ import { Book } from 'lucide-react';
 
 interface MetricsCardsProps {
     isLoading: boolean;
+    onMatriculadosClick: () => void;
 }
 
 type TipoMatriculado = 'todos' | 'profesional' | 'tecnico' | 'especializacion';
@@ -14,8 +15,6 @@ interface TipoOption {
     value: TipoMatriculado;
     label: string;
 }
-
-
 
 const tipoOptions: TipoOption[] = [
     { value: 'todos', label: 'Todos' },
@@ -63,7 +62,8 @@ interface MatriculadosCountResponse {
 }
 
 export const MetricsCards: React.FC<MetricsCardsProps> = ({
-    isLoading
+    isLoading,
+    onMatriculadosClick
 }) => {
     // Estados para Total Leads
     const [totalLeads, setTotalLeads] = useState<number | null>(null);
@@ -116,7 +116,6 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         fetchTotalLeads();
     }, [leadsStartDate, leadsEndDate]);
 
-    // Efecto para Inscritos
     useEffect(() => {
         const fetchInscritoLeads = async () => {
             try {
@@ -205,7 +204,6 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         fetchVentaPerdidaCount();
     }, [ventaPerdidaStartDate, ventaPerdidaEndDate]);
 
-    // Manejadores de eventos
     const handleLeadsStartDateSelect = (date: Date) => setLeadsStartDate(date);
     const handleLeadsEndDateSelect = (date: Date) => setLeadsEndDate(date);
     const handleInscritoStartDateSelect = (date: Date) => setInscritoStartDate(date);
@@ -215,6 +213,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     const handleVentaPerdidaStartDateSelect = (date: Date) => setVentaPerdidaStartDate(date);
     const handleVentaPerdidaEndDateSelect = (date: Date) => setVentaPerdidaEndDate(date);
     const handleTipoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        event.stopPropagation();
         setTipoMatriculado(event.target.value as TipoMatriculado);
     };
 
@@ -238,7 +237,8 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
                 onStartDateSelect={handleInscritoStartDateSelect}
                 onEndDateSelect={handleInscritoEndDateSelect}
             />
-            <div className="flex flex-col relative">
+            <div className="flex flex-col relative cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={onMatriculadosClick}>
                 <DashboardMetricCard
                     title="Matriculados"
                     value={matriculadosCount !== null ? matriculadosCount.toString() : 'N/A'}
@@ -255,6 +255,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
                                     value={tipoMatriculado}
                                     onChange={handleTipoChange}
                                     className="book-select"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     {tipoOptions.map((option) => (
                                         <option key={option.value} value={option.value}>

@@ -1,0 +1,245 @@
+.table-container {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin: 1rem;
+}
+
+.table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+}
+
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    width: 0.75rem;
+    height: 0.75rem;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition: all 0.2s ease;
+    background-color: white;
+    -webkit-appearance: none;
+    -webkit-search-decoration: none;
+    -webkit-search-cancel-button: none;
+    -webkit-search-results-button: none;
+    -webkit-search-results-decoration: none;
+}
+
+.search-input::placeholder {
+    color: #9CA3AF;
+    opacity: 0.7;
+    font-size: 0.875rem;
+}
+
+.search-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.search-input:focus::placeholder {
+    opacity: 0.5;
+}
+
+.search-input:focus + .search-icon {
+    color: #3B82F6;
+    opacity: 0.8;
+}
+
+.search-input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.filter-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 1px solid #E5E7EB;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    min-width: 120px;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.custom-table th {
+    background: #F9FAFB;
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #E5E7EB;
+    white-space: nowrap;
+}
+
+.custom-table td {
+    padding: 0.625rem 0.75rem;
+    color: #4B5563;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.table-row:hover {
+    background-color: #F9FAFB;
+}
+
+.status-badges {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 500;
+}
+
+.badge.professional {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+}
+
+.badge.technical {
+    background-color: #ECFDF5;
+    color: #047857;
+}
+
+.badge.specialization {
+    background-color: #F5F3FF;
+    color: #6D28D9;
+}
+
+.document-icons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.icon-check {
+    color: #10B981;
+    width: 1rem;
+    height: 1rem;
+}
+
+.icon-x {
+    color: #EF4444;
+    width: 1rem;
+    height: 1rem;
+}
+
+.dropdown-button {
+    padding: 0.25rem 0.5rem;
+    color: #6B7280;
+}
+
+.dropdown-content {
+    right: 0;
+    min-width: 150px;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-content button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.pagination {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-button {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    border: 1px solid #E5E7EB;
+    background: white;
+    color: #374151;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background-color: #F3F4F6;
+    border-color: #D1D5DB;
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button.active {
+    background-color: #2563EB;
+    color: white;
+    border-color: #2563EB;
+}
+
+.pagination-ellipsis {
+    color: #6B7280;
+    padding: 0 0.25rem;
+    user-select: none;
+}
+
+@media (max-width: 768px) {
+    .table-container {
+        padding: 0.75rem;
+        margin: 0.5rem;
+    }
+    
+    .custom-table th,
+    .custom-table td {
+        padding: 0.5rem;
+    }
+    
+    .search-input,
+    .filter-select {
+        font-size: 0.813rem;
+    }
+}
