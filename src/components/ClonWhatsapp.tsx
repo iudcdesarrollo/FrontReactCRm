@@ -9,7 +9,6 @@ import {
     getDownloadsFromMessages
 } from './types';
 // import Metrics from './Metricas/Metrics';
-// import KanbanBoard from './Kanban/KanbanBoard';
 import { KanbanPage } from './Kanban/KanbanPage';
 import Dashboard from './Metricas/metricas-avanzadas-Ingrid/Dashboard';
 
@@ -132,16 +131,13 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
         if (showKanban) {
-            // return <KanbanBoard
-            //     leads={agente?.leads}
-            //     soket={this.props.socket}
-            // />;
             return <KanbanPage
                 leads={agente?.leads}
                 soket={this.props.socket}
                 managementCounts={this.props.initialData?.[0]?.managementCounts}
                 totalCount={this.props.initialData?.[0]?.totalCount}
                 role={role}
+                email={this.props.email}
             />;
         }
 

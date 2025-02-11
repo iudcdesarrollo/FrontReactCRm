@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import axios from 'axios';
 import '../css/SearchBarKanBan.css';
 import { Lists } from '../@types/kanban';
@@ -144,7 +144,6 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
     return (
         <div className="search-overlay-container" ref={overlayRef}>
             <div className="search-input-wrapper">
-                <Search size={20} className="search-icon" />
                 <input
                     ref={inputRef}
                     type="text"

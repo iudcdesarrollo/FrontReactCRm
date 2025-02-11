@@ -11,6 +11,7 @@ interface KanbanPageProps {
     managementCounts?: ManagementCount[];
     totalCount?: number;
     role: string;
+    email: string;
 }
 
 export const KanbanPage: React.FC<KanbanPageProps> = ({
@@ -18,7 +19,8 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
     soket,
     managementCounts,
     totalCount,
-    role
+    role,
+    email
 }) => {
     const [currentLeads, setCurrentLeads] = useState<Lead[]>([]);
     const { clearStore, updateTaskListByTipoGestion } = useKanbanStore();
@@ -47,6 +49,7 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
                 managementCounts={managementCounts}
                 totalCount={totalCount}
                 role={role}
+                email={email}
             />
         </div>
     );

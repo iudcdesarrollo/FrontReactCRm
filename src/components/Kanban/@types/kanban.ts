@@ -86,4 +86,5 @@ export interface KanbanBoardProps {
     managementCounts?: ManagementCount[];
     totalCount?: number;
     role?: string;
+    email: string;
 }

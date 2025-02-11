@@ -11,13 +11,14 @@ interface ListProps {
     listId: ListId;
     managementCounts?: { _id: string; count: number }[];
     role: string;
+    email: string;
 }
 
 interface TaskWithPhone extends TaskType {
     phoneNumber?: string;
 }
 
-const List = memo(({ listId, managementCounts, role }: ListProps) => {
+const List = memo(({ listId, managementCounts, role, email }: ListProps) => {
     const list = useKanbanStore((state) => state.lists[listId]);
     const { setNodeRef, isOver } = useDroppable({
         id: listId,
@@ -100,7 +101,7 @@ const List = memo(({ listId, managementCounts, role }: ListProps) => {
                 </div>
             </div>
 
-            <Pagination listId={listId} />
+            <Pagination listId={listId} email={email} />
 
             {canEditList && (
                 <div className="list-add-task">

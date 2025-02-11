@@ -18,7 +18,8 @@ export default function KanbanBoard({
     leads,
     soket,
     managementCounts,
-    role = 'agent'
+    role = 'agent',
+    email
 }: KanbanBoardProps) {
     // console.log(`esto es lo que trae el conteso: ${JSON.stringify(managementCounts, null, 2)}, ${JSON.stringify(totalCount, null, 2)}`);
     // console.log(`informacion de leads: ${JSON.stringify(leads, null, 2)}`);
@@ -402,6 +403,7 @@ export default function KanbanBoard({
                                                 listId={listId}
                                                 managementCounts={managementCounts}
                                                 role={role}
+                                                email={email}
                                             />
                                         </SortableContext>
                                     </div>

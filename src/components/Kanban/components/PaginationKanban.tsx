@@ -8,9 +8,10 @@ import { usePaginatedSales } from './usePaginatedSales';
 
 interface PaginationProps {
     listId: ListId;
+    email: string;
 }
 
-const Pagination = ({ listId }: PaginationProps) => {
+const Pagination = ({ listId, email }: PaginationProps) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     const {
@@ -23,7 +24,8 @@ const Pagination = ({ listId }: PaginationProps) => {
     } = usePaginatedSales({
         listId,
         initialPage: 1,
-        itemsPerPage: 5
+        itemsPerPage: 5,
+        email: email
     });
 
     const getPageNumbers = () => {

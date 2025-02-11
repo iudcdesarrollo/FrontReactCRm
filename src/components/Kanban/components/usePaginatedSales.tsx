@@ -7,6 +7,7 @@ interface UsePaginatedSalesProps {
     listId: ListId;
     initialPage?: number;
     itemsPerPage?: number;
+    email: string;
 }
 
 interface ServerResponse {
@@ -52,7 +53,8 @@ const mapListIdToTipoGestion = (listId: ListId): string => {
 export const usePaginatedSales = ({
     listId,
     initialPage = 1,
-    itemsPerPage = 5
+    itemsPerPage = 5,
+    email
 }: UsePaginatedSalesProps) => {
     const [currentPage, setCurrentPage] = useState(initialPage);
     const [totalPages, setTotalPages] = useState(1);
@@ -72,7 +74,8 @@ export const usePaginatedSales = ({
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: itemsPerPage.toString(),
-                tipoGestion
+                tipoGestion,
+                correoAgente: email
             });
 
             if (date) {
@@ -82,8 +85,6 @@ export const usePaginatedSales = ({
             const response = await axios.get<ServerResponse>(
                 `${import.meta.env.VITE_API_URL_GENERAL}/sales?${params}`
             );
-
-            // console.log(`esto es lo que trae response de sales: ${JSON.stringify(response, null, 2)}`);
 
             if (!response.data?.success || !response.data?.data) {
                 throw new Error('Respuesta inválida del servidor');
