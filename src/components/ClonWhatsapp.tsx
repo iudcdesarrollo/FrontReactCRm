@@ -132,7 +132,6 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
 
         if (showKanban) {
             return <KanbanPage
-                leads={agente?.leads}
                 soket={this.props.socket}
                 managementCounts={this.props.initialData?.[0]?.managementCounts}
                 totalCount={this.props.initialData?.[0]?.totalCount}
