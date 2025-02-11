@@ -9,6 +9,7 @@ interface DashboardMetricCardProps {
     onStartDateSelect?: (date: Date) => void;
     onEndDateSelect?: (date: Date) => void;
     customHeaderContent?: React.ReactNode;
+    onClick?: () => void;
 }
 
 export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
@@ -19,7 +20,8 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
     isLoading = false,
     onStartDateSelect,
     onEndDateSelect,
-    customHeaderContent
+    customHeaderContent,
+    onClick
 }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
@@ -27,13 +29,12 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
     const calendarRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    // Close calendar when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
-                calendarRef.current && 
+                calendarRef.current &&
                 !calendarRef.current.contains(event.target as Node) &&
-                buttonRef.current && 
+                buttonRef.current &&
                 !buttonRef.current.contains(event.target as Node)
             ) {
                 setShowCalendar(false);
@@ -68,8 +69,17 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
         }
     };
 
+    const handleCardClick = () => {
+        if (onClick && !showCalendar) {
+            onClick();
+        }
+    };
+
     return (
-        <div className={`dashboard__metric relative ${className}`}>
+        <div
+            className={`dashboard__metric relative ${className}`}
+            onClick={handleCardClick}
+        >
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className={`dashboard__metric-title ${isLoading ? 'skeleton-text' : ''}`}>
@@ -84,34 +94,35 @@ export const DashboardMetricCard: React.FC<DashboardMetricCardProps> = ({
                         </p>
                     )}
                 </div>
-                <div className="flex items-center relative">
+                <div className="flex items-center relative" onClick={(e) => e.stopPropagation()}>
                     {customHeaderContent}
                     <button
                         ref={buttonRef}
                         onClick={toggleCalendar}
                         className="dashboard__calendar-button"
+                        type="button"
                     >
                         📅
                     </button>
                     {showCalendar && (
-                        <div 
+                        <div
                             ref={calendarRef}
                             className="dashboard__calendar absolute -right-4 top-full mt-2 p-4 border rounded shadow-lg z-50 w-[calc(100%+8rem)]"
                         >
                             <div className="mb-2">
-                                <label className="block text-sm mb-1">Dia inicio:</label>
+                                <label className="block text-sm text-gray-700 mb-1">Dia inicio:</label>
                                 <input
                                     type="date"
                                     onChange={handleStartDateSelect}
-                                    className="dashboard__calendar-input border p-1 rounded w-full"
+                                    className="border p-1 rounded w-full text-gray-700"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm mb-1">Dia Final:</label>
+                                <label className="block text-sm text-gray-700 mb-1">Dia Final:</label>
                                 <input
                                     type="date"
                                     onChange={handleEndDateSelect}
-                                    className="dashboard__calendar-input border p-1 rounded w-full"
+                                    className="border p-1 rounded w-full text-gray-700"
                                 />
                             </div>
                         </div>

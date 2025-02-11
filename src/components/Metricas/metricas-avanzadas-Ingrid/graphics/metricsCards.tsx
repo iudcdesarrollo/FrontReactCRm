@@ -90,7 +90,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     const [ventaPerdidaStartDate, setVentaPerdidaStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
     const [ventaPerdidaEndDate, setVentaPerdidaEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
 
-    // Efecto para Total Leads
+    // Efectos y llamadas a la API
     useEffect(() => {
         const fetchTotalLeads = async () => {
             try {
@@ -204,6 +204,7 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         fetchVentaPerdidaCount();
     }, [ventaPerdidaStartDate, ventaPerdidaEndDate]);
 
+    // Manejadores de eventos
     const handleLeadsStartDateSelect = (date: Date) => setLeadsStartDate(date);
     const handleLeadsEndDateSelect = (date: Date) => setLeadsEndDate(date);
     const handleInscritoStartDateSelect = (date: Date) => setInscritoStartDate(date);
@@ -212,9 +213,18 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     const handleMatriculadosEndDateSelect = (date: Date) => setMatriculadosEndDate(date);
     const handleVentaPerdidaStartDateSelect = (date: Date) => setVentaPerdidaStartDate(date);
     const handleVentaPerdidaEndDateSelect = (date: Date) => setVentaPerdidaEndDate(date);
+
     const handleTipoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         event.stopPropagation();
         setTipoMatriculado(event.target.value as TipoMatriculado);
+    };
+
+    const handleMatriculadosCardClick = (e: React.MouseEvent) => {
+        // Solo activar el click si no se está interactuando con el calendario
+        const target = e.target as HTMLElement;
+        if (!target.closest('.react-datepicker') && !target.closest('.book-control')) {
+            onMatriculadosClick();
+        }
     };
 
     return (
@@ -237,8 +247,10 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
                 onStartDateSelect={handleInscritoStartDateSelect}
                 onEndDateSelect={handleInscritoEndDateSelect}
             />
-            <div className="flex flex-col relative cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={onMatriculadosClick}>
+            <div
+                className="flex flex-col relative cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={handleMatriculadosCardClick}
+            >
                 <DashboardMetricCard
                     title="Matriculados"
                     value={matriculadosCount !== null ? matriculadosCount.toString() : 'N/A'}
@@ -248,8 +260,11 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
                     onStartDateSelect={handleMatriculadosStartDateSelect}
                     onEndDateSelect={handleMatriculadosEndDateSelect}
                     customHeaderContent={
-                        <div className="flex items-center absolute right-12 top-3 z-10">
-                            <div className="book-control">
+                        <div className="flex items-center absolute right-12 top-3 z-20">
+                            <div
+                                className="book-control"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <Book size={20} className="text-white" />
                                 <select
                                     value={tipoMatriculado}
