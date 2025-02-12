@@ -36,6 +36,12 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   const handleLogout = () => {
+    const kanbanStore = useKanbanStore.getState();
+
+    localStorage.removeItem('kanban-store');
+
+    kanbanStore.resetStoreOnNewSession();
+
     authService.clearSession();
     setEmail('');
     setAgente(null);
@@ -53,6 +59,13 @@ function App() {
         setError('El correo electrónico es requerido');
         return;
       }
+
+      const kanbanStore = useKanbanStore.getState();
+
+      localStorage.removeItem('kanban-store');
+
+      kanbanStore.resetStoreOnNewSession();
+
       setEmail(newEmail);
       authService.refreshSession(newEmail);
       await fetchData(0, newEmail);
@@ -73,7 +86,7 @@ function App() {
 
       setLoading(true);
       setError(null);
-      
+
       const cachedTimestamp = localStorage.getItem('dataTimestamp');
       const cachedData = localStorage.getItem('agenteData');
       const isValidCache = cachedTimestamp && cachedData &&

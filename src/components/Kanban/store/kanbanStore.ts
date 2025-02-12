@@ -44,6 +44,7 @@ interface KanbanState extends PersistedState {
     reorderTask: (listId: ListId, oldIndex: number, newIndex: number) => void;
     updateTaskListByTipoGestion: (numeroWhatsapp: string, newTipoGestion: string, nameLead: string, payload?: TaskPayload) => void;
     clearStore: () => void;
+    resetStoreOnNewSession: () => void;
     updateTaskCounts: () => void;
     syncWithRemote?: () => Promise<void>;
 }
@@ -132,6 +133,30 @@ export const useKanbanStore = create<KanbanState>()(
                     };
                 });
                 get().updateTaskCounts();
+            },
+
+            resetStoreOnNewSession: () => {
+                // Remove the stored data from localStorage
+                localStorage.removeItem(STORE_NAME);
+
+                // Reset the store to its initial state
+                set(() => {
+                    const initialLists: Lists = {};
+                    INITIAL_LISTS.forEach((listId) => {
+                        initialLists[listId] = {
+                            id: listId,
+                            title: LIST_TITLES[listId],
+                            tasks: [],
+                        };
+                    });
+
+                    return {
+                        version: STORE_VERSION,
+                        lastSynced: null,
+                        lists: initialLists,
+                        taskCounts: initialTaskCounts,
+                    };
+                });
             },
 
             addTask: (listId, content) => {
