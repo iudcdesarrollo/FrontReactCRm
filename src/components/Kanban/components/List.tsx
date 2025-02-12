@@ -7,9 +7,31 @@ import Task from "./Task";
 import '../css/List.css';
 import Pagination from "./PaginationKanban";
 
+// Definir un tipo más específico para los datos
+interface SalesData {
+    numeroCliente: string;
+    nombreCliente: string;
+    nombreAgente: string;
+    ultimaNota?: string | null;
+    razonVentaPerdida?: string | null;
+    tipoGestion: string;
+    agente?: {
+        nombre: string;
+        correo: string;
+        rol: string;
+    } | null;
+}
+
 interface ListProps {
     listId: ListId;
-    managementCounts?: { _id: string; count: number }[];
+    managementCounts?: { 
+        success: boolean;
+        data: SalesData[];
+        pagination: {
+            totalPorTipoGestion: Record<string, number>;
+            totalPages: number;
+        };
+    }[];
     role: string;
     email: string;
 }
@@ -17,6 +39,20 @@ interface ListProps {
 interface TaskWithPhone extends TaskType {
     phoneNumber?: string;
 }
+
+const localToServerMapping: Record<ListId, string> = {
+    sinGestionar: 'sin gestionar',
+    conversacion: 'conversacion', 
+    depurar: 'depuracion',
+    llamada: 'llamada',
+    segundaLlamada: 'segunda llamada',
+    inscrito: 'inscrito',
+    estudiante: 'estudiante',
+    ventaPerdida: 'venta perdida',
+    inscritoOtraAgente: 'inscrito otra agente',
+    gestionado: 'gestionado',
+    matriculados: 'matriculado'
+};
 
 const List = memo(({ listId, managementCounts, role, email }: ListProps) => {
     const list = useKanbanStore((state) => state.lists[listId]);
@@ -40,24 +76,17 @@ const List = memo(({ listId, managementCounts, role, email }: ListProps) => {
         return null;
     }
 
-    const count = managementCounts ? (() => {
-        const countKey = {
-            sinGestionar: 'sin gestionar',
-            conversacion: 'conversacion',
-            depurar: 'depuracion',
-            llamada: 'llamada',
-            segundaLlamada: 'segunda llamada',
-            inscrito: 'inscrito',
-            estudiante: 'estudiante',
-            ventaPerdida: 'venta perdida',
-            gestionado: 'gestionado',
-            inscritoOtraAgente: 'inscrito otra agente',
-            matriculados: 'matriculados'
-        }[listId];
-
-        const managementCount = managementCounts.find(mc => mc._id === countKey);
-        return managementCount?.count || 0;
-    })() : null;
+    const count = managementCounts && managementCounts[0]?.pagination?.totalPorTipoGestion 
+        ? (() => {
+            // Find the server-side key that corresponds to this list ID
+            const serverKey = localToServerMapping[listId];
+            
+            // Return the count for this key, or 0 if not found
+            return serverKey 
+                ? managementCounts[0].pagination.totalPorTipoGestion[serverKey] || 0 
+                : 0;
+        })() 
+        : null;
 
     const canEditList = role === 'admin' || !isRestricted;
 
@@ -101,7 +130,10 @@ const List = memo(({ listId, managementCounts, role, email }: ListProps) => {
                 </div>
             </div>
 
-            <Pagination listId={listId} email={email} />
+            <Pagination 
+                listId={listId} 
+                email={email} 
+            />
 
             {canEditList && (
                 <div className="list-add-task">

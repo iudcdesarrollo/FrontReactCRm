@@ -11,13 +11,13 @@ import { mapListIdToTipoGestion } from "./utils/mapListIdToTipoGestion";
 import { updateTipoGestion } from "./utils/updateTipoGestion";
 import { Agente, Lead } from "../types";
 import { BackendResponse } from "./typesKanbanPrincipal";
+import axios from "axios";
 
 const enpoinyBasic = import.meta.env.VITE_API_URL_GENERAL;
 
 export default function KanbanBoard({
     leads,
     soket,
-    managementCounts,
     role = 'agent',
     email
 }: KanbanBoardProps) {
@@ -36,6 +36,26 @@ export default function KanbanBoard({
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
+
+    const [salesCounts, setSalesCounts] = useState(null);
+
+    useEffect(() => {
+        const fetchSalesCounts = async () => {
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL_GENERAL}/sales`, {
+                    params: {
+                        correoAgente: email,
+                    }
+                });
+
+                setSalesCounts(response.data);
+            } catch (error) {
+                console.error('Error fetching sales counts:', error);
+            }
+        };
+
+        fetchSalesCounts();
+    }, [email]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -401,7 +421,7 @@ export default function KanbanBoard({
                                         >
                                             <List
                                                 listId={listId}
-                                                managementCounts={managementCounts}
+                                                managementCounts={salesCounts ? [salesCounts] : []}
                                                 role={role}
                                                 email={email}
                                             />

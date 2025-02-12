@@ -25,23 +25,20 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
     const [currentLeads, setCurrentLeads] = useState<Lead[]>([]);
     const { clearStore, updateTaskListByTipoGestion } = useKanbanStore();
 
-    // Memoizar la función de actualización de leads
     const updateLeads = useCallback((leadsToUpdate: Lead[]) => {
         leadsToUpdate.forEach(lead => {
             updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion, lead.nombre);
         });
     }, [updateTaskListByTipoGestion]);
 
-    // Efecto para la inicialización inicial
     useEffect(() => {
         if (leads.length > 0) {
             setCurrentLeads(leads);
             clearStore();
             updateLeads(leads);
         }
-    }, [leads]); // Solo depende de leads
+    }, [leads]);
 
-    // Manejar el filtrado de leads
     const handleLeadsFiltered = useCallback((newFilteredLeads: Lead[]) => {
         clearStore();
         setCurrentLeads(newFilteredLeads);
