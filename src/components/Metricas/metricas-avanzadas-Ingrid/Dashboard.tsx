@@ -8,6 +8,7 @@ import MapToggle from './MapToggle';
 import ProfesionalesTable from './graphics/MatriculadosTable';
 import { Profesional } from './graphics/types';
 import MetricsChart from './graphics/stackedBarChart';
+import ExcelUploader from './actualizarMetricasMatriculados/suburExcel';
 
 const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,7 +34,7 @@ const Dashboard: React.FC = () => {
         return (
             <div className="dashboard">
                 <div className="p-4">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-start mb-6">
                         <button
                             onClick={() => setCurrentView('dashboard')}
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center gap-2"
@@ -53,6 +54,8 @@ const Dashboard: React.FC = () => {
                             </svg>
                             Volver
                         </button>
+
+                        <ExcelUploader />
                     </div>
 
                     <div className="bg-white rounded-lg shadow">
