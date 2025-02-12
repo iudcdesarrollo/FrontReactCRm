@@ -8,7 +8,22 @@ interface UsePaginatedSalesProps {
     initialPage?: number;
     itemsPerPage?: number;
     email: string;
+    paginationKey?: string;
 }
+
+const mappings: Record<ListId, string> = {
+    sinGestionar: 'sin gestionar',
+    conversacion: 'conversacion',
+    depurar: 'depuracion',
+    llamada: 'llamada',
+    segundaLlamada: 'segunda llamada',
+    inscrito: 'inscrito',
+    estudiante: 'estudiante',
+    ventaPerdida: 'venta perdida',
+    inscritoOtraAgente: 'inscrito otra agente',
+    gestionado: 'gestionado',
+    matriculados: 'matriculados'
+};
 
 interface ServerResponse {
     success: boolean;
@@ -33,6 +48,11 @@ interface ServerResponse {
     };
 }
 
+const paginationStates = new Map<string, {
+    currentPage: number;
+    selectedDate: Date | null;
+}>();
+
 const mapListIdToTipoGestion = (listId: ListId): string => {
     const mappings = {
         sinGestionar: 'sin gestionar',
@@ -54,18 +74,23 @@ export const usePaginatedSales = ({
     listId,
     initialPage = 1,
     itemsPerPage = 5,
-    email
+    email,
+    paginationKey = listId
 }: UsePaginatedSalesProps) => {
-    const [currentPage, setCurrentPage] = useState(initialPage);
+    const initialState = paginationStates.get(paginationKey) || {
+        currentPage: initialPage,
+        selectedDate: null as Date | null
+    };
+
+    const [currentPage, setCurrentPage] = useState(initialState.currentPage);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(initialState.selectedDate);
 
     const updateTaskListByTipoGestion = useKanbanStore(state => state.updateTaskListByTipoGestion);
-    const clearStore = useKanbanStore(state => state.clearStore);
 
-    const fetchSales = async (page: number, date?: Date | null) => {
+    const fetchSales = async (page: number, date: Date | null) => {
         setIsLoading(true);
         setError(null);
 
@@ -85,30 +110,53 @@ export const usePaginatedSales = ({
             const response = await axios.get<ServerResponse>(
                 `${import.meta.env.VITE_API_URL_GENERAL}/sales?${params}`
             );
-
+            console.log(`esto es lo que llega en la response: ${JSON.stringify(response)}`);
             if (!response.data?.success || !response.data?.data) {
                 throw new Error('Respuesta inválida del servidor');
             }
 
-            clearStore();
+            const currentState = useKanbanStore.getState();
+            
+            const updatedLists = { ...currentState.lists };
+            
+            if (updatedLists[listId]) {
+                updatedLists[listId] = {
+                    ...updatedLists[listId],
+                    tasks: []
+                };
+            }
+
+            useKanbanStore.setState({
+                lists: updatedLists
+            });
 
             response.data.data.forEach(item => {
-                updateTaskListByTipoGestion(
-                    item.numeroCliente,
-                    item.tipoGestion,
-                    item.nombreCliente,
-                    {
-                        notas: item.ultimaNota ? [{
-                            content: item.ultimaNota,
-                            timestamp: new Date()
-                        }] : [],
-                        ventaPerdidaRazon: item.razonVentaPerdida
-                    }
-                );
+                const targetListId = Object.keys(mappings).find(
+                    (key) => mappings[key as ListId] === item.tipoGestion
+                ) as ListId | undefined;
+            
+                if (targetListId) {
+                    updateTaskListByTipoGestion(
+                        item.numeroCliente,
+                        item.tipoGestion,
+                        item.nombreCliente,
+                        {
+                            notas: item.ultimaNota ? [{
+                                content: item.ultimaNota,
+                                timestamp: new Date()
+                            }] : [],
+                            ventaPerdidaRazon: item.razonVentaPerdida
+                        }
+                    );
+                }
             });
 
             setTotalPages(response.data.pagination.totalPages);
-            return response.data.pagination;
+
+            paginationStates.set(paginationKey, {
+                currentPage: page,
+                selectedDate: date
+            });
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al cargar los datos');
@@ -132,7 +180,7 @@ export const usePaginatedSales = ({
 
     useEffect(() => {
         fetchSales(currentPage, selectedDate);
-    }, [listId, currentPage, selectedDate]);
+    }, [listId]);
 
     return {
         currentPage,

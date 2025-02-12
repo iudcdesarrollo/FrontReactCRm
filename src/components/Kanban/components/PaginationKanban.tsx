@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import DatePicker from 'react-datepicker';
@@ -12,7 +13,11 @@ interface PaginationProps {
 }
 
 const Pagination = ({ listId, email }: PaginationProps) => {
+    // Estado local para el datepicker
     const [showDatePicker, setShowDatePicker] = useState(false);
+
+    // Usar un identificador único para cada lista
+    const paginationKey = `${listId}-pagination`;
 
     const {
         currentPage,
@@ -25,7 +30,8 @@ const Pagination = ({ listId, email }: PaginationProps) => {
         listId,
         initialPage: 1,
         itemsPerPage: 5,
-        email: email
+        email,
+        paginationKey
     });
 
     const getPageNumbers = () => {
@@ -62,15 +68,17 @@ const Pagination = ({ listId, email }: PaginationProps) => {
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className="paginate-nav-btn"
+                    data-list-id={listId} // Añadir identificador de lista
                 >
                     <ChevronLeft size={16} />
                 </button>
 
                 {getPageNumbers().map((pageNum) => (
                     <button
-                        key={pageNum}
+                        key={`${listId}-${pageNum}`} // Añadir identificador único
                         onClick={() => handlePageChange(pageNum)}
                         className={`paginate-number ${pageNum === currentPage ? 'active' : ''}`}
+                        data-list-id={listId}
                     >
                         {pageNum}
                     </button>
@@ -80,6 +88,7 @@ const Pagination = ({ listId, email }: PaginationProps) => {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className="paginate-nav-btn"
+                    data-list-id={listId}
                 >
                     <ChevronRight size={16} />
                 </button>
@@ -88,6 +97,7 @@ const Pagination = ({ listId, email }: PaginationProps) => {
                     <button
                         className="paginate-calendar-btn"
                         onClick={() => setShowDatePicker(!showDatePicker)}
+                        data-list-id={listId}
                     >
                         <Calendar size={16} />
                     </button>
