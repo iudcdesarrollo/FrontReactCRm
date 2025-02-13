@@ -1,72 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
-import './subirArchivo.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './subirArchivo.css';
+import * as XLSX from 'xlsx';
 
-interface XLSXWorkSheet {
-    [cell: string]: unknown;
-}
-
-interface XLSXWorkBook {
-    SheetNames: string[];
-    Sheets: {
-        [sheet: string]: XLSXWorkSheet;
-    };
-}
-
-interface XLSX {
-    read(data: ArrayBuffer, options: {
-        type: string;
-        cellDates: boolean;
-        cellStyles: boolean;
-    }): XLSXWorkBook;
-    utils: {
-        sheet_to_json<T>(worksheet: XLSXWorkSheet): T[];
-    };
-}
-
-declare global {
-    interface Window {
-        XLSX: XLSX;
-    }
-}
-
-type TipoNombre = 'PROFESIONAL' | 'TECNICO' | 'ESPECIALIZACION';
+type TipoNombre = 'profesional' | 'tecnico laboral' | 'especializacion';
 
 interface ExcelData {
     [key: string]: string | number | Date;
 }
 
-const ExcelUploader = () => {
+const ExcelUploader: React.FC = () => {
     const [selectedType, setSelectedType] = useState<TipoNombre | ''>('');
     const [fileName, setFileName] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            toast.error('Por favor seleccione un archivo');
+            return;
+        }
+
+        if (!file.name.match(/\.(xlsx|xls)$/)) {
+            toast.error('Solo se permiten archivos Excel (.xlsx, .xls)');
+            return;
+        }
 
         setFileName(file.name);
 
         try {
             const data = await file.arrayBuffer();
-            const workbook = window.XLSX.read(data, {
+            const workbook = XLSX.read(data, {
                 type: 'array',
                 cellDates: true,
                 cellStyles: true
             });
 
             const firstSheetName = workbook.SheetNames[0];
+            if (!firstSheetName) {
+                throw new Error('El archivo Excel está vacío');
+            }
+
             const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = window.XLSX.utils.sheet_to_json<ExcelData>(worksheet);
-            console.log('Datos cargados:', jsonData);
+            const jsonData = XLSX.utils.sheet_to_json<ExcelData>(worksheet);
+            
+            if (jsonData.length === 0) {
+                throw new Error('No se encontraron datos en el archivo');
+            }
+
+            console.log('Datos preliminares:', jsonData[0]);
+            await handleSubmit(file);
         } catch (error) {
-            console.error('Error al procesar el archivo:', error instanceof Error ? error.message : 'Error desconocido');
+            console.error('Error al procesar archivo:', error);
+            toast.error(`Error al procesar el archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+            setFileName('');
+            event.target.value = '';
         }
     };
 
-    const handleSubmit = async () => {
-        if (!selectedType || !fileName) {
-            alert('Por favor, selecciona un tipo y carga un archivo');
+    const handleSubmit = async (file: File) => {
+        if (!selectedType || !file) {
+            toast.warn('Por favor, selecciona un tipo y carga un archivo');
             return;
         }
 
@@ -74,72 +70,87 @@ const ExcelUploader = () => {
 
         try {
             const formData = new FormData();
-            const fileInput = document.getElementById('excel-upload') as HTMLInputElement;
-            if (fileInput.files?.[0]) {
-                formData.append('file', fileInput.files[0]);
-                formData.append('sheetName', selectedType);
+            formData.append('file', file);
+            formData.append('sheetName', selectedType);
 
-                const response = await fetch(`${import.meta.env.VITE_API_URL_GENERAL}/UpdateDatabasewithExcel`, {
-                    method: 'POST',
-                    body: formData
-                });
+            console.log('Enviando formData:', {
+                file: file.name,
+                sheetName: selectedType
+            });
 
-                const result = await response.json();
+            const response = await fetch(`${import.meta.env.VITE_API_URL_GENERAL}/UpdateDatabasewithExcel`, {
+                method: 'POST',
+                body: formData
+            });
 
-                if (result.success) {
-                    alert(`Archivo ${fileName} subido exitosamente. Total registros: ${result.totalRegistros}`);
-                    // Reset form after successful upload
-                    setFileName('');
-                    setSelectedType('');
-                    if (fileInput) fileInput.value = '';
-                } else {
-                    alert(`Error: ${result.message}`);
-                }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error en la respuesta del servidor');
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                toast.success(`Archivo ${fileName} subido exitosamente ✅`);
+                toast.info(`Total registros: ${result.totalRegistros} 📊`);
+                
+                setFileName('');
+                setSelectedType('');
+                const fileInput = document.getElementById('excel-upload') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } else {
+                throw new Error(result.message || 'Error al procesar el archivo');
             }
         } catch (error) {
-            console.error('Error al subir el archivo:', error);
-            alert('Ocurrió un error al subir el archivo');
+            console.error('Error en la subida:', error);
+            toast.error(`Error: ${error instanceof Error ? error.message : 'Error desconocido'} ❌`);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    useEffect(() => {
-        if (selectedType && fileName) {
-            handleSubmit();
-        }
-    }, [selectedType, fileName]);
-
     return (
         <div className="uploader-container">
+            <ToastContainer position="top-right" autoClose={3000} />
+            
             <div className="uploader-content">
                 <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value as TipoNombre)}
                     className="type-select"
+                    disabled={isSubmitting}
                 >
                     <option value="">Selecciona un tipo</option>
-                    <option value="PROFESIONAL 2025-1">PROFESIONAL</option>
-                    <option value="TECNICO">TÉCNICO</option>
-                    <option value="ESPECIALIZACION">ESPECIALIZACIÓN</option>
+                    <option value="profesional">PROFESIONAL</option>
+                    <option value="tecnico laboral">TÉCNICO</option>
+                    <option value="especializacion">ESPECIALIZACIÓN</option>
                 </select>
                 
                 <div className="file-upload">
                     <label htmlFor="excel-upload" className="upload-label">
                         <Upload className="upload-icon" />
-                        <span>Subir archivo</span>
+                        <span>Subir archivo Excel</span>
                         <input
                             type="file"
                             id="excel-upload"
                             className="file-input"
                             accept=".xlsx,.xls"
                             onChange={handleFileUpload}
+                            disabled={isSubmitting}
                         />
                     </label>
-                    {fileName && <p className="file-name">Archivo: {fileName}</p>}
+                    {fileName && (
+                        <p className="file-name">
+                            Archivo seleccionado: {fileName}
+                        </p>
+                    )}
                 </div>
 
-                {isSubmitting && <p>Enviando archivo...</p>}
+                {isSubmitting && (
+                    <div className="loading-message">
+                        Procesando archivo...
+                    </div>
+                )}
             </div>
         </div>
     );
