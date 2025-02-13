@@ -9,7 +9,7 @@ interface MetricsCardsProps {
     onMatriculadosClick: () => void;
 }
 
-type TipoMatriculado = 'todos' | 'profesional' | 'tecnico' | 'especializacion';
+type TipoMatriculado = 'todos' | 'profesional' | 'tecnico' | 'especializacion' | 'homologacion';
 
 interface TipoOption {
     value: TipoMatriculado;
@@ -20,7 +20,8 @@ const tipoOptions: TipoOption[] = [
     { value: 'todos', label: 'Todos' },
     { value: 'profesional', label: 'Profesional' },
     { value: 'tecnico', label: 'Técnico' },
-    { value: 'especializacion', label: 'Especialización' }
+    { value: 'especializacion', label: 'Especialización' },
+    { value: 'homologacion', label: 'Homologación' }
 ];
 
 interface MatriculadosParams {
