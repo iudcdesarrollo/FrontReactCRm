@@ -45,14 +45,29 @@ const MetricsChart = () => {
     const [data, setData] = useState<ChartDataPoint[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const fetchData = async (date: Date) => {
+    const fetchData = async () => {
         try {
             setLoading(true);
-            const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-            const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+            let startDate: Date;
+            let endDate: Date;
+            let periodName: string;
+
+            if (selectedDate) {
+                // Si hay una fecha seleccionada, usar ese mes específico
+                startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+                endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+                const monthName = startDate.toLocaleDateString('es-ES', { month: 'long' });
+                periodName = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${startDate.getFullYear()}`;
+            } else {
+                // Si no hay fecha seleccionada, usar desde enero 2024 hasta la fecha actual
+                startDate = new Date(2024, 0, 1); // 1 de enero de 2024
+                endDate = new Date(); // fecha actual
+                periodName = 'Enero 2024 - Presente';
+            }
+
             const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 
             const [leadsRes, inscritosRes, matriculadosRes, ventaPerdidaRes] = await Promise.all([
@@ -67,10 +82,8 @@ const MetricsChart = () => {
             const matriculados: MetricsResponse = await matriculadosRes.json();
             const ventaPerdida: MetricsResponse = await ventaPerdidaRes.json();
 
-            const monthName = startDate.toLocaleDateString('es-ES', { month: 'long' });
-
             const transformedData: ChartDataPoint[] = [{
-                name: `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${startDate.getFullYear()}`,
+                name: periodName,
                 Leads: leads.dates.totalConversations,
                 Inscritos: inscritos.totalConversations,
                 Matriculados: matriculados.totalConversations,
@@ -87,7 +100,7 @@ const MetricsChart = () => {
     };
 
     useEffect(() => {
-        fetchData(selectedDate);
+        fetchData();
     }, [selectedDate]);
 
     const handleMonthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +137,7 @@ const MetricsChart = () => {
                     <input
                         ref={inputRef}
                         type="month"
-                        value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`}
+                        value={selectedDate ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}` : ''}
                         onChange={handleMonthChange}
                         className="absolute opacity-0 w-0 h-0 overflow-hidden"
                         style={{ 
@@ -148,7 +161,7 @@ const MetricsChart = () => {
                         <YAxis />
                         <Tooltip
                             formatter={(value: number) => [value.toLocaleString(), '']}
-                            labelFormatter={(label) => `Mes: ${label}`}
+                            labelFormatter={(label) => `Período: ${label}`}
                             contentStyle={{
                                 backgroundColor: '#ffffff',
                                 border: 'none',
