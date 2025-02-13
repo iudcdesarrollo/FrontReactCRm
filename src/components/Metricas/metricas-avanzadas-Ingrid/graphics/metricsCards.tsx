@@ -66,36 +66,30 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     isLoading,
     onMatriculadosClick
 }) => {
-    // Inicialización de fechas desde enero 2024 hasta hoy
-    const startOfPeriod = new Date(2024, 0, 1); // 1 de enero de 2024
-    const endOfPeriod = new Date(); // fecha actual
+    const startOfPeriod = new Date(2024, 0, 1);
+    const endOfPeriod = new Date();
 
-    // Estados para Total Leads
     const [totalLeads, setTotalLeads] = useState<number | null>(null);
     const [leadsLoading, setLeadsLoading] = useState(true);
     const [leadsStartDate, setLeadsStartDate] = useState<Date>(startOfPeriod);
     const [leadsEndDate, setLeadsEndDate] = useState<Date>(endOfPeriod);
 
-    // Estados para Inscritos
     const [inscritoLeads, setInscritoLeads] = useState<number | null>(null);
     const [inscritoLoading, setInscritoLoading] = useState(true);
     const [inscritoStartDate, setInscritoStartDate] = useState<Date>(startOfPeriod);
     const [inscritoEndDate, setInscritoEndDate] = useState<Date>(endOfPeriod);
 
-    // Estados para Matriculados
     const [matriculadosCount, setMatriculadosCount] = useState<number | null>(null);
     const [matriculadosLoading, setMatriculadosLoading] = useState(true);
     const [matriculadosStartDate, setMatriculadosStartDate] = useState<Date>(startOfPeriod);
     const [matriculadosEndDate, setMatriculadosEndDate] = useState<Date>(endOfPeriod);
     const [tipoMatriculado, setTipoMatriculado] = useState<TipoMatriculado>('todos');
 
-    // Estados para Venta Perdida
     const [ventaPerdidaCount, setVentaPerdidaCount] = useState<number | null>(null);
     const [ventaPerdidaLoading, setVentaPerdidaLoading] = useState(true);
     const [ventaPerdidaStartDate, setVentaPerdidaStartDate] = useState<Date>(startOfPeriod);
     const [ventaPerdidaEndDate, setVentaPerdidaEndDate] = useState<Date>(endOfPeriod);
 
-    // Manejadores de eventos
     const handleLeadsStartDateSelect = (date: Date) => setLeadsStartDate(date);
     const handleLeadsEndDateSelect = (date: Date) => setLeadsEndDate(date);
     const handleInscritoStartDateSelect = (date: Date) => setInscritoStartDate(date);
@@ -105,7 +99,6 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     const handleVentaPerdidaStartDateSelect = (date: Date) => setVentaPerdidaStartDate(date);
     const handleVentaPerdidaEndDateSelect = (date: Date) => setVentaPerdidaEndDate(date);
 
-    // Efectos y llamadas a la API
     useEffect(() => {
         const fetchTotalLeads = async () => {
             try {

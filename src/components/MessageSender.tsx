@@ -21,6 +21,7 @@ const MessageSender: React.FC<ExtendedMessageSenderProps> = ({
     agentRole,
     managementType
 }) => {
+    console.log('MessageSenderProps:', selectedChat, numberWhatsApp, nombreAgente, socket, agentEmail, agentRole, managementType);
     const [messageText, setMessageText] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isRecording, setIsRecording] = useState(false);
@@ -196,7 +197,7 @@ const MessageSender: React.FC<ExtendedMessageSenderProps> = ({
         <div className='message-sender-wrapper'>
             {showTemplateForm && (
                 <div className="template-form-container">
-                    <TemplateForm socket={socket} to={numberWhatsApp} />
+                    <TemplateForm socket={socket} to={numberWhatsApp} NameAgent={nombreAgente} />
                 </div>
             )}
             <div className="message-sender-container">
