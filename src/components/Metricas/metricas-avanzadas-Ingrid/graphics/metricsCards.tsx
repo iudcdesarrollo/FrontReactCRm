@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { DashboardMetricCard } from "../DashboardMetricCard"
-import { parse, format } from 'date-fns';
+import { format } from 'date-fns';
 import { Book } from 'lucide-react';
 
 interface MetricsCardsProps {
@@ -65,30 +65,45 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
     isLoading,
     onMatriculadosClick
 }) => {
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1); // 1 de enero
+    const endOfYear = new Date(currentYear, 11, 31); // 31 de diciembre
+
     // Estados para Total Leads
     const [totalLeads, setTotalLeads] = useState<number | null>(null);
     const [leadsLoading, setLeadsLoading] = useState(true);
-    const [leadsStartDate, setLeadsStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
-    const [leadsEndDate, setLeadsEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+    const [leadsStartDate, setLeadsStartDate] = useState<Date>(startOfYear);
+    const [leadsEndDate, setLeadsEndDate] = useState<Date>(endOfYear);
 
     // Estados para Inscritos
     const [inscritoLeads, setInscritoLeads] = useState<number | null>(null);
     const [inscritoLoading, setInscritoLoading] = useState(true);
-    const [inscritoStartDate, setInscritoStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
-    const [inscritoEndDate, setInscritoEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+    const [inscritoStartDate, setInscritoStartDate] = useState<Date>(startOfYear);
+    const [inscritoEndDate, setInscritoEndDate] = useState<Date>(endOfYear);
 
     // Estados para Matriculados
     const [matriculadosCount, setMatriculadosCount] = useState<number | null>(null);
     const [matriculadosLoading, setMatriculadosLoading] = useState(true);
-    const [matriculadosStartDate, setMatriculadosStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
-    const [matriculadosEndDate, setMatriculadosEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+    const [matriculadosStartDate, setMatriculadosStartDate] = useState<Date>(startOfYear);
+    const [matriculadosEndDate, setMatriculadosEndDate] = useState<Date>(endOfYear);
     const [tipoMatriculado, setTipoMatriculado] = useState<TipoMatriculado>('todos');
 
     // Estados para Venta Perdida
     const [ventaPerdidaCount, setVentaPerdidaCount] = useState<number | null>(null);
     const [ventaPerdidaLoading, setVentaPerdidaLoading] = useState(true);
-    const [ventaPerdidaStartDate, setVentaPerdidaStartDate] = useState<Date>(parse('04/02/2025', 'dd/MM/yyyy', new Date()));
-    const [ventaPerdidaEndDate, setVentaPerdidaEndDate] = useState<Date>(parse('05/02/2025', 'dd/MM/yyyy', new Date()));
+    const [ventaPerdidaStartDate, setVentaPerdidaStartDate] = useState<Date>(startOfYear);
+    const [ventaPerdidaEndDate, setVentaPerdidaEndDate] = useState<Date>(endOfYear);
+
+    // Manejadores de eventos
+    const handleLeadsStartDateSelect = (date: Date) => setLeadsStartDate(date);
+    const handleLeadsEndDateSelect = (date: Date) => setLeadsEndDate(date);
+    const handleInscritoStartDateSelect = (date: Date) => setInscritoStartDate(date);
+    const handleInscritoEndDateSelect = (date: Date) => setInscritoEndDate(date);
+    const handleMatriculadosStartDateSelect = (date: Date) => setMatriculadosStartDate(date);
+    const handleMatriculadosEndDateSelect = (date: Date) => setMatriculadosEndDate(date);
+    const handleVentaPerdidaStartDateSelect = (date: Date) => setVentaPerdidaStartDate(date);
+    const handleVentaPerdidaEndDateSelect = (date: Date) => setVentaPerdidaEndDate(date);
+
 
     // Efectos y llamadas a la API
     useEffect(() => {
@@ -204,15 +219,6 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
         fetchVentaPerdidaCount();
     }, [ventaPerdidaStartDate, ventaPerdidaEndDate]);
 
-    // Manejadores de eventos
-    const handleLeadsStartDateSelect = (date: Date) => setLeadsStartDate(date);
-    const handleLeadsEndDateSelect = (date: Date) => setLeadsEndDate(date);
-    const handleInscritoStartDateSelect = (date: Date) => setInscritoStartDate(date);
-    const handleInscritoEndDateSelect = (date: Date) => setInscritoEndDate(date);
-    const handleMatriculadosStartDateSelect = (date: Date) => setMatriculadosStartDate(date);
-    const handleMatriculadosEndDateSelect = (date: Date) => setMatriculadosEndDate(date);
-    const handleVentaPerdidaStartDateSelect = (date: Date) => setVentaPerdidaStartDate(date);
-    const handleVentaPerdidaEndDateSelect = (date: Date) => setVentaPerdidaEndDate(date);
 
     const handleTipoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         event.stopPropagation();
