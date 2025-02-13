@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import '../../../css/metricas/Dashboart.css';
 import { HorizontalBarChart } from './graphics/horizontalBarChart';
 import { GraphicDonut } from './graphics/donutGraphic';
-import { StackedBarChart } from './graphics/stackedBarChart';
 import { LineChat } from './graphics/lineChart';
 import { MetricsCards } from './graphics/metricsCards';
 import MapToggle from './MapToggle';
 import ProfesionalesTable from './graphics/MatriculadosTable';
 import { Profesional } from './graphics/types';
+import MetricsChart from './graphics/stackedBarChart';
 
 const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
                         VENTAS POR GESTOR DE CUENTA
                     </h3>
                     {!isLoading ? (
-                        <StackedBarChart />
+                        <MetricsChart />
                     ) : (
                         <div className="skeleton-box chart-skeleton" />
                     )}
