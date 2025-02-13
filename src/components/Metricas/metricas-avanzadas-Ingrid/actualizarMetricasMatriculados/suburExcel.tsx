@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './subirArchivo.css';
 import * as XLSX from 'xlsx';
 
-type TipoNombre = 'profesional' | 'tecnico laboral' | 'especializacion';
+type TipoNombre = 'profesional' | 'tecnico laboral' | 'especializacion' | 'homologacion';
 
 interface ExcelData {
     [key: string]: string | number | Date;
@@ -37,6 +37,18 @@ const ExcelUploader: React.FC = () => {
                 cellDates: true,
                 cellStyles: true
             });
+
+            // Verificar si es una hoja de homologación
+            if (selectedType === 'homologacion') {
+                // Buscar una hoja que contenga 'HOMOLOGACIONES' en su nombre
+                const homologacionSheet = workbook.SheetNames.find(name => 
+                    name.toUpperCase().includes('HOMOLOGACIONES')
+                );
+                
+                if (!homologacionSheet) {
+                    throw new Error('No se encontró una hoja de homologaciones en el archivo');
+                }
+            }
 
             const firstSheetName = workbook.SheetNames[0];
             if (!firstSheetName) {
@@ -94,6 +106,10 @@ const ExcelUploader: React.FC = () => {
                 toast.success(`Archivo ${fileName} subido exitosamente ✅`);
                 toast.info(`Total registros: ${result.totalRegistros} 📊`);
                 
+                if (result.tipo.homologacion) {
+                    toast.info('Procesado como archivo de homologación');
+                }
+                
                 setFileName('');
                 setSelectedType('');
                 const fileInput = document.getElementById('excel-upload') as HTMLInputElement;
@@ -124,6 +140,7 @@ const ExcelUploader: React.FC = () => {
                     <option value="profesional">PROFESIONAL</option>
                     <option value="tecnico laboral">TÉCNICO</option>
                     <option value="especializacion">ESPECIALIZACIÓN</option>
+                    <option value="homologacion">HOMOLOGACIÓN</option>
                 </select>
                 
                 <div className="file-upload">

@@ -174,6 +174,7 @@ const ProfesionalesTable: React.FC<ProfesionalesTableProps> = ({ onRowClick }) =
                     <option value="profesional">Profesional</option>
                     <option value="tecnico">Técnico</option>
                     <option value="especializacion">Especialización</option>
+                    <option value="homologacion">Homologación</option>
                 </select>
             </div>
 
