@@ -91,6 +91,10 @@ const VIRTUAL_PROGRAMS = [
     'Esp. Derecho Administrativo y Contractual'
 ];
 
+const formatNumber = (number: number): string => {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
 const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) => {
     const [templateName, setTemplateName] = useState<string>('');
     const [language] = useState<string>('es');
@@ -127,19 +131,30 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
     };
 
     const getProgramValues = (templateType: string, schedule: string, program: string) => {
+        let values;
         switch (templateType) {
             case 'programas_tecnicos_laborales':
-                return { full: 1800000, installment: 600000 };
+                values = { full: 1800000, installment: 600000 };
+                break;
             case 'programas_profesionales':
                 if (VIRTUAL_PROGRAMS.includes(program) && schedule === 'Virtual') {
-                    return { full: 2700000, installment: 900000 };
+                    values = { full: 2700000, installment: 900000 };
+                } else {
+                    values = { full: 3600000, installment: 1200000 };
                 }
-                return { full: 3600000, installment: 1200000 };
+                break;
             case 'especializaciones':
-                return { full: 4650000, installment: 1550000 };
+                values = { full: 4650000, installment: 1550000 };
+                break;
             default:
-                return { full: 0, installment: 0 };
+                values = { full: 0, installment: 0 };
         }
+        return {
+            full: values.full,
+            installment: values.installment,
+            formattedFull: formatNumber(values.full),
+            formattedInstallment: formatNumber(values.installment)
+        };
     };
 
     const updateComponents = (program: string, schedule: string) => {
@@ -149,8 +164,8 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         const updatedComponents = [
             { text: NameAgent },
             { text: program },
-            { text: values.full.toString() },
-            { text: values.installment.toString() },
+            { text: values.formattedFull },
+            { text: values.formattedInstallment },
             { text: schedule }
         ];
         setComponents(updatedComponents);
@@ -185,16 +200,14 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         }
 
         if (socket) {
-            // Get the current values based on selected program and schedule
             const currentValues = getProgramValues(templateName, selectedSchedule, selectedProgram);
 
             const sanitizedComponents = components.map((comp, index) => {
                 let text = comp.text;
-                // Format monetary values
-                if (index === 2) { // Full price
-                    text = currentValues.full.toString();
-                } else if (index === 3) { // Installment price
-                    text = currentValues.installment.toString();
+                if (index === 2) {
+                    text = currentValues.formattedFull;
+                } else if (index === 3) {
+                    text = currentValues.formattedInstallment;
                 }
                 return {
                     text: sanitizeForWhatsApp(text)
@@ -337,7 +350,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                                         templateName,
                                         selectedSchedule,
                                         selectedProgram
-                                    ).full.toLocaleString()}`}
+                                    ).formattedFull}`}
                                     disabled
                                     className="disabled-input"
                                     placeholder="Variable 3 (Valor Total)"
@@ -345,7 +358,6 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                             </div>
                         )}
 
-                        {/* Variable 4: Valor Cuota */}
                         {selectedProgram && selectedSchedule && (
                             <div className="component-input">
                                 <input
@@ -354,14 +366,14 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                                         templateName,
                                         selectedSchedule,
                                         selectedProgram
-                                    ).installment.toLocaleString()}`}
+                                    ).formattedInstallment}`}
                                     disabled
                                     className="disabled-input"
                                     placeholder="Variable 4 (Valor Cuota)"
                                 />
                             </div>
                         )}
-                        {/* Variable 5: Horario (primero como select, luego como input disabled) */}
+
                         <div className="component-input">
                             {selectedProgram && !selectedSchedule ? (
                                 <select
