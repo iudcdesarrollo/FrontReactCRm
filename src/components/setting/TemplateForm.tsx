@@ -200,19 +200,29 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         }
 
         if (socket) {
-            const currentValues = getProgramValues(templateName, selectedSchedule, selectedProgram);
-
-            const sanitizedComponents = components.map((comp, index) => {
-                let text = comp.text;
-                if (index === 2) {
-                    text = currentValues.formattedFull;
-                } else if (index === 3) {
-                    text = currentValues.formattedInstallment;
-                }
-                return {
-                    text: sanitizeForWhatsApp(text)
-                };
-            });
+            let parameters;
+            if (templateName === 'programas_tecnicos_laborales') {
+                // Para templates técnicos, solo enviar nombre y programa
+                parameters = [
+                    { type: 'text', text: NameAgent },
+                    { type: 'text', text: selectedProgram }
+                ];
+            } else if (['bienvenida', 'segundo_mensaje', 'saludopersonalizado', 'centro_de_idiomas'].includes(templateName)) {
+                // Para templates que solo necesitan el nombre
+                parameters = [{ type: 'text', text: NameAgent }];
+            } else {
+                // Para otros templates, enviar todos los componentes
+                const currentValues = getProgramValues(templateName, selectedSchedule, selectedProgram);
+                parameters = components.map((comp, index) => {
+                    let text = comp.text;
+                    if (index === 2) {
+                        text = currentValues.formattedFull;
+                    } else if (index === 3) {
+                        text = currentValues.formattedInstallment;
+                    }
+                    return { type: 'text', text: sanitizeForWhatsApp(text) };
+                });
+            }
 
             const templateData: TemplateData = {
                 to,
@@ -221,10 +231,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                 templateText: templateText ? sanitizeForWhatsApp(templateText) : undefined,
                 components: [{
                     type: 'body',
-                    parameters: sanitizedComponents.map(comp => ({
-                        type: 'text',
-                        text: comp.text
-                    }))
+                    parameters
                 }]
             };
 
@@ -248,7 +255,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         setSelectedProgram('');
         setSelectedSchedule('');
 
-        if (['bienvenida', 'segundo_mensaje', 'saludopersonalizado'].includes(template.name)) {
+        if (['bienvenida', 'segundo_mensaje', 'saludopersonalizado', 'centro_de_idiomas'].includes(template.name)) {
             setComponents([{ text: NameAgent }]);
         } else {
             setComponents([]);
@@ -302,7 +309,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                     </div>
                 )}
 
-                {templateName && !['bienvenida', 'segundo_mensaje', 'saludopersonalizado'].includes(templateName) && (
+                {templateName && !['bienvenida', 'segundo_mensaje', 'saludopersonalizado', 'centro_de_idiomas'].includes(templateName) && (
                     <>
                         {/* Variable 1: Nombre del Agente */}
                         <div className="component-input">
@@ -341,67 +348,74 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                             )}
                         </div>
 
-                        {/* Variable 3: Valor Total */}
-                        {selectedProgram && selectedSchedule && (
-                            <div className="component-input">
-                                <input
-                                    type="text"
-                                    value={`$${getProgramValues(
-                                        templateName,
-                                        selectedSchedule,
-                                        selectedProgram
-                                    ).formattedFull}`}
-                                    disabled
-                                    className="disabled-input"
-                                    placeholder="Variable 3 (Valor Total)"
-                                />
-                            </div>
-                        )}
+                        {/* Variables adicionales solo para templates que no son técnicos */}
+                        {templateName !== 'programas_tecnicos_laborales' && (
+                            <>
+                                {/* Variable 3: Valor Total */}
+                                {selectedProgram && selectedSchedule && (
+                                    <div className="component-input">
+                                        <input
+                                            type="text"
+                                            value={`$${getProgramValues(
+                                                templateName,
+                                                selectedSchedule,
+                                                selectedProgram
+                                            ).formattedFull}`}
+                                            disabled
+                                            className="disabled-input"
+                                            placeholder="Variable 3 (Valor Total)"
+                                        />
+                                    </div>
+                                )}
 
-                        {selectedProgram && selectedSchedule && (
-                            <div className="component-input">
-                                <input
-                                    type="text"
-                                    value={`$${getProgramValues(
-                                        templateName,
-                                        selectedSchedule,
-                                        selectedProgram
-                                    ).formattedInstallment}`}
-                                    disabled
-                                    className="disabled-input"
-                                    placeholder="Variable 4 (Valor Cuota)"
-                                />
-                            </div>
-                        )}
+                                {/* Variable 4: Valor Cuota */}
+                                {selectedProgram && selectedSchedule && (
+                                    <div className="component-input">
+                                        <input
+                                            type="text"
+                                            value={`$${getProgramValues(
+                                                templateName,
+                                                selectedSchedule,
+                                                selectedProgram
+                                            ).formattedInstallment}`}
+                                            disabled
+                                            className="disabled-input"
+                                            placeholder="Variable 4 (Valor Cuota)"
+                                        />
+                                    </div>
+                                )}
 
-                        <div className="component-input">
-                            {selectedProgram && !selectedSchedule ? (
-                                <select
-                                    value={selectedSchedule}
-                                    onChange={(e) => handleScheduleChange(e.target.value)}
-                                    className="form-select"
-                                >
-                                    <option value="">Seleccione horario</option>
-                                    {getSchedulesList().map((schedule) => (
-                                        <option key={schedule} value={schedule}>
-                                            {schedule}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : selectedProgram && selectedSchedule && (
-                                <input
-                                    type="text"
-                                    value={selectedSchedule}
-                                    disabled
-                                    className="disabled-input"
-                                    placeholder="Variable 5 (Horario)"
-                                />
-                            )}
-                        </div>
+                                {/* Variable 5: Horario */}
+                                <div className="component-input">
+                                    {selectedProgram && !selectedSchedule ? (
+                                        <select
+                                            value={selectedSchedule}
+                                            onChange={(e) => handleScheduleChange(e.target.value)}
+                                            className="form-select"
+                                        >
+                                            <option value="">Seleccione horario</option>
+                                            {getSchedulesList().map((schedule) => (
+                                                <option key={schedule} value={schedule}>
+                                                    {schedule}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : selectedProgram && selectedSchedule && (
+                                        <input
+                                            type="text"
+                                            value={selectedSchedule}
+                                            disabled
+                                            className="disabled-input"
+                                            placeholder="Variable 5 (Horario)"
+                                        />
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </>
                 )}
 
-                {['bienvenida', 'segundo_mensaje', 'saludopersonalizado'].includes(templateName) && (
+                {['bienvenida', 'segundo_mensaje', 'saludopersonalizado', 'centro_de_idiomas'].includes(templateName) && (
                     <div className="component-input">
                         <input
                             type="text"
