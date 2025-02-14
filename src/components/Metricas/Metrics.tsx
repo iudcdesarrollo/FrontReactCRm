@@ -22,7 +22,7 @@ interface MetricsProps {
   socket: Socket | null;
 }
 
-const Metrics: React.FC<MetricsProps> = ({socket}) => {
+const Metrics: React.FC<MetricsProps> = ({ socket }) => {
   const [metricsData, setMetricsData] = useState<{ [key: string]: MetricData[] }>({});
   const [agents, setAgents] = useState<string[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);

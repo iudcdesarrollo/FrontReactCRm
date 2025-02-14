@@ -18,6 +18,13 @@ const statusTranslations: { [key: string]: string } = {
     'error': 'error'
 };
 
+const validFileExtensions = {
+    audio: ['mp3', 'wav', 'ogg'],
+    image: ['jpg', 'jpeg', 'png', 'gif'],
+    video: ['mp4', 'mov'],
+    document: ['pdf', 'doc', 'docx', 'xlsx', 'xls', 'txt']
+};
+
 const MessageList: React.FC<MessageListProps> = ({
     messages,
     selectedChat,
@@ -32,6 +39,7 @@ const MessageList: React.FC<MessageListProps> = ({
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [messageStatuses, setMessageStatuses] = useState<{ [key: string]: string }>({});
+    const [timeoutMessage, setTimeoutMessage] = useState<{ number: string, message: string } | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,12 +57,19 @@ const MessageList: React.FC<MessageListProps> = ({
                     [status.messageId]: status.status
                 }));
             });
+
+            socket.on('24hTimeout', (data) => {
+                if (data.number === numberWhatsApp) {
+                    setTimeoutMessage(data);
+                }
+            });
         }
 
         return () => {
             socket?.off('messageStatus');
+            socket?.off('24hTimeout');
         };
-    }, [socket, messages]);
+    }, [socket, messages, numberWhatsApp]);
 
     const handleFileDownload = async (url: string, fileName: string) => {
         try {
@@ -98,7 +113,6 @@ const MessageList: React.FC<MessageListProps> = ({
 
             if (data.success && data.data) {
                 const latestStatuses: { [key: string]: string } = {};
-
                 data.data.forEach((message: {
                     mensaje_id: string,
                     statusHistory: Array<{ status: string, timestamp: string }>
@@ -108,7 +122,6 @@ const MessageList: React.FC<MessageListProps> = ({
                         latestStatuses[message.mensaje_id] = lastStatus;
                     }
                 });
-
                 setMessageStatuses(latestStatuses);
             }
         } catch (error) {
@@ -123,28 +136,35 @@ const MessageList: React.FC<MessageListProps> = ({
     }, [numberWhatsApp]);
 
     const isAudioFile = (extension?: string): boolean =>
-        ['mp3', 'wav', 'ogg'].includes(extension || '');
+        validFileExtensions.audio.includes(extension?.toLowerCase() || '');
 
     const isImageFile = (extension?: string): boolean =>
-        ['jpg', 'jpeg', 'png', 'gif'].includes(extension || '');
+        validFileExtensions.image.includes(extension?.toLowerCase() || '');
 
     const isVideoFile = (extension?: string): boolean =>
-        ['mp4', 'mov'].includes(extension || '');
+        validFileExtensions.video.includes(extension?.toLowerCase() || '');
+
+    const isValidFileType = (extension?: string): boolean => {
+        if (!extension) return false;
+        const lowerExt = extension.toLowerCase();
+        return [...validFileExtensions.audio,
+        ...validFileExtensions.image,
+        ...validFileExtensions.video,
+        ...validFileExtensions.document
+        ].includes(lowerExt);
+    };
 
     const getMessageStatus = (msg: Message) => {
         const messageId = msg.id;
-
         let status = messageId && messageStatuses[messageId]
             ? messageStatuses[messageId]
             : msg.status || 'pending';
-
         status = status.toLowerCase();
         return statusTranslations[status] || status;
     };
 
     const formatDateTime = (timestamp: string | undefined) => {
         if (!timestamp) return '';
-
         const date = new Date(timestamp);
         return date.toLocaleString('es-ES', {
             hour: 'numeric',
@@ -156,13 +176,18 @@ const MessageList: React.FC<MessageListProps> = ({
         });
     };
 
-    const renderMessage = (msg: Message, index: number) => {
-        console.log('Mensaje timestamp:', {
-            msgId: msg.id,
-            timestamp: msg.timestamp,
-            timestampType: typeof msg.timestamp
-        });
+    const renderTimeoutMessage = () => {
+        if (!timeoutMessage) return null;
+        return (
+            <div className="flex justify-center my-2">
+                <div className="timeout-message">
+                    {timeoutMessage.message}
+                </div>
+            </div>
+        );
+    };
 
+    const renderMessage = (msg: Message, index: number) => {
         if (!msg.message.trim()) {
             return null;
         }
@@ -180,19 +205,23 @@ const MessageList: React.FC<MessageListProps> = ({
                 return (
                     <UrlPreview
                         url={msg.message}
-                        extension={extension}
+                        extension={extension || undefined}
                         onDownload={() => handleFileDownload(msg.message, fileName)}
                     />
                 );
             }
 
             if (isFileUrl) {
+                if (!isValidFileType(extension)) {
+                    return <span className="message-text break-words whitespace-pre-wrap overflow-hidden">{msg.message}</span>;
+                }
+
                 if (isAudioFile(extension)) {
                     if (isDownloaded || audioPlaying[fileName]) {
                         return (
                             <audio
                                 controls
-                                className="audio-player"
+                                className="audio-player w-full max-w-full"
                                 onEnded={() => setAudioPlaying(prev => ({ ...prev, [fileName]: false }))}
                                 src={downloads.find(d => d.fileName === fileName && d.chatId === selectedChat)?.url || msg.message}
                             >
@@ -201,10 +230,10 @@ const MessageList: React.FC<MessageListProps> = ({
                         );
                     }
                     return (
-                        <div className="audio-preview">
-                            <Music className="audio-icon" />
+                        <div className="audio-preview flex items-center gap-2">
+                            <Music className="audio-icon w-5 h-5" />
                             <button
-                                className="play-button"
+                                className="play-button text-blue-600 hover:underline"
                                 onClick={() => handleFileDownload(msg.message, fileName)}
                             >
                                 Reproducir audio
@@ -219,10 +248,10 @@ const MessageList: React.FC<MessageListProps> = ({
                             <img
                                 src={msg.message}
                                 alt="Imagen"
-                                className="message-image"
+                                className="message-image w-full rounded-lg cursor-pointer max-w-full"
                                 onClick={() => setSelectedImage(msg.message)}
                             />
-                            <p className="file-name">{fileName}</p>
+                            <p className="file-name text-sm text-gray-600 mt-1 break-words">{fileName}</p>
                         </div>
                     );
                 }
@@ -230,20 +259,20 @@ const MessageList: React.FC<MessageListProps> = ({
                 if (isVideoFile(extension)) {
                     return (
                         <div className="video-container">
-                            <video controls className="message-video">
+                            <video controls className="message-video w-full rounded-lg max-w-full">
                                 <source src={msg.message} type="video/mp4" />
                                 Tu navegador no soporta el video.
                             </video>
-                            <p className="file-name">{fileName}</p>
+                            <p className="file-name text-sm text-gray-600 mt-1 break-words">{fileName}</p>
                         </div>
                     );
                 }
 
                 return (
-                    <div className="file-download">
-                        <FileText className="file-icon" />
+                    <div className="file-download flex items-center gap-2">
+                        <FileText className="file-icon w-5 h-5" />
                         <button
-                            className="download-button"
+                            className="download-button text-blue-600 hover:underline break-words"
                             onClick={() => handleFileDownload(msg.message, fileName)}
                         >
                             Descargar {fileName}
@@ -252,27 +281,28 @@ const MessageList: React.FC<MessageListProps> = ({
                 );
             }
 
-            return <span className="message-text">{msg.message}</span>;
+            return <span className="message-text break-words whitespace-pre-wrap overflow-hidden">{msg.message}</span>;
         };
 
         return (
-            <div key={index} className={`message-row ${msg.Cliente ? 'message-client' : 'message-agent'}`}>
+            <div key={index} className={`message-row flex ${msg.Cliente ? 'justify-start' : 'justify-end'} mb-2`}>
                 {msg.Cliente && (
-                    <div className="profile-container">
+                    <div className="profile-container mr-2">
                         {profilePictureUrl ? (
                             <img
                                 src={profilePictureUrl}
                                 alt="Profile"
-                                className="profile-image"
+                                className="profile-image w-8 h-8 rounded-full"
                             />
                         ) : (
-                            <div className="profile-placeholder" />
+                            <div className="profile-placeholder w-8 h-8 rounded-full bg-gray-200" />
                         )}
                     </div>
                 )}
-                <div className="message-bubble">
+                <div className={`message-bubble max-w-[70%] p-3 rounded-xl ${msg.Cliente ? 'bg-white' : 'bg-[#e7ffdb]'
+                    }`}>
                     {renderContent()}
-                    <div className="message-status">
+                    <div className="message-status text-xs text-gray-500 mt-1">
                         {`Estado: ${getMessageStatus(msg)} - ${formatDateTime(msg.timestamp)}`}
                     </div>
                 </div>
@@ -281,9 +311,10 @@ const MessageList: React.FC<MessageListProps> = ({
     };
 
     return (
-        <div className="message-list">
-            <div className="messages-container">
+        <div className="message-list h-full bg-gray-100">
+            <div className="messages-container h-full overflow-y-auto p-4">
                 {messages.map(renderMessage)}
+                {timeoutMessage && renderTimeoutMessage()}
                 <div ref={messagesEndRef} />
             </div>
             {selectedImage && (

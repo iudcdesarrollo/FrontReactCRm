@@ -8,6 +8,7 @@ import './App.css';
 import Login from './components/googleclud/LoginComponent.tsx';
 import ConnectionOverlay from './components/ConnectionOverlay.tsx';
 import { TemplateResponse } from './utils/templatesGenral/templateResponse.ts';
+import { useKanbanStore } from './components/Kanban/store/kanbanStore.ts';
 // import SidebarMenu from './components/clonHubSpot/MenuLateral.tsx'; esto pertenese a adriana pirazan esta en pausa por cambios al call center.
 
 const endpointRestGeneral = import.meta.env.VITE_API_URL_GENERAL;
@@ -35,6 +36,12 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   const handleLogout = () => {
+    const kanbanStore = useKanbanStore.getState();
+
+    localStorage.removeItem('kanban-store');
+
+    kanbanStore.resetStoreOnNewSession();
+
     authService.clearSession();
     setEmail('');
     setAgente(null);
@@ -52,6 +59,13 @@ function App() {
         setError('El correo electrónico es requerido');
         return;
       }
+
+      const kanbanStore = useKanbanStore.getState();
+
+      localStorage.removeItem('kanban-store');
+
+      kanbanStore.resetStoreOnNewSession();
+
       setEmail(newEmail);
       authService.refreshSession(newEmail);
       await fetchData(0, newEmail);
@@ -73,7 +87,6 @@ function App() {
       setLoading(true);
       setError(null);
 
-      // Verificar caché
       const cachedTimestamp = localStorage.getItem('dataTimestamp');
       const cachedData = localStorage.getItem('agenteData');
       const isValidCache = cachedTimestamp && cachedData &&
@@ -102,7 +115,9 @@ function App() {
         }
       );
 
-      console.log(`email en uso: ${emailToUse}`);
+      // console.log(`esto es lo que llega del response: ${JSON.stringify(response, null, 2)}`);
+
+      // console.log(`email en uso: ${emailToUse}`);
 
       if (!response.data || response.data.length === 0) {
         throw new Error('No se encontraron conversaciones para este usuario.');
@@ -169,12 +184,11 @@ function App() {
               contenido: msg.contenido,
               fecha: msg.fecha,
               usuario_destino: msg.usuario_destino,
-              mensaje_id: msg.mensaje_id || msg.id_message || msg._id, // Aseguramos que siempre haya un mensaje_id
+              mensaje_id: msg.mensaje_id || msg.id_message || msg._id,
               id_message: msg.id_message,
               messageType: msg.messageType || 'text'
             };
 
-            // Process message status from statusHistory first
             if (msg.statusHistory && msg.statusHistory.length > 0) {
               const sortedHistory = [...msg.statusHistory].sort((a, b) =>
                 new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -183,10 +197,10 @@ function App() {
               const currentStatus = sortedHistory[0];
               if (currentStatus) {
                 processedMsg.status = currentStatus.status;
-                processedMsg.statusTimestamp = new Date(currentStatus.timestamp); // Convertir a Date
+                processedMsg.statusTimestamp = new Date(currentStatus.timestamp);
                 processedMsg.statusHistory = msg.statusHistory.map(history => ({
                   ...history,
-                  timestamp: new Date(history.timestamp) // Convertir cada timestamp a Date
+                  timestamp: new Date(history.timestamp)
                 }));
               }
             } else {
@@ -194,7 +208,6 @@ function App() {
               processedMsg.statusTimestamp = new Date(msg.fecha);
             }
 
-            // Process file types
             if (msg.contenido.startsWith('image/') || msg.archivo === 'image/jpeg') {
               processedMsg = {
                 ...processedMsg,
@@ -285,6 +298,7 @@ function App() {
     if (!formattedEmail) return;
 
     const newSocket = io(socketEndpoint);
+
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
@@ -308,8 +322,8 @@ function App() {
             contenido: data.message,
             fecha: new Date().toISOString(),
             usuario_destino: data.to,
-            mensaje_id: data.metaMessageId || '', // Asegurarse de que este campo exista
-            status: 'sent' // Agregar estado inicial
+            mensaje_id: data.metaMessageId || '',
+            status: 'sent'
           });
 
           const updatedAgente = transformBackendToFrontend(existingRawData);
@@ -438,7 +452,6 @@ function App() {
       }
     });
 
-
     newSocket.on('fileSent', (data) => {
       try {
         const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
@@ -556,10 +569,22 @@ function App() {
     });
 
     newSocket.on('UpdateTipogestion', (updateTipoGestion) => {
+      console.log(JSON.stringify(updateTipoGestion, null, 2));
       try {
         const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
         const conversationIndex = existingRawData.findIndex(
           (conv: BackendResponse) => conv.numero_cliente === updateTipoGestion.numero_cliente
+        );
+
+        const kanbanStore = useKanbanStore.getState();
+        if (Object.keys(kanbanStore.lists).length === 0) {
+          kanbanStore.initializeLists();
+        }
+
+        kanbanStore.updateTaskListByTipoGestion(
+          updateTipoGestion.numero_cliente,
+          updateTipoGestion.tipo_gestion,
+          updateTipoGestion.nameLead
         );
 
         if (conversationIndex !== -1) {
@@ -643,6 +668,14 @@ function App() {
         console.error('Error actualizando localStorage con el nuevo lead:', err);
         handleLogout();
       }
+    });
+
+    newSocket.on('24hTimeout', (responseData) => {
+      console.log('Timeout detected:', {
+        number: responseData.number,
+        message: responseData.message,
+        phoneNumber: responseData.phoneNumberStatus
+      });
     });
 
     newSocket.on('error', (error) => {

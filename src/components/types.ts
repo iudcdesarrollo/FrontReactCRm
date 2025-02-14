@@ -1,6 +1,11 @@
 import { ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 
+export interface ManagementCount {
+    _id: string;
+    count: number;
+}
+
 export interface Lead {
     id: number;
     nombre: string;
@@ -18,6 +23,8 @@ export interface Agente {
     correo: string;
     rol: string;
     leads: Lead[];
+    managementCounts?: ManagementCount[];
+    totalCount?: number;
 }
 
 export interface LeadSidebarData {
@@ -85,6 +92,9 @@ export interface WhatsAppCloneState {
     downloads: Download[];
     showMetrics: boolean;
     showSettings: boolean;
+    showKanban: boolean;
+    managementCounts?: ManagementCount[];
+    totalCount?: number;
 }
 
 export interface ChatWindowProps {
@@ -142,6 +152,8 @@ export interface BackendResponse {
     tipo_gestion: string;
     _id: string;
     profilePictureUrl?: string;
+    managementCounts?: ManagementCount[];
+    totalCount?: number;
 }
 
 export interface BackendMensaje {
@@ -213,7 +225,9 @@ export const transformBackendToFrontend = (backendData: BackendResponse[]): Agen
         nombre: firstItem.nombre_agente || 'Sin nombre',
         correo: firstItem.correo_agente || '',
         rol: firstItem.rol_agente || 'agente',
-        leads: transformedLeads
+        leads: transformedLeads,
+        managementCounts: firstItem.managementCounts,
+        totalCount: firstItem.totalCount
     };
 };
 

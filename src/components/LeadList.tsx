@@ -1,17 +1,19 @@
 import React from 'react';
 import { Lead, Message } from './types';
-import '../css/Agentes/LeadList.css'
+import '../css/Agentes/LeadList.css';
 
 interface LeadListProps {
     leads: Lead[];
     selectedChat: number | null;
     setSelectedChat: (chatId: number | null) => void;
+    currentCategory: string;
 }
 
 const LeadList: React.FC<LeadListProps> = ({
     leads,
     selectedChat,
     setSelectedChat,
+    currentCategory
 }) => {
     const countUnreadMessages = (messages: Message[]) => {
         let unreadCount = 0;
@@ -38,29 +40,28 @@ const LeadList: React.FC<LeadListProps> = ({
         unreadMessages: countUnreadMessages(lead.messages || [])
     }));
 
-    // const logLeads = () => {
-    //     console.log('Leads:', leadsWithUnreadCount);
-    //     leadsWithUnreadCount.forEach((lead, index) => {
-    //         console.log(`Lead ${index + 1}:`, lead);
-    //     });
-    // };
+    // Filter leads in 'Todos' category to show only unread
+    const filteredLeads = currentCategory === 'Todos'
+        ? leadsWithUnreadCount.filter(lead => lead.unreadMessages > 0)
+        : leadsWithUnreadCount;
 
-    // useEffect(() => {
-    //     logLeads();
-    // }, [leadsWithUnreadCount]);
+    const sortedLeads = filteredLeads.sort((a, b) => b.unreadMessages - a.unreadMessages);
 
-    // Ordenar los leads por el número de mensajes sin leer, de mayor a menor
-    const sortedLeads = leadsWithUnreadCount.sort((a, b) => b.unreadMessages - a.unreadMessages);
+    const truncateText = (text: string | undefined, maxLength: number = 20): string => {
+        if (!text) return 'No hay mensajes';
+        return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+    };
 
     return (
         <div className="overflow-y-auto h-full">
             {sortedLeads.map((lead) => (
                 <div
                     key={lead.id}
-                    className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer relative ${selectedChat === lead.id ? 'bg-gray-100' : ''}`}
+                    className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer relative ${selectedChat === lead.id ? 'bg-gray-100' : ''
+                        }`}
                     onClick={() => setSelectedChat(lead.id)}
                 >
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                         <div className="w-12 h-12 rounded-md mr-3 overflow-hidden">
                             {lead.profilePictureUrl ? (
                                 <img
@@ -70,7 +71,7 @@ const LeadList: React.FC<LeadListProps> = ({
                                 />
                             ) : (
                                 <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                                    {lead.nombre.charAt(0).toUpperCase()}
+                                    {lead.nombre?.charAt(0).toUpperCase() || 'U'}
                                 </div>
                             )}
                         </div>
@@ -81,18 +82,25 @@ const LeadList: React.FC<LeadListProps> = ({
                         )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold truncate">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex justify-between items-center space-x-2">
+                            <h3 className="font-semibold truncate max-w-[70%]">
                                 {lead.nombre || lead.numeroWhatsapp}
                             </h3>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 flex-shrink-0">
                                 {lead.TipoGestion}
                             </span>
                         </div>
-                        <p className={`text-sm truncate ${lead.unreadMessages > 0 ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
-                            {lead.conversacion || 'No hay mensajes'}
-                        </p>
+                        <div className="w-full overflow-hidden">
+                            <p
+                                className={`text-sm truncate ${lead.unreadMessages > 0
+                                    ? 'font-semibold text-gray-900'
+                                    : 'text-gray-600'
+                                    }`}
+                            >
+                                {truncateText(lead.conversacion)}
+                            </p>
+                        </div>
                     </div>
                 </div>
             ))}

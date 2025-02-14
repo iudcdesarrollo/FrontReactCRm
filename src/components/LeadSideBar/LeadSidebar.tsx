@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import '../css/Agentes/LeadSidebar.css';
-import { Lead, LeadSidebarData } from './types';
+import '../../css/Agentes/LeadSidebar.css';
+import { Lead, LeadSidebarData } from '../types';
+import LeadNotes from './Notas';
+import VentaPerdidaDesplegable from './VentaPerdidaDesplegable';
 
 interface LeadSidebarProps {
     lead: LeadSidebarData;
@@ -21,8 +23,13 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
         'llamada',
         'segunda llamada',
         'inscrito',
+        'inscrito otra agente',
         'venta perdida',
+        'Gestionado',
+        'estudiante',
+        'matriculado'
     ];
+
 
     useEffect(() => {
         const obtenerProgramaMeta = async () => {
@@ -139,7 +146,7 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                 </div>
             </div>
             <div className="meta-campaign-label">
-                <label>Campaña de Meta: {programaMeta || 'Cargando...'}</label>
+                <label>Origen del Lead: {programaMeta || 'Cargando...'}</label>
             </div>
             <div className="conversation-actions">
                 <div className="action-item">
@@ -158,6 +165,10 @@ const LeadSidebar: React.FC<LeadSidebarProps> = ({ lead, onUpdate }) => {
                     </select>
                 </div>
             </div>
+            <LeadNotes numeroWhatsapp={lead.numeroWhatsapp} />
+            {selectedGestion === 'venta perdida' && (
+                <VentaPerdidaDesplegable telefono={lead.numeroWhatsapp} />
+            )}
         </div>
     );
 };
