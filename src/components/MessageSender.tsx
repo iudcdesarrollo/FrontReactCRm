@@ -21,7 +21,7 @@ const MessageSender: React.FC<ExtendedMessageSenderProps> = ({
     agentRole,
     managementType
 }) => {
-    console.log('MessageSenderProps:', selectedChat, numberWhatsApp, nombreAgente, socket, agentEmail, agentRole, managementType);
+    // console.log('MessageSenderProps:', selectedChat, numberWhatsApp, nombreAgente, socket, agentEmail, agentRole, managementType);
     const [messageText, setMessageText] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isRecording, setIsRecording] = useState(false);

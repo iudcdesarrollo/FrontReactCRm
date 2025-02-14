@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Split from 'react-split';
 import { Lead, ChatInterfaceProps } from './types';
-import LeadList from './LeadList';
-import SearchBar from './SearchBar';
-import ChatCategories from './ChatCategories';
 import ChatWindow from './ChatWindow';
+import SidebarPanel from './SidebarPanel';
 
 interface ExtendedChatInterfaceProps extends ChatInterfaceProps {
     role: 'agent' | 'admin';
@@ -116,22 +114,15 @@ const ChatInterface: React.FC<ExtendedChatInterfaceProps> = ({
             direction="horizontal"
             cursor="col-resize"
         >
-            <div className="bg-white border-r overflow-hidden">
-                <div className="p-4 bg-gray-200 flex justify-between items-center">
-                    <h1 className="text-xl font-semibold">CRM Innovacion.</h1>
-                </div>
-                <SearchBar searchTerm={searchTerm} setSearchTerm={handleSearch} />
-                <ChatCategories
-                    onCategoryChange={handleCategoryChange}
-                    initialCategory={currentCategory}
-                />
-                <LeadList
-                    leads={filteredLeads}
-                    selectedChat={selectedChat}
-                    setSelectedChat={setSelectedChat}
-                    currentCategory={currentCategory}
-                />
-            </div>
+            <SidebarPanel
+                searchTerm={searchTerm}
+                currentCategory={currentCategory}
+                filteredLeads={filteredLeads}
+                selectedChat={selectedChat}
+                setSelectedChat={setSelectedChat}
+                handleSearch={handleSearch}
+                handleCategoryChange={handleCategoryChange}
+            />
             <div className="flex-1">
                 <ChatWindow
                     selectedChat={selectedChat}

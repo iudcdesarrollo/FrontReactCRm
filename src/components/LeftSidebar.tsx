@@ -9,7 +9,7 @@ import {
 import '../css/Admins/LeftSidebar.css';
 
 interface LeftSidebarProps {
-    role: 'admin' | 'agent';
+    role: 'admin' | 'agent' | 'socialMedia';
     handleLogout: () => void;
     toggleSettings: () => void;
     onSelectHome: () => void;
@@ -32,13 +32,23 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
                     <div className="avatar">U</div>
                 </div>
 
-                <div className="icon" onClick={onSelectHome}>
-                    <Home size={24} />
-                </div>
+                {role !== 'socialMedia' && (
+                    <>
+                        <div className="icon" onClick={onSelectHome}>
+                            <Home size={24} />
+                        </div>
 
-                <div className="icon" onClick={onSelectKanban}>
-                    <Kanban size={24} />
-                </div>
+                        <div className="icon" onClick={onSelectKanban}>
+                            <Kanban size={24} />
+                        </div>
+                    </>
+                )}
+
+                {role === 'socialMedia' && (
+                    <div className="icon" onClick={onSelectHome}>
+                        <Home size={24} />
+                    </div>
+                )}
 
                 {role === 'admin' && (
                     <>

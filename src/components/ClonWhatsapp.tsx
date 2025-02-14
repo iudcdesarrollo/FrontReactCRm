@@ -8,16 +8,13 @@ import {
     WhatsAppCloneState,
     getDownloadsFromMessages
 } from './types';
-// import Metrics from './Metricas/Metrics';
 import { KanbanPage } from './Kanban/KanbanPage';
 import Dashboard from './Metricas/metricas-avanzadas-Ingrid/Dashboard';
+import SocialMedia from './SocialMedia/SocialMedia';
 
 class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     constructor(props: WhatsAppCloneProps) {
         super(props);
-        // console.log('Initial Management Counts:', props.initialData?.[0]?.managementCounts);
-        // console.log('Initial Total Count:', props.initialData?.[0]?.totalCount);
-
         this.state = {
             searchTerm: '',
             selectedCategory: 'Todos',
@@ -128,6 +125,10 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
             showKanban
         } = this.state;
 
+        if (agente?.rol === 'socialMedia') {
+            return <SocialMedia />;
+        }
+
         const role = agente?.rol === 'admin' ? 'admin' : 'agent';
 
         if (showKanban) {
@@ -141,8 +142,7 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
         }
 
         if (showMetrics) {
-            return <Dashboard />
-            // <Metrics socket={this.props.socket} />;
+            return <Dashboard />;
         }
 
         if (showSettings) {
@@ -176,7 +176,8 @@ class WhatsAppClone extends Component<WhatsAppCloneProps, WhatsAppCloneState> {
     }
 
     render() {
-        const role = this.state.agente?.rol === 'admin' ? 'admin' : 'agent';
+        const role = this.state.agente?.rol === 'admin' ? 'admin' : 
+                    (this.state.agente?.rol === 'socialMedia' ? 'socialMedia' : 'agent');
 
         return (
             <div className="whatsapp-clone-container">
