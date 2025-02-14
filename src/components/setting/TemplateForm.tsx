@@ -126,14 +126,15 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         return schedules;
     };
 
-    const getProgramValues = () => {
-        switch (templateName) {
+    const getProgramValues = (templateType: string, schedule: string, program: string) => {
+        switch (templateType) {
             case 'programas_tecnicos_laborales':
                 return { full: 1800000, installment: 600000 };
             case 'programas_profesionales':
-                return selectedSchedule === 'Virtual'
-                    ? { full: 2700000, installment: 900000 }
-                    : { full: 3600000, installment: 1200000 };
+                if (VIRTUAL_PROGRAMS.includes(program) && schedule === 'Virtual') {
+                    return { full: 2700000, installment: 900000 };
+                }
+                return { full: 3600000, installment: 1200000 };
             case 'especializaciones':
                 return { full: 4650000, installment: 1550000 };
             default:
@@ -144,7 +145,7 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
     const updateComponents = (program: string, schedule: string) => {
         if (!program || !schedule) return;
 
-        const values = getProgramValues();
+        const values = getProgramValues(templateName, schedule, program);
         const updatedComponents = [
             { text: NameAgent },
             { text: program },
@@ -184,9 +185,21 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
         }
 
         if (socket) {
-            const sanitizedComponents = components.map(comp => ({
-                text: sanitizeForWhatsApp(comp.text)
-            }));
+            // Get the current values based on selected program and schedule
+            const currentValues = getProgramValues(templateName, selectedSchedule, selectedProgram);
+
+            const sanitizedComponents = components.map((comp, index) => {
+                let text = comp.text;
+                // Format monetary values
+                if (index === 2) { // Full price
+                    text = currentValues.full.toString();
+                } else if (index === 3) { // Installment price
+                    text = currentValues.installment.toString();
+                }
+                return {
+                    text: sanitizeForWhatsApp(text)
+                };
+            });
 
             const templateData: TemplateData = {
                 to,
@@ -320,7 +333,11 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                             <div className="component-input">
                                 <input
                                     type="text"
-                                    value={`$${getProgramValues().full.toLocaleString()}`}
+                                    value={`$${getProgramValues(
+                                        templateName,
+                                        selectedSchedule,
+                                        selectedProgram
+                                    ).full.toLocaleString()}`}
                                     disabled
                                     className="disabled-input"
                                     placeholder="Variable 3 (Valor Total)"
@@ -333,14 +350,17 @@ const TemplateForm: React.FC<TemplateFormProps> = ({ socket, to, NameAgent }) =>
                             <div className="component-input">
                                 <input
                                     type="text"
-                                    value={`$${getProgramValues().installment.toLocaleString()}`}
+                                    value={`$${getProgramValues(
+                                        templateName,
+                                        selectedSchedule,
+                                        selectedProgram
+                                    ).installment.toLocaleString()}`}
                                     disabled
                                     className="disabled-input"
                                     placeholder="Variable 4 (Valor Cuota)"
                                 />
                             </div>
                         )}
-
                         {/* Variable 5: Horario (primero como select, luego como input disabled) */}
                         <div className="component-input">
                             {selectedProgram && !selectedSchedule ? (
