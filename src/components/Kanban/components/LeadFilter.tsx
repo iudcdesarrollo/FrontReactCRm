@@ -7,6 +7,33 @@ interface LeadFilterProps {
     onLeadsFiltered: (leads: ProcessedLead[]) => void;
 }
 
+interface ApiResponse<T> {
+    success: boolean;
+    data: T;
+    message?: string;
+}
+
+interface LeadResponse {
+    id: number;
+    nombre: string;
+    numeroWhatsapp: string;
+    conversacion: string;
+    urlPhotoPerfil: string;
+    TipoGestion: string;
+    messages: LeadMessage[];
+}
+
+interface LeadMessage {
+    id: string;
+    _id: string;
+    Agente: string;
+    Cliente: string;
+    message: string;
+    timestamp: string;
+    status: string;
+    messageType: string;
+}
+
 const endpointGeneral = import.meta.env.VITE_API_URL_GENERAL;
 
 const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
@@ -36,20 +63,20 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         }
     }, [isOpen]);
 
-    const fetchFilterOptions = async () => {
+    const fetchFilterOptions = async (): Promise<void> => {
         try {
             const response = await fetch(`${endpointGeneral}/filter-options`);
-            const data = await response.json();
+            const data = await response.json() as ApiResponse<FilterOptions>;
 
             if (data.success) {
                 setFilterOptions(data.data);
             }
         } catch (err) {
-            console.error('Error al cargar opciones:', err);
+            console.error('Error al cargar opciones:', err instanceof Error ? err.message : String(err));
         }
     };
 
-    const formatDateWithTime = (dateStr: string, isEnd: boolean = false) => {
+    const formatDateWithTime = (dateStr: string, isEnd: boolean = false): string => {
         if (!dateStr) return '';
         const date = new Date(dateStr);
         if (isEnd) {
@@ -60,10 +87,18 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         return date.toISOString();
     };
 
-    const processLeadData = (leadResponse: any): ProcessedLead => {
+    const processLeadData = (leadResponse: LeadResponse): ProcessedLead => {
         if (!leadResponse) {
             console.error('Lead response is undefined or null');
-            return {} as ProcessedLead;
+            return {
+                id: 0,
+                nombre: 'Unknown',
+                numeroWhatsapp: '',
+                conversacion: '',
+                urlPhotoPerfil: '',
+                TipoGestion: 'sin gestionar',
+                messages: []
+            };
         }
 
         return {
@@ -77,7 +112,7 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         };
     };
 
-    const fetchLeads = async () => {
+    const fetchLeads = async (): Promise<void> => {
         setLoading(true);
 
         try {
@@ -97,19 +132,13 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
             console.log('Full URL:', `${endpointGeneral}/filter?${queryParams}`);
 
             const response = await fetch(`${endpointGeneral}/filter?${queryParams}`);
+            const data = await response.json() as ApiResponse<LeadResponse[]>;
 
             console.log('Response Status:', response.status);
-
-            const data = await response.json();
-
             console.log('Full Response Data:', data);
 
             if (data.success && Array.isArray(data.data)) {
                 console.log('Number of Leads:', data.data.length);
-
-                if (data.data.length > 0) {
-                    // console.log('First Lead Structure:', JSON.stringify(data.data));
-                }
 
                 const processedLeads = data.data.map(processLeadData);
                 console.log('Processed Leads:', processedLeads);
@@ -121,13 +150,13 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
 
             setIsOpen(false);
         } catch (err) {
-            console.error('Error al filtrar:', err);
+            console.error('Error al filtrar:', err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
     };
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
         const { name, value } = e.target;
         setFilters(prev => ({
             ...prev,
@@ -135,13 +164,13 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent): void => {
         e.preventDefault();
         fetchLeads();
     };
 
     return (
-        <div className="filter-wrapper">
+        <div className="">
             {!isOpen ? (
                 <button 
                     type="button"
