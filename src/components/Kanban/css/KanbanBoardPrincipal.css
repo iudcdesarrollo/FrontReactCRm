@@ -81,3 +81,14 @@
 .kanban-board::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
+
+.search-wrapper{
+    justify-content: center;
+    display: flex;
+}
+
+.leads-total{
+    font-size: 1.10rem;
+    font-weight: bold;
+    color: black;
+}

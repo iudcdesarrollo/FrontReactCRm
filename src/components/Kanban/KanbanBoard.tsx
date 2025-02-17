@@ -38,6 +38,7 @@ export default function KanbanBoard({
     const [scrollLeft, setScrollLeft] = useState(0);
 
     const [salesCounts, setSalesCounts] = useState(null);
+    const [totalLeads, setTotalLeads] = useState<number>(0);
 
     useEffect(() => {
         const fetchSalesCounts = async () => {
@@ -132,7 +133,7 @@ export default function KanbanBoard({
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!boardRef.current || e.button !== 0) return; // Solo botón izquierdo
+        if (!boardRef.current || e.button !== 0) return;
 
         setIsDragging(true);
         setStartX(e.pageX - boardRef.current.offsetLeft);
@@ -214,6 +215,28 @@ export default function KanbanBoard({
             }
         });
     }, [leads, lists, isInitialized, updateTaskListByTipoGestion]);
+
+    useEffect(() => {
+        const fetchTotalLeads = async () => {
+            if (!email) return;
+
+            try {
+                const response = await axios.get(`${enpoinyBasic}/count`, {
+                    params: {
+                        agentEmail: email
+                    }
+                });
+
+                if (response.data.success && response.data.dates) {
+                    setTotalLeads(response.data.dates.totalConversations);
+                }
+            } catch (error) {
+                console.error('Error fetching total leads:', error);
+            }
+        };
+
+        fetchTotalLeads();
+    }, [email]);
 
     const findListByTaskId = useCallback((allLists: Lists, taskId: string) => {
         return Object.values(allLists).find((list) =>
@@ -400,7 +423,9 @@ export default function KanbanBoard({
                         lists={lists}
                         onLeadSelect={handleLeadClick}
                     />
+                    <span className="leads-total">Total leads: {totalLeads}</span>
                 </div>
+
                 <div className="kanban-content">
                     <div
                         ref={boardRef}

@@ -60,7 +60,7 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
                 status: msg.status,
                 messageType: msg.messageType
             })),
-            profilePictureUrl: processedLead.urlPhotoPerfil // Mantenemos la consistencia usando urlPhotoPerfil
+            profilePictureUrl: processedLead.urlPhotoPerfil
         }));
 
         clearStore();
