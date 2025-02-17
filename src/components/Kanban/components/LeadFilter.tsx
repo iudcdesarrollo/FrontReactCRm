@@ -77,7 +77,6 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
         };
     };
 
-
     const fetchLeads = async () => {
         setLoading(true);
 
@@ -108,7 +107,6 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
             if (data.success && Array.isArray(data.data)) {
                 console.log('Number of Leads:', data.data.length);
 
-                // Log first lead to see its structure
                 if (data.data.length > 0) {
                     // console.log('First Lead Structure:', JSON.stringify(data.data));
                 }
@@ -145,14 +143,19 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
     return (
         <div className="filter-wrapper">
             {!isOpen ? (
-                <Search
-                    size={20}
+                <button 
+                    type="button"
                     onClick={() => setIsOpen(true)}
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="search-icon"
-                    aria-hidden="true"
-                />
+                    className="filter-toggle-button"
+                >
+                    <Search
+                        size={20}
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="search-icon"
+                        aria-hidden="true"
+                    />
+                </button>
             ) : (
                 <>
                     <div className="filter-overlay" onClick={() => setIsOpen(false)} />

@@ -4,6 +4,7 @@ import LeadFilter from './components/LeadFilter';
 import { Lead, ManagementCount } from '../types';
 import { Socket } from 'socket.io-client';
 import { useKanbanStore } from './store/kanbanStore';
+import { ProcessedLead } from './@types/LeadFilter';
 
 interface KanbanPageProps {
     soket: Socket | null;
@@ -27,7 +28,9 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
 
     const updateLeads = useCallback((leadsToUpdate: Lead[]) => {
         leadsToUpdate.forEach(lead => {
-            updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion, lead.nombre);
+            if (lead.numeroWhatsapp && lead.TipoGestion && lead.nombre) {
+                updateTaskListByTipoGestion(lead.numeroWhatsapp, lead.TipoGestion, lead.nombre);
+            }
         });
     }, [updateTaskListByTipoGestion]);
 
@@ -37,17 +40,39 @@ export const KanbanPage: React.FC<KanbanPageProps> = ({
             clearStore();
             updateLeads(leads);
         }
-    }, [leads]);
+    }, [leads, clearStore, updateLeads]);
 
-    const handleLeadsFiltered = useCallback((newFilteredLeads: Lead[]) => {
+    const handleLeadsFiltered = useCallback((processedLeads: ProcessedLead[]) => {
+        const convertedLeads: Lead[] = processedLeads.map(processedLead => ({
+            id: processedLead.id,
+            nombre: processedLead.nombre,
+            numeroWhatsapp: processedLead.numeroWhatsapp,
+            conversacion: processedLead.conversacion,
+            urlPhotoPerfil: processedLead.urlPhotoPerfil,
+            TipoGestion: processedLead.TipoGestion,
+            messages: processedLead.messages.map(msg => ({
+                Agente: msg.Agente,
+                Cliente: msg.Cliente,
+                message: msg.message,
+                timestamp: msg.timestamp,
+                id: msg.id,
+                _id: msg._id,
+                status: msg.status,
+                messageType: msg.messageType
+            })),
+            profilePictureUrl: processedLead.urlPhotoPerfil // Mantenemos la consistencia usando urlPhotoPerfil
+        }));
+
         clearStore();
-        setCurrentLeads(newFilteredLeads);
-        updateLeads(newFilteredLeads);
+        setCurrentLeads(convertedLeads);
+        updateLeads(convertedLeads);
     }, [clearStore, updateLeads]);
 
     return (
         <div className="kanban-page">
-            <LeadFilter onLeadsFiltered={handleLeadsFiltered} />
+            <LeadFilter 
+                onLeadsFiltered={handleLeadsFiltered}
+            />
             <KanbanBoard
                 leads={currentLeads}
                 soket={soket}
