@@ -48,37 +48,57 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }, [selectedChat, agente]);
 
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !selectedChat || !agente) return;
 
-        // Escuchar mensaje enviado exitosamente
-        socket.on('messageSent', (data) => {
+        const selectedLead = agente.leads.find(lead => lead.id === selectedChat);
+        if (!selectedLead) return;
+
+        console.log('Configurando socket listeners para:', selectedLead.numeroWhatsapp);
+
+        const handleMessageSent = (data: any) => {
+            console.log('Mensaje enviado:', data);
             const newMessage: Message = {
-                Agente: agente?.correo,
+                Agente: agente.correo,
                 message: data.message,
                 timestamp: data.timestamp,
                 id: data.metaMessageId,
                 _id: data.savedMessage._id,
             };
             setMessages(prev => [...prev, newMessage]);
-        });
+        };
 
-        // Escuchar nuevos mensajes entrantes
-        socket.on('newMessage', (data) => {
-            if (data.to === selectedChat) {
+        const handleNewMessage = (data: any) => {
+            console.log('Nuevo mensaje recibido:', data);
+            if (data.to === selectedLead.numeroWhatsapp) {
                 const newMessage: Message = {
                     Cliente: data.from,
-                    message: data.message,
-                    timestamp: new Date().toISOString(),
+                    message: data.contenido || data.message,
+                    timestamp: data.timestamp || new Date().toISOString(),
                     id: data.id,
                     _id: data.id,
                 };
                 setMessages(prev => [...prev, newMessage]);
             }
-        });
+        };
+
+        const handleMessageStatus = (data: any) => {
+            setMessages(prev =>
+                prev.map(msg =>
+                    msg.id === data.messageId
+                        ? { ...msg, status: data.status }
+                        : msg
+                )
+            );
+        };
+
+        socket.on('messageSent', handleMessageSent);
+        socket.on('newMessage', handleNewMessage);
+        socket.on('messageStatus', handleMessageStatus);
 
         return () => {
-            socket.off('messageSent');
-            socket.off('newMessage');
+            socket.off('messageSent', handleMessageSent);
+            socket.off('newMessage', handleNewMessage);
+            socket.off('messageStatus', handleMessageStatus);
         };
     }, [socket, selectedChat, agente]);
 

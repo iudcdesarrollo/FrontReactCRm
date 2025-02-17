@@ -43,6 +43,14 @@ export interface Message {
     timestamp?: string;
     status?: string;
     id?: string;
+    fileUrl?: string;       // Añadido
+    fileType?: string;      // Añadido
+    fileName?: string;      // Añadido
+    messageType?: string;   // Añadido
+    tipo_archivo?: string;  // Añadido
+    url_archivo?: string;   // Añadido
+    nombre_archivo?: string;// Añadido
+    caption?: string;       // Añadido
 }
 
 export interface Download {
