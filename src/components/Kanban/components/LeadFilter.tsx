@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/LeadFilter.css';
 import { FilterOptions, FilterState, ProcessedLead } from '../@types/LeadFilter';
-import { Search } from 'lucide-react';
 
 interface LeadFilterProps {
     onLeadsFiltered: (leads: ProcessedLead[]) => void;
@@ -177,13 +176,6 @@ const LeadFilter: React.FC<LeadFilterProps> = ({ onLeadsFiltered }) => {
                     onClick={() => setIsOpen(true)}
                     className="filter-toggle-button"
                 >
-                    <Search
-                        size={20}
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="search-icon"
-                        aria-hidden="true"
-                    />
                 </button>
             ) : (
                 <>
