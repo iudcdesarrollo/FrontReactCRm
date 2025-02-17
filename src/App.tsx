@@ -374,7 +374,7 @@ function App() {
     });
 
     newSocket.on('templateSent', (data: TemplateResponse) => {
-      console.log(`Esto es lo que llega de la solicitud del envio del template, esta es la response que devuelve el server: ${JSON.stringify(data, null, 2)}`);
+      // console.log(`Esto es lo que llega de la solicitud del envio del template, esta es la response que devuelve el server: ${JSON.stringify(data, null, 2)}`);
       try {
         // Extraer información del template
         const phoneNumber = data.templateFormado.to;
@@ -410,7 +410,7 @@ function App() {
           setRawData(existingRawData);
           setAgente(updatedAgente);
 
-          console.log('Template message added:', newMessage);
+          // console.log('Template message added:', newMessage);
         } else {
           console.warn('Conversation not found for phone number:', phoneNumber);
 
@@ -569,7 +569,7 @@ function App() {
     });
 
     newSocket.on('UpdateTipogestion', (updateTipoGestion) => {
-      console.log(JSON.stringify(updateTipoGestion, null, 2));
+      // console.log(JSON.stringify(updateTipoGestion, null, 2));
       try {
         const existingRawData = JSON.parse(localStorage.getItem('rawData') || '[]');
         const conversationIndex = existingRawData.findIndex(
