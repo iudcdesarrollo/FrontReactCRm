@@ -69,15 +69,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
         const handleNewMessage = (data: any) => {
             console.log('Nuevo mensaje recibido:', data);
-            if (data.to === selectedLead.numeroWhatsapp) {
+            console.log('Número WhatsApp actual:', selectedLead.numeroWhatsapp);
+            console.log('Número del mensaje:', data.customerNumber);
+
+            if (data.customerNumber === selectedLead.numeroWhatsapp) {
                 const newMessage: Message = {
-                    Cliente: data.from,
+                    Cliente: data.customerNumber,
                     message: data.contenido || data.message,
                     timestamp: data.timestamp || new Date().toISOString(),
-                    id: data.id,
-                    _id: data.id,
+                    id: data.id || data.messageId,
+                    _id: data.id || data._id,
                 };
+                console.log('Añadiendo nuevo mensaje:', newMessage);
                 setMessages(prev => [...prev, newMessage]);
+            } else {
+                console.log('El mensaje no corresponde a esta conversación');
             }
         };
 
